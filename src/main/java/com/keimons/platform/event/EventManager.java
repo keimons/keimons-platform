@@ -131,15 +131,15 @@ public class EventManager implements IManager {
 	 */
 	private static void onEvent(Object object, long sequence, boolean endOfBatch) {
 		Event event = (Event) object;
-		Set<IEventHandler> eventHandlers = EventManager.eventHandlers.get(event.getEventCode());
-		if (eventHandlers != null) {
-			eventHandlers.forEach(handler -> {
+		Set<IEventHandler> handlers = EventManager.eventHandlers.get(event.getEventCode());
+		if (handlers != null) {
+			for (IEventHandler handler : handlers) {
 				try {
 					handler.handler(event);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			});
+			}
 		}
 	}
 
