@@ -130,39 +130,24 @@ public class GameServer {
 	private static void initManager() {
 		List<Class<IManager>> list = ClassUtil.load(PackageName, AManager.class, IManager.class);
 
-		list.sort((Class<?> o1, Class<?> o2) -> {
-			AManager clazz1 = o1.getAnnotation(AManager.class);
-			AManager clazz2 = o2.getAnnotation(AManager.class);
-			if (clazz1.Priority() > clazz2.Priority()) {
-				return 1;
-			}
-			if (clazz1.Priority() < clazz2.Priority()) {
-				return -1;
-			}
-			return 0;
-		});
-
-		List<IManager> order = new ArrayList<>();
+		list.sort(Comparator.comparingInt((Class<?> o) -> o.getAnnotation(AManager.class).Priority()));
 
 		for (Class<IManager> clazz : list) {
 			try {
-				IManager iManager = clazz.newInstance();
-				order.add(iManager);
-				managers.put(iManager.getClass(), iManager);
-				AManager manager = clazz.getAnnotation(AManager.class);
-				System.out.println("管理器: 加载顺序 " + manager.Priority() + "，名称：" + manager.Name() + "，描述：" + manager.Desc());
+				IManager manager = clazz.newInstance();
+				managers.put(manager.getClass(), manager);
+				if (manager instanceof IEventHandler) {
+					EventManager.registerEvent((IEventHandler) manager);
+				}
+				manager.init();
+				AManager managerInfo = clazz.getAnnotation(AManager.class);
+				System.out.println("管理器: 加载顺序 " + managerInfo.Priority() + "，名称：" + managerInfo.Name() + "，描述：" + managerInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
 		}
 
 		System.out.println();
-		order.forEach(item -> {
-			if (item instanceof IEventHandler) {
-				EventManager.registerEvent((IEventHandler) item);
-			}
-			item.init();
-		});
 	}
 
 	/**
@@ -171,39 +156,23 @@ public class GameServer {
 	private static void initService() {
 		List<Class<IService>> list = ClassUtil.load(PackageName, AService.class, IService.class);
 
-		list.sort((Class<?> o1, Class<?> o2) -> {
-			AService clazz1 = o1.getAnnotation(AService.class);
-			AService clazz2 = o2.getAnnotation(AService.class);
-			if (clazz1.Priority() > clazz2.Priority()) {
-				return 1;
-			}
-			if (clazz1.Priority() < clazz2.Priority()) {
-				return -1;
-			}
-			return 0;
-		});
-
-		List<IService> order = new ArrayList<>();
+		list.sort(Comparator.comparingInt((Class<?> o) -> o.getAnnotation(AService.class).Priority()));
 
 		for (Class<IService> clazz : list) {
 			try {
-				IService iService = clazz.newInstance();
-				order.add(iService);
-				services.put(iService.getClass(), iService);
-				AService manager = clazz.getAnnotation(AService.class);
-				System.out.println("服务: 加载顺序 " + manager.Priority() + "，名称：" + manager.Name() + "，描述：" + manager.Desc());
+				IService service = clazz.newInstance();
+				services.put(service.getClass(), service);
+				if (service instanceof IEventHandler) {
+					EventManager.registerEvent((IEventHandler) service);
+				}
+				service.startup();
+				AService serviceInfo = clazz.getAnnotation(AService.class);
+				System.out.println("服务: 加载顺序 " + serviceInfo.Priority() + "，名称：" + serviceInfo.Name() + "，描述：" + serviceInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {
 				LogService.log(e);
 			}
 		}
 
 		System.out.println();
-
-		order.forEach(item -> {
-			if (item instanceof IEventHandler) {
-				EventManager.registerEvent((IEventHandler) item);
-			}
-			item.startup();
-		});
 	}
 }
