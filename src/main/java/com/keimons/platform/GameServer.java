@@ -169,7 +169,7 @@ public class GameServer {
 				AService serviceInfo = clazz.getAnnotation(AService.class);
 				System.out.println("服务: 加载顺序 " + serviceInfo.Priority() + "，名称：" + serviceInfo.Name() + "，描述：" + serviceInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {
-				LogService.log(e);
+				LogService.error(e);
 			}
 		}
 

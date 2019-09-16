@@ -126,7 +126,7 @@ public class QuartzManager {
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
 		} catch (SchedulerException e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 
 		loadJobs(packageName);
@@ -135,7 +135,7 @@ public class QuartzManager {
 			// 启动
 			scheduler.start();
 		} catch (SchedulerException e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 	}
 

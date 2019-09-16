@@ -58,7 +58,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 				try {
 					request = (T) parser.parseFrom(packet.getData());
 				} catch (Exception e) {
-					LogService.log(e);
+					LogService.error(e);
 					// 通知客户端服务器错误
 					Packet pt = new Packet();
 					pt.setMsgCode(packet.getMsgCode() + 1).setErrCodes(new String[]{"EncodeError"});
@@ -72,7 +72,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 				}
 			}
 		} catch (Exception e) {
-			LogService.log(e);
+			LogService.error(e);
 			// 通知客户端服务器错误
 			Packet pt = new Packet();
 			pt.setErrCodes(new String[]{"SystemError"});

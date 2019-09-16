@@ -45,7 +45,7 @@ public class KeimonsService implements IService {
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {
-			LogService.log(e);
+			LogService.error(e);
 			System.exit(-1);
 		} finally {
 			bossGroup.shutdownGracefully();

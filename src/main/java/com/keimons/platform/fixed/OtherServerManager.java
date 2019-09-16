@@ -31,7 +31,7 @@ public class OtherServerManager {
 			OtherServer ins = (OtherServer) forName.newInstance();
 			ins.start();
 		} catch (Exception e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 	}
 
@@ -51,7 +51,7 @@ public class OtherServerManager {
 		try {
 			url = new URL(pluginurl);
 		} catch (MalformedURLException e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 		loader.addURLFile(url);
 		addLoader(pluginName, loader);

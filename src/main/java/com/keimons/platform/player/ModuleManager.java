@@ -174,7 +174,7 @@ public class ModuleManager implements IManager {
 //					RedissonManager.setMapValues(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(player.getPlayerId()), module);
 				}
 			} catch (Exception e) {
-				LogService.log(e);
+				LogService.error(e);
 				System.out.println("玩家数据保存失败：" + player.getSession().getIpAddress());
 				return false;
 			}

@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -23,11 +24,12 @@ import java.util.Locale;
  * 默认日志抽象实现
  *
  * @author monkey1993
+ * @version 1.0
  * @since 1.0
  */
 @Setter
 @Getter
-public abstract class AbsLogger implements ILogger {
+public abstract class BaseLogger implements ILogger {
 
 	private final String name;
 
@@ -37,16 +39,16 @@ public abstract class AbsLogger implements ILogger {
 
 	private FileSize maxFileSize = FileSize.valueOf("128MB");
 
-	private String pattern = "%m%n";
+	private String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS}%msg%n";
 
-	public AbsLogger(String path, String name, Level level) {
+	public BaseLogger(String path, String name, Level level) {
 		this.path = path;
 		this.name = name;
 		this.level = level;
 	}
 
 	@Override
-	public final OutputStreamAppender<ILoggingEvent> build() {
+	public OutputStreamAppender<ILoggingEvent> build() {
 		DateFormat format = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.SIMPLIFIED_CHINESE);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		//这里是可以用来设置appender的，在xml配置文件里面，是这种形式：
@@ -55,7 +57,7 @@ public abstract class AbsLogger implements ILogger {
 //        ConsoleAppender consoleAppender = new ConsoleAppender();
 
 		//这里设置级别过滤器
-		LevelFilter levelFilter = LevelController.getLevelFilter(level);
+		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(level);
 		levelFilter.start();
 		appender.addFilter(levelFilter);
 
@@ -101,6 +103,7 @@ public abstract class AbsLogger implements ILogger {
 		//设置格式
 		encoder.setPattern(pattern);
 		encoder.start();
+		encoder.setCharset(Charset.forName("UTF-8"));
 
 		//加入下面两个节点
 		appender.setRollingPolicy(policy);

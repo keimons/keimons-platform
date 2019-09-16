@@ -51,7 +51,7 @@ public class EventManager implements IManager {
 		try {
 			disruptor.publishEvent(EventManager::translate, player, eventCode, params);
 		} catch (Exception e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class EventManager implements IManager {
 		try {
 			disruptor.publishEvent(EventManager::translate, player, eventCodeExecute.valueOf(eventCode), params);
 		} catch (Exception e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 	}
 

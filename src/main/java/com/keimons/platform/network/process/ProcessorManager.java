@@ -54,7 +54,7 @@ public class ProcessorManager {
 				msgCodeInfo.put(msgCode.MsgCode(), msgCode);
 				System.out.println("消息处理器：" + "消息号：" + msgCode.MsgCode() + "，描述：" + msgCode.Desc());
 			} catch (Exception e) {
-				LogService.log(e);
+				LogService.error(e);
 			}
 		}
 		ProcessorManager.processor = processor;

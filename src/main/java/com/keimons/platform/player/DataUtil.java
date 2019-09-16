@@ -95,7 +95,7 @@ public class DataUtil {
 			return codecs.get(className).encode(data);
 		} catch (IOException e) {
 			System.out.println(data.getClass().getName());
-			LogService.log(e);
+			LogService.error(e);
 		}
 		return new byte[0];
 	}
@@ -159,7 +159,7 @@ public class DataUtil {
 				data.init(player);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
-			LogService.log(e);
+			LogService.error(e);
 		}
 	}
 }

@@ -36,7 +36,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 					processor.processor(session, packet);
 					long end = TimeUtil.currentTimeMillis();
 					if (end - start > 100) {
-						LogService.getInstance().logInfo(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
+						LogService.getInstance().info(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
 					}
 				} else {
 					System.out.println("不存在的消息号：" + packet.getMsgCode());
@@ -44,7 +44,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 			}
 		} catch (Exception e) {
 			String info = "错误号：" + packet.getMsgCode() + "，会话ID：" + ctx.channel().attr(SESSION).get();
-			LogService.logError(e, info);
+			LogService.error(e, info);
 		} finally {
 			// 释放消息体
 			ReferenceCountUtil.release(msg);
@@ -75,10 +75,10 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 			if (session.getPlayer() != null) {
 				errInfo += ", Name: " + session.getPlayer();
 			}
-			LogService.logError(cause, errInfo);
+			LogService.error(cause, errInfo);
 			session.disconnect();
 		} else {
-			LogService.logError(cause, "Netty Exception!");
+			LogService.error(cause, "Netty Exception!");
 		}
 	}
 

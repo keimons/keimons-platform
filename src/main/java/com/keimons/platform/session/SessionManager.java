@@ -45,7 +45,7 @@ public class SessionManager implements IManager {
 						// 会话会在移除后十分钟后彻底销毁
 						if (nowTime - session.getLastActiveTime() > 10 * 60 * 1000) {
 							sessions.remove(session.getSessionId());
-							LogService.getInstance().logInfo(TimeUtil.logDate() + " 彻底移除会话：" + session.getSessionId());
+							LogService.getInstance().info(TimeUtil.logDate() + " 彻底移除会话：" + session.getSessionId());
 						}
 					}
 				}

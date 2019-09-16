@@ -4,7 +4,14 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.filter.LevelFilter;
 import ch.qos.logback.core.spi.FilterReply;
 
-class LevelController {
+/**
+ * 默认日志级别过滤器实现
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @since 1.8
+ */
+class DefaultLevelFilter {
 
 	/**
 	 * 通过level设置日志过滤器
