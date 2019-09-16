@@ -3,13 +3,18 @@ package com.keimons.platform.log;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 import com.keimons.platform.iface.ILogType;
 import com.keimons.platform.iface.ILogger;
 import com.keimons.platform.unit.TimeUtil;
 import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 
 /**
  * 日志服务
@@ -17,7 +22,9 @@ import java.io.StringWriter;
  * @author monkey1993
  * @version 1.0
  * @since 1.8
+ * @deprecated 临时解决方案，慎重使用
  */
+@Deprecated
 public class LogService {
 
 	/**
@@ -25,22 +32,29 @@ public class LogService {
 	 */
 	private static String path;
 
-	private static Logger console;
+	private static Logger console = build(new DefaultConsoleLogger());
 	private static Logger info;
 	private static Logger warn;
 	private static Logger debug;
 	private static Logger error;
 
-	public static LogService getInstance() {
-		return null;
-	}
-
-	private static Logger build(ILogger iLogger) {
+	public static Logger build(ILogger iLogger) {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		Logger logger = context.getLogger(iLogger.getName() + "Appender");
+		Logger logger = context.getLogger("ROOT");
 		// 设置不向上级打印信息
 		logger.setAdditive(false);
-		logger.addAppender(iLogger.build());
+		ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) logger.getAppender("console");
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		// 设置编码格式UTF-8
+		encoder.setCharset(Charset.forName("UTF-8"));
+		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
+		encoder.setContext(context);
+		// 设置格式
+		encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n");
+		// 启动
+		encoder.start();
+		appender.setEncoder(encoder);
+		appender.start();
 		return logger;
 	}
 
@@ -148,7 +162,6 @@ public class LogService {
 	public static <T extends Enum<T> & ILogType> void init(Class<T> clazz, String path) {
 		LogService.path = path;
 
-		console = build(new DefaultConsoleLogger());
 		info = build(new DefaultRollingFileLogger(path, "info", Level.INFO));
 		debug = build(new DefaultRollingFileLogger(path, "debug", Level.DEBUG));
 		warn = build(new DefaultRollingFileLogger(path, "warn", Level.WARN));
@@ -161,5 +174,11 @@ public class LogService {
 				loggers[logType.ordinal()] = build(logType.getLogger());
 			}
 		}
+	}
+
+	public static void main(String[] args) {
+		init(null, "./logs/");
+		SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+		System.out.println(111);
 	}
 }

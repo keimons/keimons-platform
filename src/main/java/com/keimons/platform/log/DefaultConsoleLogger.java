@@ -7,14 +7,9 @@ import ch.qos.logback.classic.filter.LevelFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.OutputStreamAppender;
-import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
-import ch.qos.logback.core.util.OptionHelper;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.Locale;
 
 /**
  * 默认控制台日志实现
@@ -30,6 +25,7 @@ public class DefaultConsoleLogger extends BaseLogger {
 	 */
 	public DefaultConsoleLogger() {
 		super(null, null, null);
+		this.pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n";
 	}
 
 	@Override
@@ -40,8 +36,12 @@ public class DefaultConsoleLogger extends BaseLogger {
 		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
 		appender.setContext(context);
 
+		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(Level.INFO);
+		levelFilter.start();
+		appender.addFilter(levelFilter);
+
 		// appender的name属性
-		appender.setName("STDOUT");
+		appender.setName("console");
 
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 		// 设置编码格式UTF-8

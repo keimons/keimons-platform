@@ -37,9 +37,9 @@ public abstract class BaseLogger implements ILogger {
 
 	private final String path;
 
-	private FileSize maxFileSize = FileSize.valueOf("128MB");
+	protected FileSize maxFileSize = FileSize.valueOf("128MB");
 
-	private String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS}%msg%n";
+	protected String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS}%msg%n";
 
 	public BaseLogger(String path, String name, Level level) {
 		this.path = path;

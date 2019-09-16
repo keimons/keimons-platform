@@ -36,7 +36,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 					processor.processor(session, packet);
 					long end = TimeUtil.currentTimeMillis();
 					if (end - start > 100) {
-						LogService.getInstance().info(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
+						LogService.info(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
 					}
 				} else {
 					System.out.println("不存在的消息号：" + packet.getMsgCode());
