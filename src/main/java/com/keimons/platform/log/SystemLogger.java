@@ -21,7 +21,7 @@ public enum SystemLogger {
 		@Override
 		public void log(final String message) {
 			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-			Logger logger = context.getLogger(SystemOutErrPrintStream.OUT_CONSOLE);
+			Logger logger = context.getLogger(SystemPrint.OUT_CONSOLE);
 			logger.info(message);
 		}
 	},
@@ -33,7 +33,7 @@ public enum SystemLogger {
 		@Override
 		public void log(final String message) {
 			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-			Logger logger = context.getLogger(SystemOutErrPrintStream.ERR_CONSOLE);
+			Logger logger = context.getLogger(SystemPrint.ERR_CONSOLE);
 			logger.error(message);
 		}
 	};

@@ -2,7 +2,7 @@ package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
 import com.keimons.platform.annotation.AModule;
-import com.keimons.platform.GameServer;
+import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
@@ -76,7 +76,7 @@ public class ModuleManager implements IManager {
 //		map.putIfAbsent(playerName, hold);
 //		String result = map.get(playerName);
 //		if (hold.equals(result)) {
-//			long playerId = GameServer.ServerId * GameServer.MAX + RedissonManager.incrementAndGet(RedisKeys.keyOfPlayerId());
+//			long playerId = KeimonsServer.ServerId * KeimonsServer.MAX + RedissonManager.incrementAndGet(RedisKeys.keyOfPlayerId());
 //			map.put(playerName, String.valueOf(playerId));
 //			return playerId;
 //		}
@@ -230,7 +230,7 @@ public class ModuleManager implements IManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init() {
-		modules.addAll(ClassUtil.load(GameServer.PackageName, AModule.class, IPlayerData.class));
+		modules.addAll(ClassUtil.load(KeimonsServer.PackageName, AModule.class, IPlayerData.class));
 	}
 
 	@Override

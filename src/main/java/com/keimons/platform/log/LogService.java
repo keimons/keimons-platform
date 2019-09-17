@@ -4,27 +4,30 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.OutputStreamAppender;
-import com.keimons.platform.iface.ILogType;
 import com.keimons.platform.iface.ILogger;
-import com.keimons.platform.unit.TimeUtil;
+import com.keimons.platform.iface.ILoggerConfig;
 import org.slf4j.LoggerFactory;
-import uk.org.lidalia.sysoutslf4j.common.SystemOutput;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 日志服务
  *
  * @author monkey1993
  * @version 1.0
+ * @date 2019-09-17
  * @since 1.8
- * @deprecated 临时解决方案，慎重使用
  */
-@Deprecated
 public class LogService {
+
+	/**
+	 * 默认日志存放路径
+	 */
+	public static final String DEFAULT_LOG_PATH = "./logs/";
 
 	/**
 	 * 日志文件路径
@@ -49,7 +52,7 @@ public class LogService {
 	/**
 	 * 所有日志
 	 */
-	private static Logger[] loggers;
+	private static Map<Object, Logger> loggers = new HashMap<>();
 
 	/**
 	 * 打印日志
@@ -57,8 +60,28 @@ public class LogService {
 	 * @param logType 日志类型
 	 * @param context 日志内容
 	 */
-	public static <T extends Enum<T> & ILogType> void log(T logType, String context) {
-		loggers[logType.ordinal()].info(context);
+	public static <T extends Enum<T> & ILoggerConfig> void log(T logType, String context) {
+		Logger logger = loggers.get(logType.getLoggerName());
+		if (logger != null) {
+			logger.info(context);
+		} else {
+			error("尝试打印不存在的日志类型：" + logType);
+		}
+	}
+
+	/**
+	 * 打印日志
+	 *
+	 * @param logType 日志类型
+	 * @param context 日志内容
+	 */
+	public static void log(String logType, String context) {
+		Logger logger = loggers.get(logType);
+		if (logger != null) {
+			logger.info(context);
+		} else {
+			error("尝试打印不存在的日志类型：" + logType);
+		}
 	}
 
 	/**
@@ -123,11 +146,17 @@ public class LogService {
 			return;
 		}
 		if (e == null) {
-			error.error(TimeUtil.logDate() + " " + context);
+			System.err.println(context);
+			error.error(context);
 		} else {
 			StringWriter trace = new StringWriter();
 			e.printStackTrace(new PrintWriter(trace));
-			error.error(TimeUtil.logDate() + " " + context + "\n" + trace.toString());
+			String errInfo = trace.toString();
+			if (context != null) {
+				errInfo = context + " " + errInfo;
+			}
+			System.err.println(errInfo);
+			error.error(errInfo);
 		}
 	}
 
@@ -136,9 +165,9 @@ public class LogService {
 	 *
 	 * @param clazz 日志枚举类
 	 * @param path  日志路径
-	 * @param <T>   实现了{@link ILogType}接口的日志枚举类
+	 * @param <T>   实现了{@link ILoggerConfig}接口的日志枚举类
 	 */
-	public static <T extends Enum<T> & ILogType> void init(Class<T> clazz, String path) {
+	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> clazz, String path) {
 		LogService.path = path;
 
 		info = build(new DefaultRollingFileLogger(path, "info", Level.INFO));
@@ -148,39 +177,26 @@ public class LogService {
 
 		if (clazz != null) {
 			T[] values = clazz.getEnumConstants();
-			loggers = new Logger[values.length - 1];
 			for (T logType : values) {
-				loggers[logType.ordinal()] = build(logType.getLogger());
+				loggers.put(logType.getLoggerName(), build(new DefaultRollingFileLogger(path, logType.getLoggerName(), logType.getLoggerLevel())));
 			}
 		}
 	}
 
 	/**
-	 * 重定向System.out和System.out到Logback
-	 */
-	public static void redirectSystemPrint() {
-		// 初始化System.out和System.err日志
-		initSystemPrint(SystemOutErrPrintStream.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
-		initSystemPrint(SystemOutErrPrintStream.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
-
-		// 重定向System.out和System.err到日志
-		SystemOutput.OUT.set(new SystemOutErrPrintStream(SystemOutput.OUT.get(), SystemLogger.INFO));
-		SystemOutput.ERR.set(new SystemOutErrPrintStream(SystemOutput.ERR.get(), SystemLogger.ERROR));
-	}
-
-	/**
-	 * 重定向
+	 * 初始化日志模块
 	 *
-	 * @param name    重定向日志
-	 * @param pattern 输出格式
-	 * @param level   输出等级
+	 * @param path 日志路径
 	 */
-	private static void initSystemPrint(String name, String pattern, Level level) {
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		Logger logger = context.getLogger(name);
-		// 设置不向上级打印信息
-		logger.setAdditive(false);
-		ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) new DefaultConsoleLogger(pattern, level).build();
-		logger.addAppender(appender);
+	public static void init(String path, String... logs) {
+		LogService.path = path;
+
+		info = build(new DefaultRollingFileLogger(path, "info", Level.INFO));
+		debug = build(new DefaultRollingFileLogger(path, "debug", Level.DEBUG));
+		warn = build(new DefaultRollingFileLogger(path, "warn", Level.WARN));
+		error = build(new DefaultRollingFileLogger(path, "error", Level.ERROR));
+		for (String log : logs) {
+			loggers.put(log, build(new DefaultRollingFileLogger(path, log, Level.INFO)));
+		}
 	}
 }

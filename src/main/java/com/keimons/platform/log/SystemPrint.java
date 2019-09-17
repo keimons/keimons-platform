@@ -1,5 +1,13 @@
 package com.keimons.platform.log;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.common.SystemOutput;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -13,7 +21,7 @@ import java.util.Locale;
  * @date 2019-09-17
  * @since 1.0
  */
-public class SystemOutErrPrintStream extends PrintStream {
+public class SystemPrint extends PrintStream {
 
 	public static final String OUT_CONSOLE = "OutConsole";
 	public static final String ERR_CONSOLE = "ErrConsole";
@@ -27,7 +35,7 @@ public class SystemOutErrPrintStream extends PrintStream {
 	 * @param printStream 输出流
 	 * @param logger      日志
 	 */
-	public SystemOutErrPrintStream(PrintStream printStream, SystemLogger logger) {
+	public SystemPrint(PrintStream printStream, SystemLogger logger) {
 		super(new ByteArrayOutputStream());
 		this.printStream = printStream;
 		this.logger = logger;
@@ -201,5 +209,34 @@ public class SystemOutErrPrintStream extends PrintStream {
 	@Override
 	public void write(final byte[] bytes) throws IOException {
 		printStream.write(bytes);
+	}
+
+	/**
+	 * 重定向System.out和System.out到Logback
+	 */
+	public static void redirectSystemPrint() {
+		// 初始化System.out和System.err日志
+		initSystemPrint(SystemPrint.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
+		initSystemPrint(SystemPrint.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
+
+		// 重定向System.out和System.err到日志
+		SystemOutput.OUT.set(new SystemPrint(SystemOutput.OUT.get(), SystemLogger.INFO));
+		SystemOutput.ERR.set(new SystemPrint(SystemOutput.ERR.get(), SystemLogger.ERROR));
+	}
+
+	/**
+	 * 重定向
+	 *
+	 * @param name    重定向日志
+	 * @param pattern 输出格式
+	 * @param level   输出等级
+	 */
+	private static void initSystemPrint(String name, String pattern, Level level) {
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger logger = context.getLogger(name);
+		// 设置不向上级打印信息
+		logger.setAdditive(false);
+		ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) new DefaultConsoleLogger(pattern, level).build();
+		logger.addAppender(appender);
 	}
 }

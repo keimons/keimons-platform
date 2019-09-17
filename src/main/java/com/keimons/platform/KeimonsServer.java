@@ -4,6 +4,7 @@ import com.keimons.platform.annotation.AManager;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.event.EventManager;
 import com.keimons.platform.iface.IEventHandler;
+import com.keimons.platform.iface.ILoggerConfig;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
@@ -19,7 +20,7 @@ import java.util.*;
  * 1.管理器
  * 2.服务
  */
-public class GameServer {
+public class KeimonsServer {
 
 	/**
 	 * 服务器ID （游戏服，世界服）
@@ -40,6 +41,10 @@ public class GameServer {
 	 * 包名 程序运行中会扫描这个包下的文件
 	 */
 	public static String PackageName = ".";
+
+	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> logClass) {
+		LogService.init(logClass, "./logs/");
+	}
 
 	/**
 	 * 所有的管理器

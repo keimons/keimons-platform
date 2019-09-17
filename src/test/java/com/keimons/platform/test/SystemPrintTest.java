@@ -1,6 +1,6 @@
 package com.keimons.platform.test;
 
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.SystemPrint;
 
 /**
  * System.out和System.err重定向测试
@@ -13,7 +13,7 @@ import com.keimons.platform.log.LogService;
 public class SystemPrintTest {
 
 	public static void main(String[] args) {
-		LogService.redirectSystemPrint();
+		SystemPrint.redirectSystemPrint();
 		System.out.println(111);
 		System.err.println(222);
 	}
