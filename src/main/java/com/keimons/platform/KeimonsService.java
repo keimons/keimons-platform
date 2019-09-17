@@ -1,8 +1,8 @@
 package com.keimons.platform;
 
+import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
 import com.keimons.platform.iface.IService;
-import com.keimons.platform.log.LogService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;

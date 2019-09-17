@@ -3,18 +3,17 @@ package com.keimons.platform.log;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.OutputStreamAppender;
 import com.keimons.platform.iface.ILogType;
 import com.keimons.platform.iface.ILogger;
 import com.keimons.platform.unit.TimeUtil;
 import org.slf4j.LoggerFactory;
-import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
+import uk.org.lidalia.sysoutslf4j.common.SystemOutput;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 
 /**
  * 日志服务
@@ -32,7 +31,6 @@ public class LogService {
 	 */
 	private static String path;
 
-	private static Logger console = build(new DefaultConsoleLogger());
 	private static Logger info;
 	private static Logger warn;
 	private static Logger debug;
@@ -40,21 +38,11 @@ public class LogService {
 
 	public static Logger build(ILogger iLogger) {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		Logger logger = context.getLogger("ROOT");
+		Logger logger = context.getLogger(iLogger.getName() + "Logger");
 		// 设置不向上级打印信息
 		logger.setAdditive(false);
-		ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) logger.getAppender("console");
-		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		// 设置编码格式UTF-8
-		encoder.setCharset(Charset.forName("UTF-8"));
-		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		encoder.setContext(context);
-		// 设置格式
-		encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n");
-		// 启动
-		encoder.start();
-		appender.setEncoder(encoder);
-		appender.start();
+		OutputStreamAppender<ILoggingEvent> appender = iLogger.build();
+		logger.addAppender(appender);
 		return logger;
 	}
 
@@ -71,15 +59,6 @@ public class LogService {
 	 */
 	public static <T extends Enum<T> & ILogType> void log(T logType, String context) {
 		loggers[logType.ordinal()].info(context);
-	}
-
-	/**
-	 * 打印控制台信息
-	 *
-	 * @param msg
-	 */
-	public static void console(String msg) {
-		console.info(msg);
 	}
 
 	/**
@@ -176,9 +155,32 @@ public class LogService {
 		}
 	}
 
-	public static void main(String[] args) {
-		init(null, "./logs/");
-		SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
-		System.out.println(111);
+	/**
+	 * 重定向System.out和System.out到Logback
+	 */
+	public static void redirectSystemPrint() {
+		// 初始化System.out和System.err日志
+		initSystemPrint(SystemOutErrPrintStream.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
+		initSystemPrint(SystemOutErrPrintStream.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
+
+		// 重定向System.out和System.err到日志
+		SystemOutput.OUT.set(new SystemOutErrPrintStream(SystemOutput.OUT.get(), SystemLogger.INFO));
+		SystemOutput.ERR.set(new SystemOutErrPrintStream(SystemOutput.ERR.get(), SystemLogger.ERROR));
+	}
+
+	/**
+	 * 重定向
+	 *
+	 * @param name    重定向日志
+	 * @param pattern 输出格式
+	 * @param level   输出等级
+	 */
+	private static void initSystemPrint(String name, String pattern, Level level) {
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger logger = context.getLogger(name);
+		// 设置不向上级打印信息
+		logger.setAdditive(false);
+		ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) new DefaultConsoleLogger(pattern, level).build();
+		logger.addAppender(appender);
 	}
 }

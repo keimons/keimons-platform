@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
  *
  * @author monkey1993
  * @version 1.0
+ * @date 2019-09-17
  * @since 1.8
  */
 public class DefaultConsoleLogger extends BaseLogger {
@@ -23,9 +24,9 @@ public class DefaultConsoleLogger extends BaseLogger {
 	/**
 	 * 控制台日志
 	 */
-	public DefaultConsoleLogger() {
-		super(null, null, null);
-		this.pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n";
+	public DefaultConsoleLogger(String pattern, Level level) {
+		super(".", null, level);
+		this.pattern = pattern;
 	}
 
 	@Override
@@ -36,7 +37,7 @@ public class DefaultConsoleLogger extends BaseLogger {
 		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
 		appender.setContext(context);
 
-		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(Level.INFO);
+		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(level);
 		levelFilter.start();
 		appender.addFilter(levelFilter);
 

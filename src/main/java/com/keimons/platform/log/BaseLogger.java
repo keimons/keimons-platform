@@ -25,6 +25,7 @@ import java.util.Locale;
  *
  * @author monkey1993
  * @version 1.0
+ * @date 2019-09-17
  * @since 1.0
  */
 @Setter
@@ -33,7 +34,7 @@ public abstract class BaseLogger implements ILogger {
 
 	private final String name;
 
-	private final Level level;
+	protected final Level level;
 
 	private final String path;
 
@@ -42,6 +43,9 @@ public abstract class BaseLogger implements ILogger {
 	protected String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS}%msg%n";
 
 	public BaseLogger(String path, String name, Level level) {
+		if (!path.endsWith("/")) {
+			path += "/";
+		}
 		this.path = path;
 		this.name = name;
 		this.level = level;
@@ -66,7 +70,7 @@ public abstract class BaseLogger implements ILogger {
 		// 但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
 		appender.setContext(context);
 		// appender的name属性
-		appender.setName(name.toUpperCase() + "Appender");
+		appender.setName(name + "Appender");
 		//设置文件名
 		appender.setFile(OptionHelper.substVars(path + name + ".log", context));
 
