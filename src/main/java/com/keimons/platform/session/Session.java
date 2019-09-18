@@ -1,6 +1,6 @@
 package com.keimons.platform.session;
 
-import com.keimons.platform.event.EventManager;
+import com.keimons.platform.event.EventService;
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.player.AbsPlayer;
 import com.keimons.platform.unit.TimeUtil;
@@ -96,7 +96,7 @@ public class Session {
 		String time = TimeUtil.logDate();
 		if (player != null) {
 			player.setSession(null);
-			EventManager.publicEvent(player, "PLAYER_DOWNLINE");
+			EventService.publicEvent(player, "PLAYER_DOWNLINE");
 			player = null;
 		}
 		if (ctx != null) {

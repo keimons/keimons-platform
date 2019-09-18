@@ -3,12 +3,17 @@ package com.keimons.platform.iface;
 import com.keimons.platform.event.Event;
 
 /**
- * 事件处理接口
+ * 事件处理器
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-19
+ * @since 1.0
  */
 public interface IEventHandler {
 
 	/**
-	 * 注册
+	 * 注册事件
 	 *
 	 * @return 关注的消息号
 	 */
@@ -16,6 +21,7 @@ public interface IEventHandler {
 
 	/**
 	 * 事件处理
+	 *
 	 * @param event 事件
 	 */
 	void handler(Event event);

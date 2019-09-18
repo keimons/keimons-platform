@@ -2,7 +2,6 @@ package com.keimons.platform.event;
 
 import com.keimons.platform.iface.IEventCode;
 import com.keimons.platform.iface.IEventHandler;
-import com.keimons.platform.iface.IManager;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.AbsPlayer;
 import com.lmax.disruptor.BlockingWaitStrategy;
@@ -20,8 +19,13 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * 事件处理器
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-19
+ * @since 1.0
  */
-public class EventManager implements IManager {
+public class EventService {
 
 	/**
 	 * RingBuffer 大小，必须是 2 的 N 次方
@@ -33,23 +37,18 @@ public class EventManager implements IManager {
 	/**
 	 * 事件处理
 	 */
-	private static Map<IEventCode, Set<IEventHandler>> eventHandlers = new HashMap<>();
-
-	/**
-	 * 消息号处理
-	 */
-	public static IEventCodeExecute eventCodeExecute;
+	private static Map<String, Set<IEventHandler>> eventHandlers = new HashMap<>();
 
 	/**
 	 * 发布事件
 	 *
-	 * @param player    玩家uuid
+	 * @param player    玩家
 	 * @param eventCode 事件号
 	 * @param params    参数列表
 	 */
-	public static void publicEvent(AbsPlayer player, IEventCode eventCode, Object... params) {
+	public static void publicEvent(AbsPlayer player, Enum<? extends IEventCode> eventCode, Object... params) {
 		try {
-			disruptor.publishEvent(EventManager::translate, player, eventCode, params);
+			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
 			LogService.error(e);
 		}
@@ -64,7 +63,7 @@ public class EventManager implements IManager {
 	 */
 	public static void publicEvent(AbsPlayer player, String eventCode, Object... params) {
 		try {
-			disruptor.publishEvent(EventManager::translate, player, eventCodeExecute.valueOf(eventCode), params);
+			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
 			LogService.error(e);
 		}
@@ -73,27 +72,53 @@ public class EventManager implements IManager {
 	/**
 	 * 注册事件处理器
 	 *
-	 * @param eventHandler
+	 * @param handler 处理器
 	 */
-	public static void registerEvent(IEventHandler eventHandler) {
-		for (IEventCode code : eventHandler.register()) {
-			Set<IEventHandler> eventHandlers = EventManager.eventHandlers.computeIfAbsent(code, k -> new HashSet<>());
-			eventHandlers.add(eventHandler);
+	public static void registerEvent(IEventHandler handler) {
+		for (IEventCode code : handler.register()) {
+			Set<IEventHandler> handlers = EventService.eventHandlers.computeIfAbsent(code.toString(), k -> new HashSet<>());
+			handlers.add(handler);
 		}
 	}
 
-	private static void translate(Event event, long sequence, AbsPlayer player, IEventCode eventCode, Object... parms) {
+	private static void translate(Event event, long sequence, AbsPlayer player, Enum<? extends IEventCode> eventCode, Object... params) {
 		event.setPlayer(player);
 		event.setEventCode(eventCode);
-		event.setParams(parms);
+		event.setParams(params);
+	}
+
+	private static void translate(Event event, long sequence, AbsPlayer player, String eventCode, Object... params) {
+		event.setPlayer(player);
+		event.setEventCode(null);
+		event.setParams(params);
+	}
+
+	/**
+	 * 事件处理
+	 *
+	 * @param object
+	 * @param sequence
+	 * @param endOfBatch
+	 */
+	private static void onEvent(Object object, long sequence, boolean endOfBatch) {
+		Event event = (Event) object;
+		Set<IEventHandler> handlers = EventService.eventHandlers.get(event.getEventCode().toString());
+		if (handlers != null) {
+			for (IEventHandler handler : handlers) {
+				try {
+					handler.handler(event);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/**
 	 * 初始化
 	 */
 	@SuppressWarnings("unchecked")
-	@Override
-	public void init() {
+	public static void init() {
 		EventFactory<Event> eventFactory = new com.keimons.platform.event.EventFactory();
 		ThreadFactory executor = Executors.defaultThreadFactory();
 
@@ -116,40 +141,12 @@ public class EventManager implements IManager {
 				RING_BUFFER_SIZE, executor, ProducerType.MULTI,
 				new BlockingWaitStrategy());
 
-		EventHandler<Event>[] handlers = new EventHandler[]{EventManager::onEvent};
+		EventHandler<Event>[] handlers = new EventHandler[]{EventService::onEvent};
 		disruptor.handleEventsWith(handlers);
 
 		disruptor.start();
 	}
 
-	/**
-	 * 事件处理
-	 *
-	 * @param object
-	 * @param sequence
-	 * @param endOfBatch
-	 */
-	private static void onEvent(Object object, long sequence, boolean endOfBatch) {
-		Event event = (Event) object;
-		Set<IEventHandler> handlers = EventManager.eventHandlers.get(event.getEventCode());
-		if (handlers != null) {
-			for (IEventHandler handler : handlers) {
-				try {
-					handler.handler(event);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-
-	@Override
-	public void reload() {
-		this.init();
-	}
-
-	@Override
 	public boolean shutdown() {
 		disruptor.shutdown();
 		return true;

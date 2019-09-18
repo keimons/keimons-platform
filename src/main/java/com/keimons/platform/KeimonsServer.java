@@ -3,7 +3,7 @@ package com.keimons.platform;
 import com.keimons.platform.annotation.AManager;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
-import com.keimons.platform.event.EventManager;
+import com.keimons.platform.event.EventService;
 import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.iface.ILoggerConfig;
 import com.keimons.platform.iface.IManager;
@@ -156,7 +156,7 @@ public class KeimonsServer {
 				IManager manager = clazz.newInstance();
 				managers.put(manager.getClass(), manager);
 				if (manager instanceof IEventHandler) {
-					EventManager.registerEvent((IEventHandler) manager);
+					EventService.registerEvent((IEventHandler) manager);
 				}
 				manager.init();
 				AManager managerInfo = clazz.getAnnotation(AManager.class);
@@ -182,7 +182,7 @@ public class KeimonsServer {
 				IService service = clazz.newInstance();
 				services.put(service.getClass(), service);
 				if (service instanceof IEventHandler) {
-					EventManager.registerEvent((IEventHandler) service);
+					EventService.registerEvent((IEventHandler) service);
 				}
 				service.startup();
 				AService serviceInfo = clazz.getAnnotation(AService.class);

@@ -7,6 +7,12 @@ import lombok.Setter;
 
 /**
  * 事件
+ * 减少对象的创建，采用环形Buffer实现
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-19
+ * @since 1.0
  */
 @Setter
 @Getter
@@ -20,7 +26,7 @@ public class Event {
 	/**
 	 * 事件号
 	 */
-	private IEventCode eventCode;
+	private Enum<? extends IEventCode> eventCode;
 
 	/**
 	 * 参数列表
