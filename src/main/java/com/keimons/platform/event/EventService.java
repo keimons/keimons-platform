@@ -147,8 +147,7 @@ public class EventService {
 		disruptor.start();
 	}
 
-	public boolean shutdown() {
+	public static void shutdown() {
 		disruptor.shutdown();
-		return true;
 	}
 }

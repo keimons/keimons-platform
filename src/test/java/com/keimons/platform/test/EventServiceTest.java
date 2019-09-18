@@ -19,7 +19,7 @@ public class EventServiceTest implements IEventHandler {
 		EventService.init();
 		EventService.registerEvent(new EventServiceTest());
 		EventService.publicEvent(null, TestEventCodeEnum.LOGIN, "测试事件系统");
-		System.exit(0);
+		EventService.shutdown();
 	}
 
 	@Override
