@@ -1,12 +1,12 @@
-package com.keimons.platform.log;
+package com.keimons.platform.console;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import com.keimons.platform.log.DefaultConsoleLogger;
 import org.slf4j.LoggerFactory;
-import uk.org.lidalia.sysoutslf4j.common.SystemOutput;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,13 +21,13 @@ import java.util.Locale;
  * @date 2019-09-17
  * @since 1.0
  */
-public class SystemPrint extends PrintStream {
+public class ConsoleService extends PrintStream {
 
 	public static final String OUT_CONSOLE = "OutConsole";
 	public static final String ERR_CONSOLE = "ErrConsole";
 
 	private final PrintStream printStream;
-	private final SystemLogger logger;
+	private final ConsoleLogger logger;
 
 	/**
 	 * 重定向方案
@@ -35,7 +35,7 @@ public class SystemPrint extends PrintStream {
 	 * @param printStream 输出流
 	 * @param logger      日志
 	 */
-	public SystemPrint(PrintStream printStream, SystemLogger logger) {
+	public ConsoleService(PrintStream printStream, ConsoleLogger logger) {
 		super(new ByteArrayOutputStream());
 		this.printStream = printStream;
 		this.logger = logger;
@@ -57,38 +57,38 @@ public class SystemPrint extends PrintStream {
 	}
 
 	@Override
-	public synchronized void println(final boolean bool) {
-		logger.log(String.valueOf(bool));
+	public synchronized void println(final boolean value) {
+		logger.log(String.valueOf(value));
 	}
 
 	@Override
-	public synchronized void println(final char character) {
-		logger.log(String.valueOf(character));
+	public synchronized void println(final char value) {
+		logger.log(String.valueOf(value));
 	}
 
 	@Override
-	public synchronized void println(final char[] charArray) {
-		logger.log(String.valueOf(charArray));
+	public synchronized void println(final char[] array) {
+		logger.log(String.valueOf(array));
 	}
 
 	@Override
-	public synchronized void println(final double doub) {
-		logger.log(String.valueOf(doub));
+	public synchronized void println(final double value) {
+		logger.log(String.valueOf(value));
 	}
 
 	@Override
-	public synchronized void println(final float floa) {
-		logger.log(String.valueOf(floa));
+	public synchronized void println(final float value) {
+		logger.log(String.valueOf(value));
 	}
 
 	@Override
-	public synchronized void println(final int integer) {
-		logger.log(String.valueOf(integer));
+	public synchronized void println(final int value) {
+		logger.log(String.valueOf(value));
 	}
 
 	@Override
-	public synchronized void println(final long lon) {
-		logger.log(String.valueOf(lon));
+	public synchronized void println(final long value) {
+		logger.log(String.valueOf(value));
 	}
 
 	@Override
@@ -214,14 +214,14 @@ public class SystemPrint extends PrintStream {
 	/**
 	 * 重定向System.out和System.out到Logback
 	 */
-	public static void redirectSystemPrint() {
+	public static void init() {
 		// 初始化System.out和System.err日志
-		initSystemPrint(SystemPrint.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
-		initSystemPrint(SystemPrint.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
+		init(ConsoleService.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
+		init(ConsoleService.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
 
 		// 重定向System.out和System.err到日志
-		SystemOutput.OUT.set(new SystemPrint(SystemOutput.OUT.get(), SystemLogger.INFO));
-		SystemOutput.ERR.set(new SystemPrint(SystemOutput.ERR.get(), SystemLogger.ERROR));
+		System.setOut(new ConsoleService(System.out, ConsoleLogger.INFO));
+		System.setErr(new ConsoleService(System.err, ConsoleLogger.ERROR));
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class SystemPrint extends PrintStream {
 	 * @param pattern 输出格式
 	 * @param level   输出等级
 	 */
-	private static void initSystemPrint(String name, String pattern, Level level) {
+	private static void init(String name, String pattern, Level level) {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		Logger logger = context.getLogger(name);
 		// 设置不向上级打印信息

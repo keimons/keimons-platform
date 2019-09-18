@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
+import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.ILogger;
 import com.keimons.platform.iface.ILoggerConfig;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,6 @@ public class LogService {
 	 * 默认日志存放路径
 	 */
 	public static final String DEFAULT_LOG_PATH = "./logs/";
-
-	/**
-	 * 日志文件路径
-	 */
-	private static String path;
 
 	private static Logger info;
 	private static Logger warn;
@@ -90,6 +86,7 @@ public class LogService {
 	 * @param context 信息内容
 	 */
 	public static void info(String context) {
+		System.out.println(context);
 		if (info != null) {
 			info.info(context);
 		}
@@ -164,21 +161,17 @@ public class LogService {
 	 * 初始化日志模块
 	 *
 	 * @param clazz 日志枚举类
-	 * @param path  日志路径
 	 * @param <T>   实现了{@link ILoggerConfig}接口的日志枚举类
+	 * @deprecated 未完成的设计方案，谨慎使用
 	 */
-	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> clazz, String path) {
-		LogService.path = path;
-
-		info = build(new DefaultRollingFileLogger(path, "info", Level.INFO));
-		debug = build(new DefaultRollingFileLogger(path, "debug", Level.DEBUG));
-		warn = build(new DefaultRollingFileLogger(path, "warn", Level.WARN));
-		error = build(new DefaultRollingFileLogger(path, "error", Level.ERROR));
-
+	@Deprecated
+	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> clazz) {
+		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+		init();
 		if (clazz != null) {
 			T[] values = clazz.getEnumConstants();
 			for (T logType : values) {
-				loggers.put(logType.getLoggerName(), build(new DefaultRollingFileLogger(path, logType.getLoggerName(), logType.getLoggerLevel())));
+				loggers.put(logType.getLoggerName(), build(new DefaultRollingFileLogger(logPath, logType.getLoggerName(), logType.getLoggerLevel())));
 			}
 		}
 	}
@@ -189,14 +182,29 @@ public class LogService {
 	 * @param path 日志路径
 	 */
 	public static void init(String path, String... logs) {
-		LogService.path = path;
-
-		info = build(new DefaultRollingFileLogger(path, "info", Level.INFO));
-		debug = build(new DefaultRollingFileLogger(path, "debug", Level.DEBUG));
-		warn = build(new DefaultRollingFileLogger(path, "warn", Level.WARN));
-		error = build(new DefaultRollingFileLogger(path, "error", Level.ERROR));
+		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+		init();
 		for (String log : logs) {
 			loggers.put(log, build(new DefaultRollingFileLogger(path, log, Level.INFO)));
 		}
+	}
+
+	/**
+	 * 初始化系统日志
+	 */
+	public static void init() {
+		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+
+		info = build(new DefaultRollingFileLogger(logPath, "info", Level.INFO));
+		info("初始化[info]日志");
+
+		debug = build(new DefaultRollingFileLogger(logPath, "debug", Level.DEBUG));
+		info("初始化[debug]日志");
+
+		warn = build(new DefaultRollingFileLogger(logPath, "warn", Level.WARN));
+		info("初始化[warn]日志");
+
+		error = build(new DefaultRollingFileLogger(logPath, "error", Level.ERROR));
+		info("初始化[error]日志");
 	}
 }

@@ -1,4 +1,4 @@
-package com.keimons.platform.log;
+package com.keimons.platform.console;
 
 import ch.qos.logback.classic.LoggerContext;
 import org.slf4j.Logger;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * @date 2019-09-17
  * @since 1.0
  */
-public enum SystemLogger {
+public enum ConsoleLogger {
 
 	/**
 	 * 输出日志 System.out
@@ -21,7 +21,7 @@ public enum SystemLogger {
 		@Override
 		public void log(final String message) {
 			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-			Logger logger = context.getLogger(SystemPrint.OUT_CONSOLE);
+			Logger logger = context.getLogger(ConsoleService.OUT_CONSOLE);
 			logger.info(message);
 		}
 	},
@@ -33,7 +33,7 @@ public enum SystemLogger {
 		@Override
 		public void log(final String message) {
 			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-			Logger logger = context.getLogger(SystemPrint.ERR_CONSOLE);
+			Logger logger = context.getLogger(ConsoleService.ERR_CONSOLE);
 			logger.error(message);
 		}
 	};

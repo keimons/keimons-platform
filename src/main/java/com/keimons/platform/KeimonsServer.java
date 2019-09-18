@@ -2,6 +2,7 @@ package com.keimons.platform;
 
 import com.keimons.platform.annotation.AManager;
 import com.keimons.platform.annotation.AService;
+import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventManager;
 import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.iface.ILoggerConfig;
@@ -21,6 +22,11 @@ import java.util.*;
  * 2.服务
  */
 public class KeimonsServer {
+
+	/**
+	 * 日志路径
+	 */
+	public static final String LOG_PATH = "LogPath";
 
 	/**
 	 * 服务器ID （游戏服，世界服）
@@ -43,7 +49,15 @@ public class KeimonsServer {
 	public static String PackageName = ".";
 
 	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> logClass) {
-		LogService.init(logClass, "./logs/");
+		ConsoleService.init();
+		checkConfig();
+		LogService.init(logClass);
+	}
+
+	public static void checkConfig() {
+		if (System.getProperty(LOG_PATH) == null) {
+			System.out.println("未配置的[日志目录]，默认目录：" + LogService.DEFAULT_LOG_PATH);
+		}
 	}
 
 	/**

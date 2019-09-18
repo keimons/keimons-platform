@@ -10,10 +10,10 @@ import com.keimons.platform.log.LogService;
  * @date 2019-09-17
  * @since 1.0
  */
-public class LoggerTest {
+public class LogServiceTest {
 
 	public static void main(String[] args) {
-		LogService.init(TestLogEnum.class, LogService.DEFAULT_LOG_PATH);
+		LogService.init(TestLogEnum.class);
 		LogService.log(TestLogEnum.LOGIN, "This is monkey1993 login.");
 		LogService.log(TestLogEnum.LOGOUT, "This is monkey1993 logout.");
 		LogService.log("levelup", "This is monkey1993 logout.");

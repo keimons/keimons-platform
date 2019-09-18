@@ -7,8 +7,7 @@ import ch.qos.logback.classic.filter.LevelFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
-import ch.qos.logback.core.util.FileSize;
+import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 import ch.qos.logback.core.util.OptionHelper;
 import com.keimons.platform.iface.ILogger;
 import lombok.Getter;
@@ -16,9 +15,6 @@ import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * 默认日志抽象实现
@@ -38,9 +34,7 @@ public abstract class BaseLogger implements ILogger {
 
 	private final String path;
 
-	protected FileSize maxFileSize = FileSize.valueOf("128MB");
-
-	protected String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS}%msg%n";
+	protected String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n";
 
 	public BaseLogger(String path, String name, Level level) {
 		if (!path.endsWith("/")) {
@@ -53,65 +47,49 @@ public abstract class BaseLogger implements ILogger {
 
 	@Override
 	public OutputStreamAppender<ILoggingEvent> build() {
-		DateFormat format = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.SIMPLIFIED_CHINESE);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		//这里是可以用来设置appender的，在xml配置文件里面，是这种形式：
-		// <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+		// 设置appender的
 		RollingFileAppender<ILoggingEvent> appender = new RollingFileAppender<>();
-//        ConsoleAppender consoleAppender = new ConsoleAppender();
-
-		//这里设置级别过滤器
-		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(level);
-		levelFilter.start();
-		appender.addFilter(levelFilter);
-
-
 		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		// 但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
 		appender.setContext(context);
 		// appender的name属性
 		appender.setName(name + "Appender");
-		//设置文件名
+		// 日志的文件名
 		appender.setFile(OptionHelper.substVars(path + name + ".log", context));
 
-		appender.setAppend(true);
+		// 设置日志的级别过滤器
+		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(level);
+		levelFilter.start();
 
-		appender.setPrudent(false);
-
-		// 设置文件创建时间及大小的类
-		SizeAndTimeBasedRollingPolicy policy = new SizeAndTimeBasedRollingPolicy();
+		// 日志文件创建规则：时间线策略
+		TimeBasedRollingPolicy<ILoggingEvent> policy = new TimeBasedRollingPolicy<>();
 		// 文件名格式
-		String fp = OptionHelper.substVars(path + format.format(new Date()) + "/" + name + ".%d{yyyy-MM-dd}.%i.log", context);
-		// 最大日志文件大小
-		policy.setMaxFileSize(maxFileSize);
+		String fp = OptionHelper.substVars(path + "%d{yyyy-MM-dd}/" + name + ".%d{yyyy-MM-dd}.log", context);
 		// 设置文件名模式
 		policy.setFileNamePattern(fp);
-
-		// 设置最大历史记录为15条
-		// policy.setMaxHistory(15);
-
-		// 总大小限制
-		// policy.setTotalSizeCap(FileSize.valueOf("32GB"));
-
 		// 设置父节点是appender
 		policy.setParent(appender);
 		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		// 但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
 		policy.setContext(context);
+		// 启动文件创建策略
 		policy.start();
 
+		// 日志输出样式和编码
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		//设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		// 但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
+		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
 		encoder.setContext(context);
-		//设置格式
+		// 设置格式
 		encoder.setPattern(pattern);
-		encoder.start();
+		// 设置文件编码格式
 		encoder.setCharset(Charset.forName("UTF-8"));
+		// 启动编码器
+		encoder.start();
 
-		//加入下面两个节点
 		appender.setRollingPolicy(policy);
 		appender.setEncoder(encoder);
+		appender.addFilter(levelFilter);
+
 		appender.start();
 		return appender;
 	}

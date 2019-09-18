@@ -1,6 +1,6 @@
 package com.keimons.platform.test;
 
-import com.keimons.platform.log.SystemPrint;
+import com.keimons.platform.console.ConsoleService;
 
 /**
  * System.out和System.err重定向测试
@@ -10,10 +10,10 @@ import com.keimons.platform.log.SystemPrint;
  * @date 2019-09-17
  * @since 1.0
  */
-public class SystemPrintTest {
+public class ConsoleServiceTest {
 
 	public static void main(String[] args) {
-		SystemPrint.redirectSystemPrint();
+		ConsoleService.init();
 		System.out.println(111);
 		System.err.println(222);
 	}
