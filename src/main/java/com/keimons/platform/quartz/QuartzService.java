@@ -116,7 +116,7 @@ public class QuartzService {
 	 *
 	 * @param packageName 包名
 	 */
-	private void loadJobs(String packageName) {
+	private static void loadJobs(String packageName) {
 		List<Class<BaseJob>> classes = ClassUtil.load(packageName, AJob.class, BaseJob.class);
 		for (Class<BaseJob> clazz : classes) {
 			try {
@@ -131,7 +131,7 @@ public class QuartzService {
 	/**
 	 * 初始化定时任务系统
 	 */
-	public void init() {
+	public static void init() {
 		// 从工厂中获取调度器实例
 		// Quartz默认启动10个线程，考虑到各种保存数据，可能会长时间占用一个线程，例如保存玩家，保存排行榜等
 		// 允许Quartz启动10个线程，暂时不考虑修改
@@ -154,7 +154,7 @@ public class QuartzService {
 	/**
 	 * 关闭定时任务系统
 	 */
-	public boolean shutdown() {
+	public static boolean shutdown() {
 		try {
 			scheduler.shutdown();
 		} catch (SchedulerException e) {
