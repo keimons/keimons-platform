@@ -39,7 +39,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 						LogService.info(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
 					}
 				} else {
-					System.out.println("不存在的消息号：" + packet.getMsgCode());
+					LogService.error("不存在的消息号：" + packet.getMsgCode());
 				}
 			}
 		} catch (Exception e) {
@@ -117,9 +117,6 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 		System.out.println("激活通道：" + ctx);
 		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
 		System.out.println(insocket.getHostString());
-		// todo 这里做IP 黑名单 白名单处理
-
-
 		super.channelActive(ctx);
 	}
 

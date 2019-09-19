@@ -1,10 +1,8 @@
 package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
-import com.keimons.platform.iface.IOtherDay;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.session.Session;
-import com.keimons.platform.unit.TimeUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -64,32 +62,6 @@ public abstract class AbsPlayer {
 		return modules.containsKey(clazz);
 	}
 
-	public void otherDay0(long flushTime) {
-		for (IPlayerData data : modules.values()) {
-			if (data instanceof IOtherDay) {
-				((IOtherDay) data).otherDay0(this, !TimeUtil.isSameWeek(flushTime, TimeUtil.currentTimeMillis()), !TimeUtil.isSameMonth(flushTime, TimeUtil.currentTimeMillis()));
-			}
-		}
-	}
-
-	/**
-	 * 跨天5点
-	 *
-	 * @param flushTime 上次刷新时间
-	 * @param now       当前时间
-	 */
-	public void otherDay5(long flushTime, long now) {
-		flushTime -= 5 * 60 * 60 * 1000;
-		now -= 5 * 60 * 60 * 1000;
-		boolean otherWeek = !TimeUtil.isSameWeek(flushTime, now);
-		boolean otherMonth = !TimeUtil.isSameMonth(flushTime, now);
-		for (IPlayerData data : modules.values()) {
-			if (data instanceof IOtherDay) {
-				((IOtherDay) data).otherDay5(this, otherWeek, otherMonth);
-			}
-		}
-	}
-
 	/**
 	 * 发送消息至客户端
 	 *
@@ -124,5 +96,5 @@ public abstract class AbsPlayer {
 		}
 	}
 
-	abstract void kick();
+	public abstract void kick();
 }
