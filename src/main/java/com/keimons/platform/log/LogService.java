@@ -181,22 +181,9 @@ public class LogService {
 	}
 
 	/**
-	 * 初始化日志模块
-	 *
-	 * @param path 日志路径
+	 * 初始化日志系统
 	 */
-	public static void init(String path, String... logs) {
-		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
-		init();
-		for (String log : logs) {
-			loggers.put(log, build(new DefaultRollingFileLogger(path, log, Level.INFO)));
-		}
-	}
-
-	/**
-	 * 初始化系统日志
-	 */
-	public static void init() {
+	public static void init(String... logs) {
 		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
 
 		info = build(new DefaultRollingFileLogger(logPath, "info", Level.INFO));
@@ -210,5 +197,9 @@ public class LogService {
 
 		error = build(new DefaultRollingFileLogger(logPath, "error", Level.ERROR));
 		info("初始化[error]日志");
+
+		for (String log : logs) {
+			loggers.put(log, build(new DefaultRollingFileLogger(logPath, log, Level.INFO)));
+		}
 	}
 }

@@ -75,7 +75,7 @@ public class EventService {
 	 * @deprecated 优化中，当前版本不可用
 	 */
 	@Deprecated
-	private static void publicEvent(AbsPlayer player, String eventCode, Object... params) {
+	public static void publicEvent(AbsPlayer player, String eventCode, Object... params) {
 		try {
 			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
