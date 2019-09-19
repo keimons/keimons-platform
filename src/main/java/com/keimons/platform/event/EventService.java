@@ -72,8 +72,10 @@ public class EventService {
 	 * @param player    玩家
 	 * @param eventCode 事件号
 	 * @param params    参数列表
+	 * @deprecated 优化中，当前版本不可用
 	 */
-	public static void publicEvent(AbsPlayer player, String eventCode, Object... params) {
+	@Deprecated
+	private static void publicEvent(AbsPlayer player, String eventCode, Object... params) {
 		try {
 			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
@@ -129,7 +131,7 @@ public class EventService {
 				try {
 					handler.handler(event);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LogService.error(e);
 				}
 			}
 		}
