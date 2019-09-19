@@ -5,7 +5,12 @@ import lombok.Getter;
 import org.quartz.*;
 
 /**
- * 基础任务描述，包括任务的触发器和描述
+ * 定时任务描述，包括任务的触发器和描述
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-19
+ * @since 1.0
  */
 @Getter
 @AJob
@@ -31,6 +36,13 @@ public abstract class BaseJob implements Job {
 	 */
 	private final JobDetail jobDetail;
 
+	/**
+	 * 定时任务
+	 *
+	 * @param group 任务组
+	 * @param name  任务名
+	 * @param cron  任务触发表达式
+	 */
 	public BaseJob(String group, String name, String cron) {
 		this.cron = CronScheduleBuilder.cronSchedule(cron);
 		this.name = name;
@@ -38,10 +50,20 @@ public abstract class BaseJob implements Job {
 		jobDetail = JobBuilder.newJob(this.getClass()).withIdentity(name, group).build();
 	}
 
+	/**
+	 * 获取任务描述
+	 *
+	 * @return 任务描述
+	 */
 	public final JobDetail getJobDetail() {
 		return jobDetail;
 	}
 
+	/**
+	 * 获取任务触发器
+	 *
+	 * @return 触发器
+	 */
 	public final Trigger getTrigger() {
 		return trigger;
 	}

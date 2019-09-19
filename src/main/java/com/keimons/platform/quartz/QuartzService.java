@@ -1,5 +1,6 @@
 package com.keimons.platform.quartz;
 
+import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AJob;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
@@ -9,7 +10,15 @@ import org.quartz.impl.StdSchedulerFactory;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class QuartzManager {
+/**
+ * 定时任务系统
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-19
+ * @since 1.0
+ */
+public class QuartzService {
 
 	/**
 	 * 创建Scheduler的工厂
@@ -119,7 +128,10 @@ public class QuartzManager {
 		}
 	}
 
-	public void init(String packageName) {
+	/**
+	 * 初始化定时任务系统
+	 */
+	public void init() {
 		// 从工厂中获取调度器实例
 		// Quartz默认启动10个线程，考虑到各种保存数据，可能会长时间占用一个线程，例如保存玩家，保存排行榜等
 		// 允许Quartz启动10个线程，暂时不考虑修改
@@ -129,7 +141,7 @@ public class QuartzManager {
 			LogService.error(e);
 		}
 
-		loadJobs(packageName);
+		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.DEFAULT_PACKET));
 
 		try {
 			// 启动
@@ -139,10 +151,9 @@ public class QuartzManager {
 		}
 	}
 
-	public void reload() {
-		System.out.println(this.getClass().toString() + "!!!");
-	}
-
+	/**
+	 * 关闭定时任务系统
+	 */
 	public boolean shutdown() {
 		try {
 			scheduler.shutdown();
