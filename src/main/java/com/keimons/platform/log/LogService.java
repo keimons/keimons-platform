@@ -86,10 +86,10 @@ public class LogService {
 	 * @param context 信息内容
 	 */
 	public static void info(String context) {
-		System.out.println(context);
 		if (info != null) {
 			info.info(context);
 		}
+		System.out.println(context);
 	}
 
 	/**
@@ -101,6 +101,7 @@ public class LogService {
 		if (warn != null) {
 			warn.warn(context);
 		}
+		System.out.println(context);
 	}
 
 	/**
@@ -112,6 +113,7 @@ public class LogService {
 		if (debug != null) {
 			debug.debug(context);
 		}
+		System.out.println(context);
 	}
 
 	/**
@@ -139,22 +141,24 @@ public class LogService {
 	 * @param context 错误内容
 	 */
 	public static void error(Throwable e, String context) {
-		if (error == null) {
+		if (e == null && context == null) {
 			return;
 		}
-		if (e == null) {
-			System.err.println(context);
-			error.error(context);
-		} else {
+		if (context == null) {
 			StringWriter trace = new StringWriter();
 			e.printStackTrace(new PrintWriter(trace));
-			String errInfo = trace.toString();
-			if (context != null) {
-				errInfo = context + " " + errInfo;
+			context = trace.toString();
+		} else {
+			if (e != null) {
+				StringWriter trace = new StringWriter();
+				e.printStackTrace(new PrintWriter(trace));
+				context = context + " " + trace.toString();
 			}
-			System.err.println(errInfo);
-			error.error(errInfo);
 		}
+		if (error != null) {
+			error.error(context);
+		}
+		System.err.println(context);
 	}
 
 	/**
