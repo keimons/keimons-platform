@@ -30,7 +30,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 				Session session = ctx.channel().attr(SESSION).get();
 				if (session == null) {
 					ctx.close();
-					LogService.error("极限情况，无法在ctx中获取Session");
+					LogService.error("极限情况，无法在ctx中获取Session，ctx已经被销毁");
 					return;
 				}
 				// 直接发送到世界服
