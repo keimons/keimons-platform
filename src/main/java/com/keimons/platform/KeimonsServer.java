@@ -39,6 +39,11 @@ public class KeimonsServer {
 	public static final String DEFAULT_PACKET = ".";
 
 	/**
+	 * 日志路径
+	 */
+	public static final String KEIMONS_PACKET = "com.keimons.platform";
+
+	/**
 	 * 服务器ID （游戏服，世界服）
 	 */
 	public static int ServerId;

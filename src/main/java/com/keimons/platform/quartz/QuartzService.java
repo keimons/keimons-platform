@@ -7,7 +7,9 @@ import com.keimons.platform.unit.ClassUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -24,6 +26,11 @@ public class QuartzService {
 	 * 创建Scheduler的工厂
 	 */
 	private static Scheduler scheduler = null;
+
+	/**
+	 * 已经加载的任务
+	 */
+	private static Set<Class<?>> loaded = new HashSet<>();
 
 	/**
 	 * 新增一个定时任务
@@ -119,9 +126,13 @@ public class QuartzService {
 	private static void loadJobs(String packageName) {
 		List<Class<BaseJob>> classes = ClassUtil.load(packageName, AJob.class, BaseJob.class);
 		for (Class<BaseJob> clazz : classes) {
+			if (loaded.contains(clazz)) {
+				continue;
+			}
 			try {
 				BaseJob job = clazz.newInstance();
 				addJob(job);
+				loaded.add(clazz);
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
@@ -141,6 +152,7 @@ public class QuartzService {
 			LogService.error(e);
 		}
 
+		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.KEIMONS_PACKET));
 		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.DEFAULT_PACKET));
 
 		try {

@@ -9,8 +9,6 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.net.InetSocketAddress;
-
 /**
  * 会话，每一个ctx都会附带一个会话，每一个玩家也会依赖于一个会话
  * <br />
@@ -113,20 +111,6 @@ public class Session {
 	public <T extends Packet> void send(T msg) {
 		if (connect && msg != null && ctx != null) {
 			ctx.writeAndFlush(msg);
-		}
-	}
-
-	/**
-	 * 获取连接的IP地址
-	 *
-	 * @return 连接IP
-	 */
-	public String getIpAddress() {
-		if (ctx != null) {
-			InetSocketAddress socket = (InetSocketAddress) ctx.channel().remoteAddress();
-			return socket.getAddress().getHostAddress();
-		} else {
-			return "0.0.0.0";
 		}
 	}
 }

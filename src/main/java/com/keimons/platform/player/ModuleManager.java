@@ -7,10 +7,7 @@ import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.unit.CharsetUtil;
-import com.keimons.platform.unit.ClassUtil;
-import com.keimons.platform.unit.MD5Util;
-import com.keimons.platform.unit.TimeUtil;
+import com.keimons.platform.unit.*;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -174,8 +171,7 @@ public class ModuleManager implements IManager {
 //					RedissonManager.setMapValues(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(player.getPlayerId()), module);
 				}
 			} catch (Exception e) {
-				LogService.error(e);
-				System.out.println("玩家数据保存失败：" + player.getSession().getIpAddress());
+				LogService.error(e, "存储玩家数据失败");
 				return false;
 			}
 		}
