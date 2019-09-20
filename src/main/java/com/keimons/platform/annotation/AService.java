@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * 服务注解 服务器启动时会扫描所有实现这个注解类
  *
  * @author monkey1993
- * @since 1.0
+ * @since 1.8
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

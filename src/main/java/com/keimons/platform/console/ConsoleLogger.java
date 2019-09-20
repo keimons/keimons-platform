@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * @author monkey1993
  * @version 1.0
  * @date 2019-09-17
- * @since 1.0
+ * @since 1.8
  */
 public enum ConsoleLogger {
 

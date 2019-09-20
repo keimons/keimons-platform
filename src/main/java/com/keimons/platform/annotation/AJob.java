@@ -8,7 +8,7 @@ import java.lang.annotation.*;
  * @author monkey1993
  * @version 1.0
  * @date 2019-09-19
- * @since 1.0
+ * @since 1.8
  **/
 @Inherited
 @Target({ElementType.TYPE}) // 用于类、枚举

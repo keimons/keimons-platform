@@ -15,9 +15,9 @@ public class KeimonsServiceInitializer extends ChannelInitializer<SocketChannel>
 		ch.pipeline()
 				.addLast("IdleHandler", new IdleStateHandler(5 * 60, 5 * 60, 5 * 60))
 				.addLast("FramerDecoder", new ClientRequestFrameDecoder())
-				.addLast("ProtobufDecoder", new ClientRequestDecoder())
+				.addLast("RequestDecoder", new ClientRequestDecoder())
 				.addLast("FramerEncoder", new ServerResponseFrameEncoder())
-				.addLast("ProtobufEncoder", new ServerResponseEncoder())
+				.addLast("RequestEncoder", new ServerResponseEncoder())
 				.addLast("KeimonsHandler", new KeimonsHandler());
 	}
 }

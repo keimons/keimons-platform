@@ -1,9 +1,6 @@
 package com.keimons.platform.network.process;
 
-import com.google.protobuf.Internal;
-import com.google.protobuf.Message;
-import com.google.protobuf.MessageLite;
-import com.google.protobuf.Parser;
+import com.google.protobuf.*;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.player.AbsPlayer;
@@ -13,7 +10,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * 根消息处理器
+ * 消息处理器
  */
 public abstract class BaseProcessor<T extends Message> implements IProcessor {
 
@@ -27,57 +24,56 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 */
 	private Parser<? extends Message> parser;
 
-	public final Parser<? extends Message> getParser() {
-		return parser;
-	}
-
-	@SuppressWarnings("unchecked")
 	public BaseProcessor() {
 		Type type = getClass().getGenericSuperclass();
 		if (type instanceof ParameterizedType) {
 			ParameterizedType superclass = (ParameterizedType) type;
+			@SuppressWarnings("unchecked")
 			Class<T> clazz = (Class<T>) superclass.getActualTypeArguments()[0];
 			T instance = Internal.getDefaultInstance(clazz);
 			parser = instance.getParserForType();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void processor(Session session, Packet packet) {
-		Packet msg = null;
+		AbsPlayer player = session.getPlayer();
+		if (session.isLogined() && player == null) {
+			session.disconnect();
+			LogService.error("极限情况，连接已经关闭但是仍有未处理完的消息");
+			return;
+		}
+		Packet msg;
 		try {
-			// 注册或者登录等没有Player的情况
 			if (parser == null) {
-				if (session.isLogin()) {
-					msg = process(session.getPlayer());
+				if (session.isLogined()) {
+					msg = process(player);
 				} else {
 					msg = process(session);
 				}
 			} else {
-				T request;
-				try {
-					request = (T) parser.parseFrom(packet.getData());
-				} catch (Exception e) {
-					LogService.error(e);
-					// 通知客户端服务器错误
-					Packet pt = new Packet();
-					pt.setMsgCode(packet.getMsgCode() + 1).setErrCodes(new String[]{"EncodeError"});
-					session.send(pt);
-					return;
-				}
-				if (session.isLogin()) {
-					msg = process(session.getPlayer(), request);
+				@SuppressWarnings("unchecked")
+				T request = (T) parser.parseFrom(packet.getData());
+				if (session.isLogined()) {
+					msg = process(player, request);
 				} else {
 					msg = process(session, request);
 				}
 			}
 		} catch (Exception e) {
-			LogService.error(e);
+			String[] errCodes = new String[1];
+			if (e instanceof InvalidProtocolBufferException) {
+				LogService.error(e, "数据解析失败");
+				errCodes[0] = "DecodeError";
+			} else {
+				LogService.error(e, "消息执行失败");
+				errCodes[0] = "ExecutorError";
+			}
 			// 通知客户端服务器错误
 			Packet pt = new Packet();
-			pt.setErrCodes(new String[]{"SystemError"});
+			pt.setErrCodes(errCodes);
 			pt.setMsgCode(packet.getMsgCode() + 1);
 			session.send(pt);
+			return;
 		}
 		if (msg != null) {
 			session.send(msg.setMsgCode(packet.getMsgCode() + 1));
@@ -145,5 +141,9 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 			packet.setData(data.toByteArray());
 		}
 		return packet;
+	}
+
+	public final Parser<? extends Message> getParser() {
+		return parser;
 	}
 }

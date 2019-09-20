@@ -9,8 +9,8 @@ import ch.qos.logback.core.spi.FilterReply;
  *
  * @author monkey1993
  * @version 1.0
- * @since 1.8
  * @date 2019-09-17
+ * @since 1.8
  */
 class DefaultLevelFilter {
 

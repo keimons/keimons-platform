@@ -19,7 +19,7 @@ import java.net.InetSocketAddress;
 
 public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 
-	private static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
+	public static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -28,6 +28,11 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 			if (msg instanceof Packet) {
 				packet = (Packet) msg;
 				Session session = ctx.channel().attr(SESSION).get();
+				if (session == null) {
+					ctx.close();
+					LogService.error("极限情况，无法在ctx中获取Session");
+					return;
+				}
 				// 直接发送到世界服
 				IProcessor processor = ProcessorManager.getProcessor(packet.getMsgCode());
 				if (processor != null) {
