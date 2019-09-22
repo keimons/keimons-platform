@@ -32,4 +32,10 @@ public class ClientRequestFrameDecoder extends ByteToMessageDecoder {
 			out.add(bytes);
 		}
 	}
+
+	@Override
+	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+		// TODO IP黑白名单
+		super.channelRegistered(ctx);
+	}
 }

@@ -1,16 +1,16 @@
 package com.keimons.platform;
 
+import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.network.process.IProcessor;
 import com.keimons.platform.network.process.ProcessorManager;
-import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.session.SessionManager;
+import com.keimons.platform.unit.NetUtil;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
@@ -60,7 +60,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 	public void channelRegistered(ChannelHandlerContext ctx) {
 		Session session = new Session(ctx);
 		ctx.channel().attr(KeimonsHandler.SESSION).set(session);
-		SessionManager.addSession(session);
+		SessionManager.getInstance().addSession(session);
 	}
 
 	@Override
@@ -77,16 +77,13 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 		// 已经是pipeline中最后一个handler了
 		Session session = ctx.channel().attr(SESSION).get();
 		if (session != null) {
-			String errInfo = "Netty Exception! SessionId: " + session.getIpAddress();
-			if (session.getPlayer() != null) {
-				errInfo += ", Name: " + session.getPlayer();
-			}
-			LogService.error(cause, errInfo);
+			String errInfo = "Netty Exception! SessionId: " + NetUtil.getIpAddress(ctx);
+			LogService.error(errInfo);
 			session.disconnect();
 		} else {
-			LogService.error(cause, "Netty Exception!");
 			ctx.close();
 		}
+		LogService.error(cause, "未能在应用中捕获的异常");
 	}
 
 	@Override
@@ -94,36 +91,31 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 		super.channelInactive(ctx);
 	}
 
+	/**
+	 * 事件被触发
+	 *
+	 * @param ctx 连接
+	 * @param evt 事件
+	 * @throws Exception 异常
+	 */
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
 			throws Exception {
+		super.userEventTriggered(ctx, evt);
 		// 读写超时时调用
 		if (evt instanceof IdleStateEvent) {
-			IdleState state = ((IdleStateEvent) evt).state();
-			if (state == IdleState.READER_IDLE) {
-				Session session = ctx.channel().attr(SESSION).get();
-				if (session != null && TimeUtil.currentTimeMillis() - session.getLastActiveTime() > 5 * 60 * 1000) {
-					session.disconnect();
-				}
+			// 如果5分钟没有发生读/写的操作，则认定客户端已经掉线，直接关闭会话
+			Session session = ctx.channel().attr(SESSION).get();
+			if (session != null && TimeUtil.currentTimeMillis() - session.getLastActiveTime() >= 5 * 60 * 1000) {
+				session.disconnect();
 			}
-		} else {
-			super.userEventTriggered(ctx, evt);
-		}
-	}
-
-	@Override
-	public void handlerRemoved(ChannelHandlerContext ctx) {
-		Session session = ctx.channel().attr(SESSION).get();
-		if (session != null) {
-			session.disconnect();
 		}
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		System.out.println("激活通道：" + ctx);
-		InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-		System.out.println(insocket.getHostString());
+		InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
+		System.out.println("开启连接：" + address.getHostString());
 		super.channelActive(ctx);
 	}
 
