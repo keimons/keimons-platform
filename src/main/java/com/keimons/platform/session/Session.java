@@ -5,7 +5,9 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.player.AbsPlayer;
 import com.keimons.platform.unit.TimeUtil;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.concurrent.GenericFutureListener;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -112,7 +114,12 @@ public class Session {
 	 */
 	public <T extends Packet> void send(T msg) {
 		if (connect && msg != null && ctx != null) {
-			ctx.writeAndFlush(msg);
+			ctx.writeAndFlush(msg).addListener((GenericFutureListener<ChannelFuture>) future -> {
+				// 发送失败，打印错误信息
+				if (!future.isSuccess()) {
+					LogService.error(future.cause());
+				}
+			});
 		}
 	}
 

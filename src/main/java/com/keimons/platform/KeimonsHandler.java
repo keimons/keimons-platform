@@ -74,6 +74,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+		// 已经是pipeline中最后一个handler了
 		Session session = ctx.channel().attr(SESSION).get();
 		if (session != null) {
 			String errInfo = "Netty Exception! SessionId: " + session.getIpAddress();
@@ -84,6 +85,7 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 			session.disconnect();
 		} else {
 			LogService.error(cause, "Netty Exception!");
+			ctx.close();
 		}
 	}
 
