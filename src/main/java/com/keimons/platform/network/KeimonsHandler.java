@@ -1,8 +1,7 @@
-package com.keimons.platform;
+package com.keimons.platform.network;
 
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.Packet;
 import com.keimons.platform.network.process.IProcessor;
 import com.keimons.platform.network.process.ProcessorManager;
 import com.keimons.platform.session.Session;
@@ -10,49 +9,51 @@ import com.keimons.platform.session.SessionManager;
 import com.keimons.platform.unit.NetUtil;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
 
-public class KeimonsHandler extends ChannelInboundHandlerAdapter {
+/**
+ * 消息最终处理器
+ * <p>
+ * 入栈事件在pipeline中流动的最后一个节点，出栈事件在pipeline中流动的第一个节点
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-22
+ * @since 1.8
+ */
+public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 
 	public static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
 
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) {
-		Packet packet = null;
+	public void channelRead0(ChannelHandlerContext ctx, Packet packet) {
 		try {
-			if (msg instanceof Packet) {
-				packet = (Packet) msg;
-				Session session = ctx.channel().attr(SESSION).get();
-				if (session == null) {
-					ctx.close();
-					LogService.error("极限情况，无法在ctx中获取Session，ctx已经被销毁");
-					return;
+			Session session = ctx.channel().attr(SESSION).get();
+			if (session == null) {
+				ctx.close();
+				LogService.error("当前ctx无法获取Session，Session已经被销毁");
+				return;
+			}
+			// 直接发送到世界服
+			IProcessor processor = ProcessorManager.getProcessor(packet.getMsgCode());
+			if (processor != null) {
+				long start = TimeUtil.currentTimeMillis();
+				AProcessor aProcessor = ProcessorManager.getMsgCodeInfo(packet.getMsgCode());
+				processor.processor(session, packet);
+				long end = TimeUtil.currentTimeMillis();
+				if (end - start > 100) {
+					LogService.info(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
 				}
-				// 直接发送到世界服
-				IProcessor processor = ProcessorManager.getProcessor(packet.getMsgCode());
-				if (processor != null) {
-					long start = TimeUtil.currentTimeMillis();
-					AProcessor aProcessor = ProcessorManager.getMsgCodeInfo(packet.getMsgCode());
-					processor.processor(session, packet);
-					long end = TimeUtil.currentTimeMillis();
-					if (end - start > 100) {
-						LogService.info(TimeUtil.logDate() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
-					}
-				} else {
-					LogService.error("不存在的消息号：" + packet.getMsgCode());
-				}
+			} else {
+				LogService.error("不存在的消息号：" + packet.getMsgCode());
 			}
 		} catch (Exception e) {
 			String info = "错误号：" + packet.getMsgCode() + "，会话ID：" + ctx.channel().attr(SESSION).get();
 			LogService.error(e, info);
-		} finally {
-			// 释放消息体
-			ReferenceCountUtil.release(msg);
 		}
 	}
 
@@ -87,8 +88,11 @@ public class KeimonsHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		super.channelInactive(ctx);
+	public void channelInactive(ChannelHandlerContext ctx) {
+		Session session = ctx.channel().attr(SESSION).get();
+		if (session != null) {
+			session.disconnect();
+		}
 	}
 
 	/**

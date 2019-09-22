@@ -63,10 +63,10 @@ public class KeimonsServer {
 	 */
 	public static String PackageName = ".";
 
-	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> logClass) {
+	public static <T extends Enum<T> & ILoggerConfig> void init(String... logs) {
 		ConsoleService.init();
 		checkConfig();
-		LogService.init(logClass);
+		LogService.init("login", "logout");
 	}
 
 	public static void checkConfig() {

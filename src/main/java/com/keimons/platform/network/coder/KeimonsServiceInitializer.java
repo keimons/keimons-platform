@@ -1,6 +1,6 @@
 package com.keimons.platform.network.coder;
 
-import com.keimons.platform.KeimonsHandler;
+import com.keimons.platform.network.KeimonsHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
