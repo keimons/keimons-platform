@@ -187,16 +187,16 @@ public class LogService {
 		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
 
 		info = build(new DefaultRollingFileLogger(logPath, "info", Level.INFO));
-		info("初始化[info]日志");
+		info("成功初始化[info]日志");
 
 		debug = build(new DefaultRollingFileLogger(logPath, "debug", Level.DEBUG));
-		info("初始化[debug]日志");
+		info("成功初始化[debug]日志");
 
 		warn = build(new DefaultRollingFileLogger(logPath, "warn", Level.WARN));
-		info("初始化[warn]日志");
+		info("成功初始化[warn]日志");
 
 		error = build(new DefaultRollingFileLogger(logPath, "error", Level.ERROR));
-		info("初始化[error]日志");
+		info("成功初始化[error]日志");
 
 		for (String log : logs) {
 			loggers.put(log, build(new DefaultRollingFileLogger(logPath, log, Level.INFO)));

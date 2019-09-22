@@ -2,7 +2,6 @@ package com.keimons.platform;
 
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
-import com.keimons.platform.iface.IService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -10,12 +9,22 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class KeimonsService implements IService {
+/**
+ * TCP通讯模块
+ * <p>
+ * 底层采用Netty实现
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-22
+ * @since 1.8
+ */
+public class KeimonsTcpNet {
 
-	private EventLoopGroup bossGroup;
-	private EventLoopGroup workerGroup;
+	private static EventLoopGroup bossGroup;
+	private static EventLoopGroup workerGroup;
 
-	private void start() {
+	private static void start() {
 		String osName = System.getProperty("os.name");
 		if (osName.contains("Linux")) {
 			bossGroup = new EpollEventLoopGroup();
@@ -56,20 +65,16 @@ public class KeimonsService implements IService {
 	/**
 	 * 关闭Netty的线程池
 	 */
-	public void close() {
+	public static void close() {
 		bossGroup.shutdownGracefully();
 		workerGroup.shutdownGracefully();
 	}
 
-	@Override
-	public boolean startup() {
-		Thread thread = new Thread(this::start, "TCP-SERVER");
+	/**
+	 * 初始化通讯模块
+	 */
+	public static void init() {
+		Thread thread = new Thread(KeimonsTcpNet::start, "TCP-SERVER");
 		thread.start();
-		return true;
-	}
-
-	@Override
-	public boolean shutdown() {
-		return true;
 	}
 }

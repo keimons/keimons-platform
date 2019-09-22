@@ -5,10 +5,10 @@ import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
 import com.keimons.platform.iface.IEventHandler;
-import com.keimons.platform.iface.ILoggerConfig;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.quartz.QuartzService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
 
@@ -44,6 +44,11 @@ public class KeimonsServer {
 	public static final String KEIMONS_PACKET = "com.keimons.platform";
 
 	/**
+	 * 控制台输出重定向
+	 */
+	public static final String KEIMONS_CONSOLE_REDIRECT = "ConsoleRedirect";
+
+	/**
 	 * 服务器ID （游戏服，世界服）
 	 */
 	public static int ServerId;
@@ -63,10 +68,14 @@ public class KeimonsServer {
 	 */
 	public static String PackageName = ".";
 
-	public static <T extends Enum<T> & ILoggerConfig> void init(String... logs) {
-		ConsoleService.init();
+	/**
+	 * 初始化，初始化所有服务
+	 *
+	 * @param logs 日志
+	 */
+	public static void init(String... logs) {
 		checkConfig();
-		LogService.init("login", "logout");
+		LogService.init(logs);
 	}
 
 	public static void checkConfig() {
@@ -116,9 +125,19 @@ public class KeimonsServer {
 	/**
 	 * 启动入口
 	 */
-	public void start() {
+	public static void start() {
+		if (System.getProperty(KEIMONS_CONSOLE_REDIRECT, String.valueOf(true)).equals("true")) {
+			ConsoleService.init();
+			System.out.print("启用控制台输出重定向！");
+		} else {
+			System.out.println("禁用控制台输出重定向！");
+		}
+		LogService.init();
+		EventService.init();
+		QuartzService.init();
 		initManager();
 		initService();
+		KeimonsTcpNet.init();
 	}
 
 	/**
@@ -127,22 +146,15 @@ public class KeimonsServer {
 	public static void shutdown() {
 		// 关闭Netty
 		System.out.println("服务器准备关闭！");
-		KeimonsService netty = getService(KeimonsService.class);
-		if (netty != null) {
-			netty.close();
-		}
+		KeimonsTcpNet.close();
 
 		try {
-
 			// 暂停15秒以便Netty处理完剩余逻辑
 			Thread.sleep(15000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		long time = TimeUtil.currentTimeMillis();
-		for (IManager manager : managers.values()) {
-			manager.shutdown();
-		}
 		for (IService service : services.values()) {
 			service.shutdown();
 		}
@@ -173,7 +185,7 @@ public class KeimonsServer {
 				if (manager instanceof IEventHandler) {
 					EventService.registerEvent((IEventHandler) manager);
 				}
-				manager.init();
+				manager.load();
 				AManager managerInfo = clazz.getAnnotation(AManager.class);
 				System.out.println("管理器: 加载顺序 " + managerInfo.Priority() + "，名称：" + managerInfo.Name() + "，描述：" + managerInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {
@@ -199,7 +211,7 @@ public class KeimonsServer {
 				if (service instanceof IEventHandler) {
 					EventService.registerEvent((IEventHandler) service);
 				}
-				service.startup();
+				service.start();
 				AService serviceInfo = clazz.getAnnotation(AService.class);
 				System.out.println("服务: 加载顺序 " + serviceInfo.Priority() + "，名称：" + serviceInfo.Name() + "，描述：" + serviceInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {

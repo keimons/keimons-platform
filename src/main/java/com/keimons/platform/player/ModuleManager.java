@@ -1,13 +1,15 @@
 package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
-import com.keimons.platform.annotation.AModule;
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.IManager;
+import com.keimons.platform.annotation.AModule;
 import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.unit.*;
+import com.keimons.platform.unit.CharsetUtil;
+import com.keimons.platform.unit.ClassUtil;
+import com.keimons.platform.unit.MD5Util;
+import com.keimons.platform.unit.TimeUtil;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -15,7 +17,7 @@ import java.util.function.Consumer;
 /**
  * 玩家管理器
  */
-public class ModuleManager implements IManager {
+public class ModuleManager {
 
 	private static Map<Long, AbsPlayer> players = new HashMap<>();
 
@@ -223,13 +225,10 @@ public class ModuleManager implements IManager {
 		return (T) module;
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
 	public void init() {
 		modules.addAll(ClassUtil.load(KeimonsServer.PackageName, AModule.class, IPlayerData.class));
 	}
 
-	@Override
 	public boolean shutdown() {
 		saveAllPlayer(true);
 		return false;

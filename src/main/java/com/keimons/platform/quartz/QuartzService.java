@@ -154,7 +154,12 @@ public class QuartzService {
 
 		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.KEIMONS_PACKET));
 		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.DEFAULT_PACKET));
+	}
 
+	/**
+	 * 启动定时任务系统
+	 */
+	public static void start() {
 		try {
 			// 启动
 			scheduler.start();

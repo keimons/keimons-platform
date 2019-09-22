@@ -2,49 +2,41 @@ package com.keimons.platform.iface;
 
 /**
  * 静态数据管理
+ * <p>
+ * 一般都会在这里存放静态的表数据，静态数据声明周期中总共会发生4个事件
+ * 1.load   初始化
+ * 2.reload 重加载
+ * 3.unload 卸载
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-22
+ * @since 1.8
  */
 public interface IManager {
 
 	/**
-	 * 初始化 <br \>
-	 * 警告：在初始化过程中，禁止加载任何数据 <br \>
-	 * 所有数据必须通过reloadData统一执行 <br \>
-	 * 相互关联数据，按照加载顺序进行加载 <br \>
+	 * 加载
+	 * <p>
+	 * 将数据从txt、json、xml、db中加载到内存数据
 	 */
-	default void init() {
+	default void load() {
 	}
 
 	/**
-	 * 重新加载数据 <br \>
-	 * 警告：加在静态数据过程中，必须锁定对象
+	 * 重加载
+	 * <p>
+	 * 重新加载数据，用于表数据的热更新
 	 */
 	default void reload() {
-		this.init();
+		this.load();
 	}
 
 	/**
-	 * 系统框架允许在每天0点处理一些全服数据
+	 * 卸载
 	 * <p>
-	 * 跨天0点数据处理
+	 * 数据卸载，用于模块的数据卸载
 	 */
-	default void otherDay0() {
-	}
-
-	/**
-	 * 系统框架允许在每天5点处理一些全服数据
-	 * <p>
-	 * 跨天5数据处理
-	 */
-	default void otherDay5() {
-	}
-
-	/**
-	 * 关闭 <br \>
-	 * 警告：关闭服务器时，必须先讲内存中的所有数据保存至数据库
-	 *
-	 * @return 是否可以关闭
-	 */
-	default boolean shutdown() {
-		return true;
+	default void unload() {
 	}
 }

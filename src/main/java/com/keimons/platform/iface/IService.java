@@ -1,37 +1,30 @@
 package com.keimons.platform.iface;
 
 /**
- * 服务
+ * 业务逻辑管理
+ * <p>
+ * 在这里管理该模块的业务逻辑部分
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-22
+ * @since 1.8
  */
 public interface IService {
 
 	/**
-	 * 服务器启动
-	 *
-	 * @return 是否开服成功
-	 */
-	boolean startup();
-
-	/**
-	 * 系统框架允许在每天0点处理一些全服数据
+	 * 模块启动
 	 * <p>
-	 * 跨天0数据处理
-	 */
-	default void otherDay0() {
-	}
-
-	/**
-	 * 系统框架允许在每天5点处理一些全服数据
-	 * <p>
-	 * 跨天5数据处理
-	 */
-	default void otherDay5() {
-	}
-
-	/**
-	 * 服务停止
+	 * 该模块下的数据，通过这里进行启动
 	 *
-	 * @return 是否关服成功
+	 * @return 是否启动成功
+	 */
+	boolean start();
+
+	/**
+	 * 模块停止
+	 *
+	 * @return 是否停止成功
 	 */
 	boolean shutdown();
 }

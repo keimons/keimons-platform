@@ -1,6 +1,10 @@
 package com.keimons.platform.test;
 
+import com.keimons.platform.KeimonsServer;
+
 /**
+ * 系统测试
+ *
  * @author monkey1993
  * @version 1.0
  * @date 2019-09-20
@@ -9,6 +13,6 @@ package com.keimons.platform.test;
 public class Test {
 
 	public static void main(String[] args) {
-		System.out.println(Integer.MIN_VALUE - 1 + Integer.MIN_VALUE);
+		KeimonsServer.start();
 	}
 }
