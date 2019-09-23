@@ -70,12 +70,10 @@ public class KeimonsServer {
 
 	/**
 	 * 初始化，初始化所有服务
-	 *
-	 * @param logs 日志
 	 */
-	public static void init(String... logs) {
+	public static void init() {
 		checkConfig();
-		LogService.init(logs);
+		LogService.init();
 	}
 
 	public static void checkConfig() {

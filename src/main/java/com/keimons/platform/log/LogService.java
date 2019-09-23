@@ -30,11 +30,32 @@ public class LogService {
 	 */
 	public static final String DEFAULT_LOG_PATH = "./logs/";
 
+	/**
+	 * 信息
+	 */
 	private static Logger info;
+
+	/**
+	 * 警告
+	 */
 	private static Logger warn;
+
+	/**
+	 * 调试
+	 */
 	private static Logger debug;
+
+	/**
+	 * 错误
+	 */
 	private static Logger error;
 
+	/**
+	 * 构造日志
+	 *
+	 * @param iLogger 日志信息
+	 * @return 日志
+	 */
 	public static Logger build(ILogger iLogger) {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		Logger logger = context.getLogger(iLogger.getName() + "Logger");
@@ -55,7 +76,9 @@ public class LogService {
 	 *
 	 * @param logType 日志类型
 	 * @param context 日志内容
+	 * @deprecated 不推荐使用，推荐直接使用字符串
 	 */
+	@Deprecated
 	public static <T extends Enum<T> & ILoggerConfig> void log(T logType, String context) {
 		Logger logger = loggers.get(logType.getLoggerName());
 		if (logger != null) {
@@ -68,16 +91,17 @@ public class LogService {
 	/**
 	 * 打印日志
 	 *
-	 * @param logType 日志类型
+	 * @param logName 日志名字 最终输出到硬盘上的日志名
 	 * @param context 日志内容
 	 */
-	public static void log(String logType, String context) {
-		Logger logger = loggers.get(logType);
-		if (logger != null) {
-			logger.info(context);
-		} else {
-			error("尝试打印不存在的日志类型：" + logType);
+	public static void log(String logName, String context) {
+		Logger logger = loggers.get(logName);
+		if (logger == null) {
+			String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+			logger = build(new DefaultRollingFileLogger(logPath, logName, Level.INFO));
+			loggers.put(logName, logger);
 		}
+		logger.info(context);
 	}
 
 	/**
@@ -183,23 +207,27 @@ public class LogService {
 	/**
 	 * 初始化日志系统
 	 */
-	public static void init(String... logs) {
+	public static void init() {
 		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
 
-		info = build(new DefaultRollingFileLogger(logPath, "info", Level.INFO));
-		info("成功初始化[info]日志");
+		if (info == null) {
+			info = build(new DefaultRollingFileLogger(logPath, "info", Level.INFO));
+			info("成功初始化[info]日志");
+		}
 
-		debug = build(new DefaultRollingFileLogger(logPath, "debug", Level.DEBUG));
-		info("成功初始化[debug]日志");
+		if (debug == null) {
+			debug = build(new DefaultRollingFileLogger(logPath, "debug", Level.DEBUG));
+			info("成功初始化[debug]日志");
+		}
 
-		warn = build(new DefaultRollingFileLogger(logPath, "warn", Level.WARN));
-		info("成功初始化[warn]日志");
+		if (debug == null) {
+			warn = build(new DefaultRollingFileLogger(logPath, "warn", Level.WARN));
+			info("成功初始化[warn]日志");
+		}
 
-		error = build(new DefaultRollingFileLogger(logPath, "error", Level.ERROR));
-		info("成功初始化[error]日志");
-
-		for (String log : logs) {
-			loggers.put(log, build(new DefaultRollingFileLogger(logPath, log, Level.INFO)));
+		if (error == null) {
+			error = build(new DefaultRollingFileLogger(logPath, "error", Level.ERROR));
+			info("成功初始化[error]日志");
 		}
 	}
 }
