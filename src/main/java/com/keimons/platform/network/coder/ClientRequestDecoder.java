@@ -8,7 +8,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 
 import java.util.List;
 
-//@Sharable
+// @Sharable
 public class ClientRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
 
 	@Override

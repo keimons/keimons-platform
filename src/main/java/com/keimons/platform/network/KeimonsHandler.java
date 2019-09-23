@@ -38,7 +38,6 @@ public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			// 直接发送到世界服
 			IProcessor processor = ProcessorManager.getProcessor(packet.getMsgCode());
 			if (processor != null) {
 				long start = TimeUtil.currentTimeMillis();
