@@ -2,39 +2,61 @@ package com.keimons.platform.unit;
 
 import java.nio.ByteBuffer;
 
+/**
+ * 字节相关转化工具
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-25
+ * @since 1.8
+ */
 public class ByteUtil {
 
-	private static ByteBuffer buffer = ByteBuffer.allocate(8);
-
 	/**
-	 * byte 数组与 long 的相互转换
+	 * 长整型转字节数组
+	 *
+	 * @param value 长整数
+	 * @return 字节数组
 	 */
-	public static byte[] longToBytes(long x) {
-		buffer.putLong(0, x);
+	public static byte[] longToBytes(long value) {
+		ByteBuffer buffer = ByteBuffer.allocate(8);
+		buffer.putLong(0, value);
 		return buffer.array();
 	}
 
 	/**
-	 * byte 数组与 long 的相互转换
+	 * 字节数组转长整型
+	 *
+	 * @param bytes 字节数组
+	 * @return 长整型
 	 */
 	public static long bytesToLong(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.allocate(8);
 		buffer.put(bytes, 0, bytes.length);
 		buffer.flip();
 		return buffer.getLong();
 	}
 
 	/**
-	 * byte 数组与 int 的相互转换
+	 * 整型转字节数组
+	 *
+	 * @param value 整型
+	 * @return 字节数组
 	 */
-	public static byte[] longToBytes(int x) {
-		buffer.putInt(0, x);
+	public static byte[] intToBytes(int value) {
+		ByteBuffer buffer = ByteBuffer.allocate(4);
+		buffer.putInt(0, value);
 		return buffer.array();
 	}
 
 	/**
-	 * byte 数组与 int 的相互转换
+	 * 字节数组转整型
+	 *
+	 * @param bytes 字节数组
+	 * @return 整型
 	 */
 	public static int bytesToInt(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.allocate(4);
 		buffer.put(bytes, 0, bytes.length);
 		buffer.flip();
 		return buffer.getInt();

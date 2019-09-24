@@ -4,8 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * 随机工具类
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-25
+ * @since 1.8
+ */
 public class RandomUtil {
 
+	/**
+	 * 随机种子
+	 */
 	private static final Random random = new Random(TimeUtil.currentTimeMillis());
 
 	/**
@@ -30,24 +41,11 @@ public class RandomUtil {
 	/**
 	 * 获取一个整数 [0, end)
 	 *
-	 * @param end
-	 * @return
+	 * @param end 最大数
+	 * @return 随机数
 	 */
 	public static int nextInt(int end) {
 		return random.nextInt(end);
-	}
-
-
-	/**
-	 * @param seed
-	 * @return
-	 */
-	public static Random getRandomBySeed(long seed) {
-		return new Random(seed);
-	}
-
-	public static int[] randomIndex(int end, int times) {
-		return new int[0];
 	}
 
 	/**

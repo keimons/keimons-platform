@@ -6,7 +6,12 @@ import java.time.temporal.TemporalQueries;
 import java.util.Date;
 
 /**
- * 时间工具
+ * 线程安全的时间工具
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-25
+ * @since 1.8
  */
 public class TimeUtil {
 
@@ -82,9 +87,7 @@ public class TimeUtil {
 	 * @return 当前日期 日期格式："yyyy-MM-dd HH:mm:ss.SSS"
 	 */
 	public static String getDateTime(long time) {
-		return formatter.format(LocalDateTime.ofInstant(
-				Instant.ofEpochMilli(time), ZoneId.systemDefault()
-		));
+		return formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
 	}
 
 	/**

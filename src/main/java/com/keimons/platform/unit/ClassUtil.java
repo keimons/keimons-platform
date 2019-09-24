@@ -13,7 +13,12 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 /**
- * 1. 读取某一个jar包或者某一个文件夹下的所有class文件
+ * 读取某一个jar包或者某一个文件夹下的所有class文件
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-09-25
+ * @since 1.8
  */
 public class ClassUtil {
 
@@ -56,7 +61,6 @@ public class ClassUtil {
 	 * @return 该包下所有的class文件
 	 */
 	public static Set<Class<?>> getClasses(String pack) {
-
 		// 第一个class类的集合
 		Set<Class<?>> classes = new LinkedHashSet<>();
 		// 获取包的名字 并进行替换
