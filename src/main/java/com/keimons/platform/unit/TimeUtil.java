@@ -1,10 +1,10 @@
 package com.keimons.platform.unit;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalQueries;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -23,7 +23,7 @@ public class TimeUtil {
 	 * 东加西减 中国UTC+8<br />
 	 * 应该在{@link System#currentTimeMillis()}的基础上加8个小时
 	 */
-	private static long offsetZero0 = Calendar.getInstance().get(Calendar.ZONE_OFFSET);
+	private static long offsetZero0 = 0L;
 
 	/**
 	 * 5时 时区时间偏移量<br />
@@ -33,19 +33,10 @@ public class TimeUtil {
 	private static long offsetZero5 = Calendar.getInstance().get(Calendar.ZONE_OFFSET) - 5 * 60 * 60 * 1000L;
 
 	/**
-	 * 时间格式
-	 */
-	private final static DateTimeFormatter log = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-
-	/**
-	 * 时间格式
-	 */
-	private final static DateTimeFormatter order = DateTimeFormatter.ofPattern("yyyyMMdd000000000");
-
-	/**
 	 * 标准程序中标准日期格式
 	 */
-	private final static DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+	private final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	public static long getOffsetTime() {
 		return offsetTime;
@@ -73,18 +64,30 @@ public class TimeUtil {
 		return new Date(currentTimeMillis());
 	}
 
-	public static String logDate() {
-		return log.format(LocalDateTime.now());
+	/**
+	 * 获取当前日期
+	 * <p>
+	 * 采用的是线程安全的{@link DateTimeFormatter}实现
+	 *
+	 * @return 当前日期 日期格式："yyyy-MM-dd HH:mm:ss.SSS"
+	 */
+	public static String getDateTime() {
+		return formatter.format(LocalDateTime.ofInstant(
+				Instant.ofEpochMilli(currentTimeMillis()), ZoneId.systemDefault()
+		));
 	}
 
 	/**
-	 * 获取订单日期
+	 * 获取当前日期
+	 * <p>
+	 * 采用的是线程安全的{@link DateTimeFormatter}实现
 	 *
-	 * @return 订单日期
+	 * @return 当前日期 日期格式："yyyy-MM-dd HH:mm:ss.SSS"
 	 */
-	public static long orderTime() {
-		Instant instant = Instant.ofEpochMilli(System.currentTimeMillis() + offsetTime);
-		return Long.parseLong(order.format(LocalDateTime.ofInstant(instant, ZoneId.systemDefault())));
+	public static String getDateTime(long time) {
+		return formatter.format(LocalDateTime.ofInstant(
+				Instant.ofEpochMilli(time), ZoneId.systemDefault()
+		));
 	}
 
 	/**
@@ -95,7 +98,9 @@ public class TimeUtil {
 	 * @return 是否同一天
 	 */
 	public static boolean isSameDay0(long time1, long time2) {
-		return isSameDay(time1, time2, offsetZero0);
+		LocalDate date1 = Instant.ofEpochMilli(time1).query(TemporalQueries.localDate());
+		LocalDate date2 = Instant.ofEpochMilli(time2).query(TemporalQueries.localDate());
+		return date1.equals(date2);
 	}
 
 	/**
@@ -106,7 +111,21 @@ public class TimeUtil {
 	 * @return 是否同一天
 	 */
 	public static boolean isSameDay5(long time1, long time2) {
-		return isSameDay(time1, time2, offsetZero5);
+		LocalDateTime dateTime1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time1), ZoneId.systemDefault());
+		LocalDateTime dateTime2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time2), ZoneId.systemDefault());
+		LocalDate date1;
+		LocalDate date2;
+		if (dateTime1.toLocalTime().isBefore(LocalTime.of(5, 0))) {
+			date1 = dateTime1.toLocalDate().plusDays(-1);
+		} else {
+			date1 = dateTime1.toLocalDate();
+		}
+		if (dateTime2.toLocalTime().isBefore(LocalTime.of(5, 0))) {
+			date2 = dateTime2.toLocalDate().plusDays(-1);
+		} else {
+			date2 = dateTime2.toLocalDate();
+		}
+		return date1.equals(date2);
 	}
 
 	/**
@@ -121,124 +140,6 @@ public class TimeUtil {
 		return (time1 + offset) / (24 * 60 * 60 * 1000L) == (time2 + offset) / (24 * 60 * 60 * 1000L);
 	}
 
-	public static int getYear() {
-		return getTime(Calendar.YEAR);
-	}
-
-	public static int getMonth() {
-		return getTime(Calendar.MONTH); //todo 周日从1开始
-	}
-
-	/**
-	 * 当前周几
-	 *
-	 * @return 1-7 代表周一到周日
-	 */
-	public static int getDayOfWeek() {
-		int dayOfWeek = getTime(Calendar.DAY_OF_WEEK) - 1;
-		return dayOfWeek == 0 ? 7 : dayOfWeek;
-	}
-
-	/**
-	 * 当前周几
-	 *
-	 * @return 1-7 代表周一到周日
-	 */
-	public static int getHouseOfMonth() {
-		return (getDayOfMonth() - 1) * 24 + getHourOfDay();
-	}
-
-	/**
-	 * 这个月的第几天
-	 *
-	 * @return
-	 */
-	public static int getDayOfMonth() {
-		return getTime(Calendar.DAY_OF_MONTH);
-	}
-
-	/**
-	 * 几点
-	 *
-	 * @return
-	 */
-	public static int getHourOfDay() {
-		return getTime(Calendar.HOUR_OF_DAY);
-	}
-
-	/**
-	 * 当前是一天中的第x分钟
-	 *
-	 * @return 第x分钟
-	 */
-	public static int getMinuteOfDay() {
-		return getTime(Calendar.HOUR_OF_DAY) * 60 + getTime(Calendar.MINUTE);
-	}
-
-	/**
-	 * 第几分钟
-	 *
-	 * @return
-	 */
-	public static int getMinuteOfHouse() {
-		return getTime(Calendar.MINUTE);
-	}
-
-	/**
-	 * 今天的第多少秒
-	 *
-	 * @return 今天的第多少秒
-	 */
-	public static int getSecondOfDay() {
-		Calendar timeNow = Calendar.getInstance();
-		Calendar timeZero = Calendar.getInstance();
-		timeZero.set(Calendar.HOUR_OF_DAY, 0);
-		timeZero.set(Calendar.MINUTE, 0);
-		timeZero.set(Calendar.SECOND, 0);
-		return (int) (timeNow.getTimeInMillis() - timeZero.getTimeInMillis()) / 1000;
-	}
-
-	public static int getTime(int type) {
-		Calendar instance = Calendar.getInstance();
-		instance.setTimeInMillis(currentTimeMillis());
-		return instance.get(type);
-	}
-
-
-	/**
-	 * 判断是否是同一周
-	 *
-	 * @param startTime
-	 * @param endTime
-	 * @return
-	 */
-	public static boolean isSameWeek(long startTime, long endTime) {
-		Calendar startInstance = Calendar.getInstance();
-		startInstance.setTimeInMillis(startTime);
-		Calendar endInstance = Calendar.getInstance();
-		endInstance.setTimeInMillis(endTime);
-		if (endTime - startTime >= 7 * 24 * 60 * 60 * 1000) {
-			return false;
-		}
-		return startInstance.get(Calendar.WEEK_OF_YEAR) == endInstance.get(Calendar.WEEK_OF_YEAR);
-	}
-
-	/**
-	 * 是否是同一个月
-	 *
-	 * @param startTime
-	 * @param endTime
-	 * @return
-	 */
-	public static boolean isSameMonth(long startTime, long endTime) {
-		Calendar startInstance = Calendar.getInstance();
-		startInstance.setTimeInMillis(startTime);
-		Calendar endInstance = Calendar.getInstance();
-		endInstance.setTimeInMillis(endTime);
-		return startInstance.get(Calendar.YEAR) == endInstance.get(Calendar.YEAR) &&
-				startInstance.get(Calendar.MONTH) == endInstance.get(Calendar.MONTH);
-	}
-
 	/**
 	 * 时间转化工具
 	 *
@@ -247,7 +148,7 @@ public class TimeUtil {
 	 */
 	public static String convertTime(long time) {
 		Instant instant = Instant.ofEpochMilli(time);
-		return date.format(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
+		return formatter.format(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
 	}
 
 	/**
@@ -257,7 +158,7 @@ public class TimeUtil {
 	 * @return 时间毫秒
 	 */
 	public static long convertTime(String date) {
-		LocalDateTime parse = LocalDateTime.parse(date, TimeUtil.date);
+		LocalDateTime parse = LocalDateTime.parse(date, dtf);
 		return parse.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
@@ -269,10 +170,9 @@ public class TimeUtil {
 	 *
 	 * @return 今天的开始时间
 	 */
-	public static long beginTime() {
-		Instant instant = Instant.ofEpochMilli(currentTimeMillis());
-		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-		LocalDateTime beginTime = LocalDateTime.of(localDateTime.toLocalDate(), LocalTime.MIN);
+	public static long beginTime(long millis) {
+		LocalDate date = Instant.ofEpochMilli(millis).query(TemporalQueries.localDate());
+		LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
 		return beginTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
@@ -283,10 +183,9 @@ public class TimeUtil {
 	 *
 	 * @return 今天的结束时间
 	 */
-	public static long endTime() {
-		Instant instant = Instant.ofEpochMilli(currentTimeMillis());
-		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-		LocalDateTime beginTime = LocalDateTime.of(localDateTime.toLocalDate(), LocalTime.MAX);
+	public static long endTime(long millis) {
+		LocalDate date = Instant.ofEpochMilli(millis).query(TemporalQueries.localDate());
+		LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MAX);
 		return beginTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
@@ -310,40 +209,38 @@ public class TimeUtil {
 		return house * 60L * 60 * 1000;
 	}
 
-	/**
-	 * 服务器活动时间
-	 *
-	 * @param startDate
-	 * @param openTime
-	 * @return
-	 */
-	public static long createActivityTime(String startDate, long openTime) {
-		String[] split = startDate.split("\\|");
-		int day = Integer.parseInt(split[0]) - 1;
-		int hour = Integer.parseInt(split[1]);
-		return openTime + day * 24 * 60 * 60 * 1000 + hour * 60 * 60 * 1000;
-	}
+	public static void main(String[] args) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	/**
-	 * 开服第几天开启
-	 *
-	 * @param day
-	 * @param hour
-	 * @param openTime
-	 * @return
-	 */
-	public static long getTimeByServerStart(int day, int hour, long openTime) {
-		return openTime + (day - 1) * 24 * 60 * 60 * 1000 + hour * 60 * 60 * 1000;
-	}
+		Calendar instance1 = Calendar.getInstance();
+		instance1.setTime(sdf.parse("1991-04-13 03:00:00"));
 
-	public static void main(String[] args) {
-		Calendar calendar1 = Calendar.getInstance();
-		calendar1.set(2019, 6, 28, 4, 59, 59);
-		Calendar calendar2 = Calendar.getInstance();
-		calendar2.set(2019, 6, 28, 5, 0, 0);
-		System.out.println(isSameDay5(calendar1.getTimeInMillis(), calendar2.getTimeInMillis()));
-		System.out.println(convertTime(1565584200000L));
+		System.out.println("当前时间：" + sdf.format(instance1.getTime()));
 
+		instance1.add(Calendar.HOUR_OF_DAY, -2);
 
+		System.out.println("两小时前：" + sdf.format(instance1.getTime()));
+
+		System.out.println();
+
+		Calendar instance2 = Calendar.getInstance();
+		instance2.setTimeInMillis(671565600000L);
+
+		System.out.println("当前时间：" + sdf.format(instance2.getTime()));
+
+		instance2.add(Calendar.HOUR_OF_DAY, -2);
+
+		System.out.println("两小时前：" + sdf.format(instance2.getTime()));
+
+		System.out.println();
+
+		Calendar instance3 = Calendar.getInstance();
+		instance3.setTime(sdf.parse("1991-04-15 03:00:00"));
+
+		System.out.println("当前时间：" + sdf.format(instance3.getTime()));
+
+		instance3.add(Calendar.DAY_OF_YEAR, -1);
+
+		System.out.println("两小时前：" + sdf.format(instance3.getTime()));
 	}
 }
