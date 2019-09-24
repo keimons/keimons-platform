@@ -3,7 +3,6 @@ package com.keimons.platform.unit;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalQueries;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -17,29 +16,29 @@ public class TimeUtil {
 	private static long offsetTime;
 
 	/**
-	 * 0时 时区时间偏移量<br />
-	 * 东加西减 中国UTC+8<br />
-	 * 应该在{@link System#currentTimeMillis()}的基础上加8个小时
-	 */
-	private static long offsetZero0 = 0L;
-
-	/**
-	 * 5时 时区时间偏移量<br />
-	 * 东加西减 中国UTC+8<br />
-	 * 应该在{@link System#currentTimeMillis()}的基础上加8个小时
-	 */
-	private static long offsetZero5 = Calendar.getInstance().get(Calendar.ZONE_OFFSET) - 5 * 60 * 60 * 1000L;
-
-	/**
 	 * 标准程序中标准日期格式
 	 */
 	private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+	/**
+	 * 短日期格式
+	 */
 	private final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+	/**
+	 * 获取系统时间偏移量
+	 *
+	 * @return 系统时间偏移量
+	 */
 	public static long getOffsetTime() {
 		return offsetTime;
 	}
 
+	/**
+	 * 设置系统时间偏移量
+	 *
+	 * @param offsetTime 系统时间偏移量
+	 */
 	public static void setOffsetTime(long offsetTime) {
 		TimeUtil.offsetTime = offsetTime;
 	}
