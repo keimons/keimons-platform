@@ -98,9 +98,9 @@ public class TimeUtil {
 	 * @return 是否同一天
 	 */
 	public static boolean isSameDay0(long time1, long time2) {
-		LocalDate date1 = Instant.ofEpochMilli(time1).query(TemporalQueries.localDate());
-		LocalDate date2 = Instant.ofEpochMilli(time2).query(TemporalQueries.localDate());
-		return date1.equals(date2);
+		LocalDateTime date1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time1), ZoneId.systemDefault());
+		LocalDateTime date2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time2), ZoneId.systemDefault());
+		return date1.toLocalDate().equals(date2.toLocalDate());
 	}
 
 	/**
@@ -242,5 +242,7 @@ public class TimeUtil {
 		instance3.add(Calendar.DAY_OF_YEAR, -1);
 
 		System.out.println("两小时前：" + sdf.format(instance3.getTime()));
+
+		System.out.println(isSameDay0(9L, 100L));
 	}
 }
