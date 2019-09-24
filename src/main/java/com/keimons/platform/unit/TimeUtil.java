@@ -1,7 +1,5 @@
 package com.keimons.platform.unit;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalQueries;
@@ -207,42 +205,5 @@ public class TimeUtil {
 	 */
 	public static long houseToMillis(int house) {
 		return house * 60L * 60 * 1000;
-	}
-
-	public static void main(String[] args) throws ParseException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-		Calendar instance1 = Calendar.getInstance();
-		instance1.setTime(sdf.parse("1991-04-13 03:00:00"));
-
-		System.out.println("当前时间：" + sdf.format(instance1.getTime()));
-
-		instance1.add(Calendar.HOUR_OF_DAY, -2);
-
-		System.out.println("两小时前：" + sdf.format(instance1.getTime()));
-
-		System.out.println();
-
-		Calendar instance2 = Calendar.getInstance();
-		instance2.setTimeInMillis(671565600000L);
-
-		System.out.println("当前时间：" + sdf.format(instance2.getTime()));
-
-		instance2.add(Calendar.HOUR_OF_DAY, -2);
-
-		System.out.println("两小时前：" + sdf.format(instance2.getTime()));
-
-		System.out.println();
-
-		Calendar instance3 = Calendar.getInstance();
-		instance3.setTime(sdf.parse("1991-04-15 03:00:00"));
-
-		System.out.println("当前时间：" + sdf.format(instance3.getTime()));
-
-		instance3.add(Calendar.DAY_OF_YEAR, -1);
-
-		System.out.println("两小时前：" + sdf.format(instance3.getTime()));
-
-		System.out.println(isSameDay0(9L, 100L));
 	}
 }
