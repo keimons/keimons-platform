@@ -1,12 +1,10 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.player;
 
-import com.keimons.platform.annotation.AModule;
-import com.keimons.platform.player.AbsPlayer;
+import com.keimons.platform.iface.IPlayerData;
 
 /**
  * 玩家数据
  */
-@AModule
 public abstract class BasePlayerData implements IPlayerData {
 	/**
 	 * 计算上次的MD5

@@ -82,11 +82,6 @@ public class ModuleManager {
 		return 0L;
 	}
 
-	public static void main(String[] args) {
-		String i = 5 * 1_000_000 + "";
-		System.out.println(i.substring(0, 1));
-	}
-
 	/**
 	 * 踢玩家下线
 	 * 关闭Session -> 移除缓存 -> 保存玩家数据
@@ -97,7 +92,6 @@ public class ModuleManager {
 	public void kickPlayer(AbsPlayer player, int kickType) {
 		if (player != null) {
 			// TODO 玩家下线需要通知客户端下线类型
-			player.kick();
 		}
 	}
 
@@ -162,7 +156,7 @@ public class ModuleManager {
 				Map<byte[], byte[]> module = new HashMap<>();
 				for (IPlayerData data : player.getModules()) {
 					data.encode();
-					byte[] bytes = DataUtil.encode(data);
+					byte[] bytes = ModuleUtil.encode(data);
 					String md5 = MD5Util.md5(bytes);
 					if (coercive || data.getLastMd5() == null || !data.getLastMd5().equals(md5)) {
 						data.setLastMd5(md5);
@@ -193,15 +187,16 @@ public class ModuleManager {
 			for (Map.Entry<byte[], byte[]> entry : playerData.entrySet()) {
 				size += entry.getKey().length;
 				size += entry.getValue().length;
+				String moduleName = CharsetUtil.getUTF8(entry.getKey());
 				// 反序列化
-				IPlayerData data = DataUtil.decode(CharsetUtil.getUTF8(entry.getKey()), entry.getValue());
+				IPlayerData data = ModuleUtil.decode(ModuleUtil.getModuleClass(moduleName), entry.getValue());
 				if (data != null) {
 					data.decode();
 					player.addPlayerData(data);
 				}
 			}
 			// 玩家身上没有该模块，搞一个存进去
-			DataUtil.checkPlayerData(player);
+			player.checkPlayerData();
 			for (IPlayerData data : player.getModules()) {
 				data.loaded(player);
 			}
@@ -218,7 +213,8 @@ public class ModuleManager {
 	public static <T extends IPlayerData> T loadPlayer(long playerId, Enum<? extends IModule> moduleType) {
 		byte[] data = null; //RedissonManager.getMapValue(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(playerId), CharsetUtil.getUTF8(moduleType.toString()));
 		// 反序列化
-		IPlayerData module = DataUtil.decode(moduleType.toString(), data);
+		Class<? extends IPlayerData> clazz = ModuleUtil.getModuleClass(moduleType.toString());
+		IPlayerData module = ModuleUtil.decode(clazz, data);
 		if (module != null) {
 			module.decode();
 		}

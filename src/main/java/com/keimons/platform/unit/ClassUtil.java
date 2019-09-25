@@ -23,33 +23,20 @@ import java.util.stream.Collectors;
 public class ClassUtil {
 
 	/**
-	 * 加载所有使用该注解的非抽象类
-	 *
-	 * @param packageName 包名
-	 * @param annotation  注解
-	 * @param parent      父类
-	 * @return 使用该注解的非抽象类
-	 */
-	public static <T> List<Class<T>> load(String packageName, Class<? extends Annotation> annotation, Class<? extends T> parent) {
-		return load(packageName, annotation, parent, false);
-	}
-
-	/**
 	 * 加载所有使用该注解的类
 	 *
 	 * @param packageName 包名
 	 * @param annotation  注解
 	 * @param parent      父类
-	 * @param isAbstract  是否抽象类
 	 * @return 使用该注解的类
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> List<Class<T>> load(String packageName, Class<? extends Annotation> annotation, Class<? extends T> parent, boolean isAbstract) {
+	public static <T> List<Class<T>> load(String packageName, Class<? extends Annotation> annotation, Class<? extends T> parent) {
 		return ClassUtil.getClasses(packageName)
 				.stream()
 				.filter(clazz -> clazz.isAnnotationPresent(annotation))
 				.filter(clazz -> parent == null || parent.isAssignableFrom(clazz))
-				.filter(clazz -> isAbstract || !Modifier.isAbstract(clazz.getModifiers()))
+				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()) && Modifier.isInterface(clazz.getModifiers()))
 				.map(clazz -> (Class<T>) clazz)
 				.collect(Collectors.toList());
 	}

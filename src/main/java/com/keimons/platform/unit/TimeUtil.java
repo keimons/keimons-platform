@@ -98,9 +98,7 @@ public class TimeUtil {
 	 * @return 是否同一天
 	 */
 	public static boolean isSameDay0(long time1, long time2) {
-		LocalDateTime date1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time1), ZoneId.systemDefault());
-		LocalDateTime date2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time2), ZoneId.systemDefault());
-		return date1.toLocalDate().equals(date2.toLocalDate());
+		return isSameDay(time1, time2, 0);
 	}
 
 	/**
@@ -111,33 +109,33 @@ public class TimeUtil {
 	 * @return 是否同一天
 	 */
 	public static boolean isSameDay5(long time1, long time2) {
+		return isSameDay(time1, time2, 5);
+	}
+
+	/**
+	 * 按照某一个整点划分 判断两个日期是否同一天
+	 *
+	 * @param time1 时间1
+	 * @param time2 时间2
+	 * @param hour  划分时间（小时）
+	 * @return 是否同一天
+	 */
+	public static boolean isSameDay(long time1, long time2, int hour) {
 		LocalDateTime dateTime1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time1), ZoneId.systemDefault());
 		LocalDateTime dateTime2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(time2), ZoneId.systemDefault());
 		LocalDate date1;
 		LocalDate date2;
-		if (dateTime1.toLocalTime().isBefore(LocalTime.of(5, 0))) {
+		if (dateTime1.toLocalTime().isBefore(LocalTime.of(hour, 0))) {
 			date1 = dateTime1.toLocalDate().plusDays(-1);
 		} else {
 			date1 = dateTime1.toLocalDate();
 		}
-		if (dateTime2.toLocalTime().isBefore(LocalTime.of(5, 0))) {
+		if (dateTime2.toLocalTime().isBefore(LocalTime.of(hour, 0))) {
 			date2 = dateTime2.toLocalDate().plusDays(-1);
 		} else {
 			date2 = dateTime2.toLocalDate();
 		}
 		return date1.equals(date2);
-	}
-
-	/**
-	 * 依赖服务器时区的是否同一天
-	 *
-	 * @param time1  时间1
-	 * @param time2  时间2
-	 * @param offset 时间偏移
-	 * @return 是否同一天
-	 */
-	private static boolean isSameDay(long time1, long time2, long offset) {
-		return (time1 + offset) / (24 * 60 * 60 * 1000L) == (time2 + offset) / (24 * 60 * 60 * 1000L);
 	}
 
 	/**
@@ -177,11 +175,11 @@ public class TimeUtil {
 	}
 
 	/**
-	 * 获取一天的开始时间
+	 * 获取一天的结束时间
 	 * <p>
 	 * yyyy-MM-dd 23:59:59.999
 	 *
-	 * @return 今天的结束时间
+	 * @return 当天结束时间
 	 */
 	public static long endTime(long millis) {
 		LocalDate date = Instant.ofEpochMilli(millis).query(TemporalQueries.localDate());

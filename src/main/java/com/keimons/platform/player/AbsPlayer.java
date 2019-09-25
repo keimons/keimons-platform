@@ -2,12 +2,15 @@ package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
 import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.log.LogService;
 import com.keimons.platform.session.Session;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,13 +31,20 @@ public abstract class AbsPlayer {
 	/**
 	 * 储存玩家所有数据
 	 */
-	private HashMap<Class<? extends IPlayerData>, IPlayerData> modules = new HashMap<>();
+	protected HashMap<Class<? extends IPlayerData>, IPlayerData> modules = new HashMap<>();
 
 	/**
 	 * 最后活跃时间
 	 */
 	private volatile long lastActiveTime;
 
+	/**
+	 * 获取玩家的一个模块
+	 *
+	 * @param clazz 模块
+	 * @param <T>   模块类型
+	 * @return 数据模块
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends IPlayerData> T getModule(Class<T> clazz) {
 		return (T) modules.get(clazz);
@@ -52,14 +62,41 @@ public abstract class AbsPlayer {
 	/**
 	 * 获取玩家所有的模块数据
 	 *
-	 * @return
+	 * @return 玩家所有模块数据
 	 */
 	public Collection<IPlayerData> getModules() {
 		return modules.values();
 	}
 
+	/**
+	 * 检查玩家是否有该模块
+	 *
+	 * @param clazz 模块
+	 * @return 是否有该模块
+	 */
 	public boolean hasModule(Class<? extends IPlayerData> clazz) {
 		return modules.containsKey(clazz);
+	}
+
+	/**
+	 * 检测玩家缺少的数据模块并添加该模块
+	 */
+	public void checkPlayerData() {
+		try {
+			List<IPlayerData> init = new ArrayList<>();
+			for (Class<? extends IPlayerData> clazz : ModuleUtil.getModules()) {
+				if (!hasModule(clazz)) {
+					IPlayerData data = clazz.newInstance();
+					addPlayerData(data);
+					init.add(data);
+				}
+			}
+			for (IPlayerData data : init) {
+				data.init(this);
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			LogService.error(e);
+		}
 	}
 
 	/**
@@ -95,6 +132,4 @@ public abstract class AbsPlayer {
 			session.send(msgCode, data, errCodes);
 		}
 	}
-
-	public abstract void kick();
 }
