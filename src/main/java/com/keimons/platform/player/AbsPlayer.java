@@ -1,16 +1,14 @@
 package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
+import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.session.Session;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,12 +24,12 @@ public abstract class AbsPlayer {
 	/**
 	 * 会话
 	 */
-	private Session session;
+	protected Session session;
 
 	/**
 	 * 储存玩家所有数据
 	 */
-	protected HashMap<Class<? extends IPlayerData>, IPlayerData> modules = new HashMap<>();
+	protected HashMap<String, IPlayerData> modules = new HashMap<>();
 
 	/**
 	 * 最后活跃时间
@@ -41,13 +39,31 @@ public abstract class AbsPlayer {
 	/**
 	 * 获取玩家的一个模块
 	 *
-	 * @param clazz 模块
-	 * @param <T>   模块类型
+	 * @param moduleName 模块名称
+	 * @param <T>        模块类型
 	 * @return 数据模块
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends IPlayerData> T getModule(Class<T> clazz) {
-		return (T) modules.get(clazz);
+	public <T extends IPlayerData> T getModule(String moduleName) {
+		IPlayerData data = modules.get(moduleName);
+		if (data == null) {
+			synchronized (this) {
+				if (modules.get(moduleName) == null) {
+					checkPlayerData();
+				}
+			}
+			data = modules.get(moduleName);
+		}
+		if (data.getVersion() < KeimonsServer.VERSION) {
+			synchronized (this) {
+				if (data.getVersion() < KeimonsServer.VERSION) {
+					byte[] oldVersionData = ModuleUtil.encode(data);
+					IPlayerData newVersionData = ModuleUtil.decode(null, oldVersionData);
+					modules.put(moduleName, newVersionData);
+				}
+			}
+		}
+		return (T) modules.get(moduleName);
 	}
 
 	/**
@@ -56,7 +72,7 @@ public abstract class AbsPlayer {
 	 * @param data
 	 */
 	public void addPlayerData(IPlayerData data) {
-		modules.put(data.getClass(), data);
+		modules.put(data.getModuleName(), data);
 	}
 
 	/**
@@ -74,7 +90,7 @@ public abstract class AbsPlayer {
 	 * @param clazz 模块
 	 * @return 是否有该模块
 	 */
-	public boolean hasModule(Class<? extends IPlayerData> clazz) {
+	public boolean hasModule(String clazz) {
 		return modules.containsKey(clazz);
 	}
 
@@ -84,9 +100,9 @@ public abstract class AbsPlayer {
 	public void checkPlayerData() {
 		try {
 			List<IPlayerData> init = new ArrayList<>();
-			for (Class<? extends IPlayerData> clazz : ModuleUtil.getModules()) {
-				if (!hasModule(clazz)) {
-					IPlayerData data = clazz.newInstance();
+			for (Map.Entry<String, Class<? extends IPlayerData>> entry : ModuleUtil.getModules().entrySet()) {
+				if (!hasModule(entry.getKey())) {
+					IPlayerData data = entry.getValue().newInstance();
 					addPlayerData(data);
 					init.add(data);
 				}

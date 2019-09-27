@@ -21,6 +21,7 @@ public class ByteUtil {
 	public static byte[] longToBytes(long value) {
 		ByteBuffer buffer = ByteBuffer.allocate(8);
 		buffer.putLong(0, value);
+		buffer.clear();
 		return buffer.array();
 	}
 

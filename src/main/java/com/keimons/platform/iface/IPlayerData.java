@@ -32,7 +32,7 @@ public interface IPlayerData extends IData, ILoaded {
 	 *
 	 * @return 这个模块的类型
 	 */
-	Enum<? extends IModule> getModuleType();
+	String getModuleName();
 
 	/**
 	 * 上次计算的MD5
@@ -49,4 +49,13 @@ public interface IPlayerData extends IData, ILoaded {
 	 * @param lastMd5 模块的MD5值
 	 */
 	void setLastMd5(String lastMd5);
+
+	/**
+	 * 获取当前的玩家数据版本
+	 * <p>
+	 * 这是设计中的一个核心接口，依赖于模块的版本号，决定模块是否需要升级
+	 *
+	 * @return 当前的玩家数据版本
+	 */
+	int getVersion();
 }

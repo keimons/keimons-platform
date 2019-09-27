@@ -11,7 +11,6 @@ import com.keimons.platform.unit.ClassUtil;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,9 @@ public class ModuleUtil {
 		List<Class<IPlayerData>> classes = ClassUtil.load(packageName, AModule.class, null);
 		for (Class<IPlayerData> clazz : classes) {
 			System.out.println("玩家数据模块：" + clazz.getName());
-			Codec simpleTypeCodec = ProtobufProxy.create(clazz);
+			// 由程序自行缓存，关闭工具的自带缓存
+			ProtobufProxy.enableCache(false);
+			Codec simpleTypeCodec = ProtobufProxy.create(clazz, true);
 			codecs.put(clazz, simpleTypeCodec);
 			IPlayerData data = null;
 			try {
@@ -49,8 +50,8 @@ public class ModuleUtil {
 				System.exit(0);
 			}
 			try {
-				Object getModuleType = clazz.getMethod("getModuleType").invoke(data);
-				modules.put(getModuleType.toString(), clazz);
+				String moduleName = (String) clazz.getMethod("getModuleName").invoke(data);
+				modules.put(moduleName, clazz);
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				LogService.error(e, "未能成功获取模块类型");
 			}
@@ -124,7 +125,7 @@ public class ModuleUtil {
 	 *
 	 * @return 所有玩家数据模块
 	 */
-	public static Collection<Class<? extends IPlayerData>> getModules() {
-		return modules.values();
+	public static Map<String, Class<? extends IPlayerData>> getModules() {
+		return modules;
 	}
 }

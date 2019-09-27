@@ -1,13 +1,10 @@
 package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
-import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.annotation.AModule;
 import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.CharsetUtil;
-import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.MD5Util;
 import com.keimons.platform.unit.TimeUtil;
 
@@ -22,9 +19,11 @@ public class ModuleManager {
 	private static Map<Long, AbsPlayer> players = new HashMap<>();
 
 	/**
-	 * 系统中玩家的模块
+	 * 存储所有模块的当前版本号，这个版本号依赖于class文件的变动
+	 * <p>
+	 * 版本自动升级，一旦发现新加载上来的class文件有变动，则升级版本号
 	 */
-	private static Set<Class<? extends IPlayerData>> modules = new HashSet<>();
+	private static Map<String, Integer> versions = new HashMap<>();
 
 	/**
 	 * 加载并执行
@@ -160,7 +159,7 @@ public class ModuleManager {
 					String md5 = MD5Util.md5(bytes);
 					if (coercive || data.getLastMd5() == null || !data.getLastMd5().equals(md5)) {
 						data.setLastMd5(md5);
-						module.put(CharsetUtil.getUTF8(data.getModuleType().toString()), bytes);
+						module.put(CharsetUtil.getUTF8(data.getModuleName().toString()), bytes);
 					}
 				}
 				if (!module.isEmpty()) {
@@ -222,7 +221,7 @@ public class ModuleManager {
 	}
 
 	public void init() {
-		modules.addAll(ClassUtil.load(KeimonsServer.PackageName, AModule.class, IPlayerData.class));
+
 	}
 
 	public boolean shutdown() {

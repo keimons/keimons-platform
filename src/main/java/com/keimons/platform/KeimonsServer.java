@@ -69,6 +69,11 @@ public class KeimonsServer {
 	public static String PackageName = ".";
 
 	/**
+	 * 系统版本
+	 */
+	public volatile static int VERSION = 0;
+
+	/**
 	 * 初始化，初始化所有服务
 	 */
 	public static void init() {
