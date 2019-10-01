@@ -1,9 +1,8 @@
 package com.keimons.platform.session;
 
-import com.keimons.platform.log.LogService;
+import io.netty.util.internal.ConcurrentSet;
 
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.Set;
 
 /**
  * 会话管理器
@@ -21,6 +20,9 @@ public class SessionManager {
 	 */
 	private static SessionManager instance;
 
+	/**
+	 * 单例模式，Session管理器
+	 */
 	private SessionManager() {
 
 	}
@@ -45,7 +47,7 @@ public class SessionManager {
 	/**
 	 * 缓存整个游戏中所有的缓存
 	 */
-	private ConcurrentLinkedDeque<Session> sessions = new ConcurrentLinkedDeque<>();
+	private Set<Session> sessions = new ConcurrentSet<>();
 
 	/**
 	 * 增加一个客户端-服务器会话
@@ -57,26 +59,17 @@ public class SessionManager {
 	}
 
 	/**
-	 * 会话存活检测 每5秒执行一次
+	 * 移除客户端-服务器会话
+	 *
+	 * @param session 会话
 	 */
-	public void update() {
-		// 缓存当前时间是一件非常危险的事，因为在迭代时，时间依然在走 考虑到 nowTime - Session#getLastActiveTime < 0 并没有问题
-		long nowTime = System.currentTimeMillis();
-		Iterator<Session> iterator = sessions.iterator();
-		while (iterator.hasNext()) {
-			try {
-				Session session = iterator.next();
-				// 连接已经断开 或 5分钟没有心跳
-				if (!session.isConnect() || nowTime - session.getLastActiveTime() > 5 * 60 * 1000) {
-					session.disconnect();
-					iterator.remove();
-				}
-			} catch (Exception e) {
-				LogService.error(e);
-			}
-		}
+	public void removeSession(Session session) {
+		sessions.remove(session);
 	}
 
+	/**
+	 * 关闭服务器
+	 */
 	public void shutdown() {
 		for (Session session : sessions) {
 			session.disconnect();

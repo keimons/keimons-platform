@@ -151,15 +151,14 @@ public class QuartzService {
 		} catch (SchedulerException e) {
 			LogService.error(e);
 		}
-
-		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.KEIMONS_PACKET));
-		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.DEFAULT_PACKET));
 	}
 
 	/**
 	 * 启动定时任务系统
 	 */
 	public static void start() {
+		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.KEIMONS_PACKET));
+		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.DEFAULT_PACKET));
 		try {
 			// 启动
 			scheduler.start();

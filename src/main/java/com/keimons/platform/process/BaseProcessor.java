@@ -1,4 +1,4 @@
-package com.keimons.platform.network.process;
+package com.keimons.platform.process;
 
 import com.google.protobuf.*;
 import com.keimons.platform.annotation.AProcessor;

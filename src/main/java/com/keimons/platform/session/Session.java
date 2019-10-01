@@ -47,6 +47,9 @@ public class Session {
 
 	/**
 	 * 是否登录
+	 * <p>
+	 * 该值只有在未登录时为{@code false}
+	 * 登录成功后不会再重置为{@code false}
 	 */
 	private volatile boolean logined;
 
@@ -69,9 +72,11 @@ public class Session {
 	 * 为保证始终可以通过Session到玩家，玩家数据下线必须在Session彻底关闭后
 	 */
 	public void disconnect() {
+		connect = false;
 		if (player != null) {
 			player.setSession(null);
 		}
+		player = null;
 		if (ctx != null) {
 			try {
 				ctx.channel().attr(KeimonsHandler.SESSION).set(null);
@@ -81,8 +86,7 @@ public class Session {
 			}
 		}
 		ctx = null;
-		player = null;
-		connect = false;
+		SessionManager.getInstance().removeSession(this);
 		// Fixed 是否登录过是一个标识状态，哪怕连接断开了，也不能置为false
 		// logined = false;
 	}

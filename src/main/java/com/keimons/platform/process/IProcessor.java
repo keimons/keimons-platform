@@ -1,4 +1,4 @@
-package com.keimons.platform.network.process;
+package com.keimons.platform.process;
 
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.session.Session;
