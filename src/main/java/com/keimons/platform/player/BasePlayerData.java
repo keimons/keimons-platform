@@ -2,6 +2,7 @@ package com.keimons.platform.player;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.MD5Util;
 
 /**
@@ -32,7 +33,7 @@ public abstract class BasePlayerData implements IPlayerData {
 
 	@Override
 	public byte[] latest(boolean notnull) {
-		byte[] bytes = ModuleUtil.encode(this);
+		byte[] bytes = CodeUtil.encode(this);
 		String thisMd5 = MD5Util.md5(bytes);
 		if (!notnull && lastMd5 != null && lastMd5.equals(thisMd5)) {
 			return null;
@@ -47,6 +48,6 @@ public abstract class BasePlayerData implements IPlayerData {
 	}
 
 	@Override
-	public void loaded(AbsPlayer player) {
+	public void loaded(BasePlayer player) {
 	}
 }

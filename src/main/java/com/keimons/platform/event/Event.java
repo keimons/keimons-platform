@@ -1,7 +1,7 @@
 package com.keimons.platform.event;
 
 import com.keimons.platform.iface.IEventCode;
-import com.keimons.platform.player.AbsPlayer;
+import com.keimons.platform.player.BasePlayer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,7 +21,7 @@ public class Event {
 	/**
 	 * 玩家Uuid
 	 */
-	private AbsPlayer player;
+	private BasePlayer player;
 
 	/**
 	 * 事件号

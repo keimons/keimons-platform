@@ -1,8 +1,7 @@
 package com.keimons.platform.test;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.IModule;
-import com.keimons.platform.player.AbsPlayer;
+import com.keimons.platform.player.BasePlayer;
 import com.keimons.platform.player.BasePlayerData;
 
 /**
@@ -20,12 +19,12 @@ public class Test extends BasePlayerData {
 	}
 
 	@Override
-	public void init(AbsPlayer player) {
+	public void init(BasePlayer player) {
 
 	}
 
 	@Override
-	public Enum<? extends IModule> getModuleName() {
+	public String getModuleName() {
 		return null;
 	}
 }

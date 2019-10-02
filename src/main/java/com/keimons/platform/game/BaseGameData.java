@@ -1,10 +1,8 @@
-package com.keimons.platform.common;
+package com.keimons.platform.game;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.IData;
-import com.keimons.platform.iface.IDataVersion;
-import com.keimons.platform.iface.ILoaded;
-import com.keimons.platform.player.AbsPlayer;
+import com.keimons.platform.annotation.AGameData;
+import com.keimons.platform.iface.IGameData;
 
 /**
  * 公共数据
@@ -16,7 +14,8 @@ import com.keimons.platform.player.AbsPlayer;
  * @date 2019-10-02
  * @since 1.0
  */
-public abstract class BaseCommonData implements IData, ILoaded, IDataVersion {
+@AGameData
+public abstract class BaseGameData implements IGameData {
 
 	/**
 	 * 当前数据版本
@@ -28,9 +27,5 @@ public abstract class BaseCommonData implements IData, ILoaded, IDataVersion {
 	@Override
 	public int getVersion() {
 		return version;
-	}
-
-	@Override
-	public void loaded(AbsPlayer player) {
 	}
 }

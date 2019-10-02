@@ -5,6 +5,7 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.session.Session;
+import com.keimons.platform.unit.CodeUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,9 +13,17 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 玩家数据
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-10-02
+ * @since 1.8
+ */
 @Setter
 @Getter
-public abstract class AbsPlayer {
+public abstract class BasePlayer {
 
 	/**
 	 * 玩家锁，玩家上线下线时用
@@ -57,8 +66,8 @@ public abstract class AbsPlayer {
 		if (data.getVersion() < KeimonsServer.VERSION) {
 			synchronized (this) {
 				if (data.getVersion() < KeimonsServer.VERSION) {
-					byte[] oldVersionData = ModuleUtil.encode(data);
-					IPlayerData newVersionData = ModuleUtil.decode(null, oldVersionData);
+					byte[] oldVersionData = CodeUtil.encode(data);
+					IPlayerData newVersionData = CodeUtil.decode(null, oldVersionData);
 					modules.put(moduleName, newVersionData);
 				}
 			}
@@ -100,7 +109,7 @@ public abstract class AbsPlayer {
 	public void checkPlayerData() {
 		try {
 			List<IPlayerData> init = new ArrayList<>();
-			for (Map.Entry<String, Class<? extends IPlayerData>> entry : ModuleUtil.getModules().entrySet()) {
+			for (Map.Entry<String, Class<? extends IPlayerData>> entry : PlayerDataManager.modules.entrySet()) {
 				if (!hasModule(entry.getKey())) {
 					IPlayerData data = entry.getValue().newInstance();
 					addPlayerData(data);

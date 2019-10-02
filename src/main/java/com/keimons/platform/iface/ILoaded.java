@@ -1,6 +1,6 @@
 package com.keimons.platform.iface;
 
-import com.keimons.platform.player.AbsPlayer;
+import com.keimons.platform.player.BasePlayer;
 
 /**
  * 玩家数据加载成功接口
@@ -17,5 +17,5 @@ public interface ILoaded {
 	 *
 	 * @param player 玩家
 	 */
-	void loaded(AbsPlayer player);
+	void loaded(BasePlayer player);
 }

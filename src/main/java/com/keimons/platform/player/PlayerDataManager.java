@@ -1,23 +1,38 @@
 package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
+import com.keimons.platform.KeimonsServer;
+import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.CharsetUtil;
+import com.keimons.platform.unit.ClassUtil;
+import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.TimeUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * 玩家管理器
+ * 玩家数据管理器
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-10-02
+ * @since 1.8
  */
-public class ModuleManager {
+public class PlayerDataManager {
 
-	private static Map<Long, AbsPlayer> players = new HashMap<>();
+	/**
+	 * 玩家数据模块
+	 */
+	public static Map<String, Class<? extends IPlayerData>> modules = new HashMap<>();
+
+	private static Map<Long, BasePlayer> players = new HashMap<>();
 
 	/**
 	 * 存储所有模块的当前版本号，这个版本号依赖于class文件的变动
@@ -32,8 +47,8 @@ public class ModuleManager {
 	 * @param playerId 玩家ID
 	 * @param consumer 消费函数
 	 */
-	public static void loadAndExecute(long playerId, Consumer<AbsPlayer> consumer) {
-		AbsPlayer player = players.get(playerId);
+	public static void loadAndExecute(long playerId, Consumer<BasePlayer> consumer) {
+		BasePlayer player = players.get(playerId);
 		if (player == null) {
 //			Loader.fastLoad(new Player().setPlayerId(playerId), consumer);
 		} else {
@@ -49,8 +64,8 @@ public class ModuleManager {
 	 * @param playerId 玩家ID
 	 * @param consumer 消费函数
 	 */
-	public static void loadAndExecute2(long playerId, Consumer<AbsPlayer> consumer) {
-		AbsPlayer player = players.get(playerId);
+	public static void loadAndExecute2(long playerId, Consumer<BasePlayer> consumer) {
+		BasePlayer player = players.get(playerId);
 		if (player == null) {
 //			Loader.slowLoad(new Player().setPlayerId(playerId), false, consumer);
 		} else {
@@ -89,7 +104,7 @@ public class ModuleManager {
 	 * @param player   玩家
 	 * @param kickType 1.异地登陆 2.强制下线
 	 */
-	public void kickPlayer(AbsPlayer player, int kickType) {
+	public void kickPlayer(BasePlayer player, int kickType) {
 		if (player != null) {
 			// TODO 玩家下线需要通知客户端下线类型
 		}
@@ -101,7 +116,7 @@ public class ModuleManager {
 	 * @param coercive 是否强制存储
 	 */
 	public void saveAllPlayer(boolean coercive) {
-		for (AbsPlayer player : players.values()) {
+		for (BasePlayer player : players.values()) {
 			if (player.getSession() == null && TimeUtil.currentTimeMillis() - player.getLastActiveTime() > TimeUtil.minuteToMillis(5)) {
 				if (savePlayer(player, true)) {
 					player.getLock().lock();
@@ -127,7 +142,7 @@ public class ModuleManager {
 	 * @param msg     消息体
 	 */
 	public void sendToOnlinePlayer(int msgCode, MessageLite msg) {
-		for (AbsPlayer player : players.values()) {
+		for (BasePlayer player : players.values()) {
 			player.send(msgCode, msg);
 		}
 	}
@@ -139,7 +154,7 @@ public class ModuleManager {
 	 * @param data    数据
 	 */
 	public void sendToOnlinePlayer(int msgCode, byte[] data) {
-		for (AbsPlayer player : players.values()) {
+		for (BasePlayer player : players.values()) {
 			player.send(msgCode, data);
 		}
 	}
@@ -150,7 +165,7 @@ public class ModuleManager {
 	 * @param player   玩家
 	 * @param coercive 是否强制存储
 	 */
-	public boolean savePlayer(AbsPlayer player, boolean coercive) {
+	public boolean savePlayer(BasePlayer player, boolean coercive) {
 		if (player != null) {
 			try {
 				Map<byte[], byte[]> module = new HashMap<>();
@@ -177,7 +192,7 @@ public class ModuleManager {
 	 *
 	 * @param player 玩家
 	 */
-	public static void loadPlayer(AbsPlayer player) {
+	public static void loadPlayer(BasePlayer player) {
 		long time = TimeUtil.currentTimeMillis();
 		int size = 0;
 		if (player != null) {
@@ -187,7 +202,7 @@ public class ModuleManager {
 				size += entry.getValue().length;
 				String moduleName = CharsetUtil.getUTF8(entry.getKey());
 				// 反序列化
-				IPlayerData data = ModuleUtil.decode(ModuleUtil.getModuleClass(moduleName), entry.getValue());
+				IPlayerData data = CodeUtil.decode(modules.get(moduleName), entry.getValue());
 				if (data != null) {
 					data.decode();
 					player.addPlayerData(data);
@@ -205,14 +220,14 @@ public class ModuleManager {
 	 * 加载一个玩家的数据
 	 *
 	 * @param playerId   玩家ID
-	 * @param moduleType 模块
+	 * @param moduleName 模块
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IPlayerData> T loadPlayer(long playerId, Enum<? extends IModule> moduleType) {
+	public static <T extends IPlayerData> T loadPlayer(long playerId, Enum<? extends IModule> moduleName) {
 		byte[] data = null; //RedissonManager.getMapValue(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(playerId), CharsetUtil.getUTF8(moduleType.toString()));
 		// 反序列化
-		Class<? extends IPlayerData> clazz = ModuleUtil.getModuleClass(moduleType.toString());
-		IPlayerData module = ModuleUtil.decode(clazz, data);
+		Class<? extends IPlayerData> clazz = modules.get(moduleName.toString());
+		IPlayerData module = CodeUtil.decode(clazz, data);
 		if (module != null) {
 			module.decode();
 		}
@@ -220,7 +235,20 @@ public class ModuleManager {
 	}
 
 	public void init() {
-
+		String packageName = System.getProperty(KeimonsServer.PACKET);
+		List<Class<IPlayerData>> classes = ClassUtil.load(packageName, APlayerData.class, null);
+		for (Class<IPlayerData> clazz : classes) {
+			System.out.println("玩家数据模块：" + clazz.getName());
+			IPlayerData data = null;
+			try {
+				data = clazz.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				LogService.error(e, "由于模块添加是由系统底层完成，所以需要提供默认构造方法，如有初始化操作，请重载init和loaded方法中");
+				System.exit(0);
+			}
+			String moduleName = data.getModuleName();
+			modules.put(moduleName, clazz);
+		}
 	}
 
 	public boolean shutdown() {
