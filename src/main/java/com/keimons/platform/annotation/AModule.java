@@ -1,0 +1,49 @@
+package com.keimons.platform.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * 应用模块
+ * <p>
+ * 包级注解，这个注解描述了一个模块的相关信息
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-10-02
+ * @since 1.8
+ **/
+@Target({ElementType.PACKAGE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AModule {
+
+	/**
+	 * 模块名字
+	 *
+	 * @return 模块名字
+	 */
+	String Name();
+
+	/**
+	 * 模块包名，我们会依赖这个包名，对这个模块进行扫描
+	 *
+	 * @return 模块包名
+	 */
+	String Package();
+
+	/**
+	 * 模块描述
+	 *
+	 * @return 模块描述
+	 */
+	String Desc() default "";
+
+	/**
+	 * 模块加载优先级
+	 *
+	 * @return 加载优先级
+	 */
+	int Priority() default 1000;
+}
