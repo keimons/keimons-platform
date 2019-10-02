@@ -5,10 +5,11 @@ import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.CharsetUtil;
-import com.keimons.platform.unit.MD5Util;
 import com.keimons.platform.unit.TimeUtil;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -155,11 +156,9 @@ public class ModuleManager {
 				Map<byte[], byte[]> module = new HashMap<>();
 				for (IPlayerData data : player.getModules()) {
 					data.encode();
-					byte[] bytes = ModuleUtil.encode(data);
-					String md5 = MD5Util.md5(bytes);
-					if (coercive || data.getLastMd5() == null || !data.getLastMd5().equals(md5)) {
-						data.setLastMd5(md5);
-						module.put(CharsetUtil.getUTF8(data.getModuleName().toString()), bytes);
+					byte[] bytes = data.latest(coercive);
+					if (bytes != null) {
+						module.put(CharsetUtil.getUTF8(data.getModuleName()), bytes);
 					}
 				}
 				if (!module.isEmpty()) {

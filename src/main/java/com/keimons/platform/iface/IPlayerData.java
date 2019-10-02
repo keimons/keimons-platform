@@ -13,7 +13,7 @@ import com.keimons.platform.player.ModuleUtil;
  * @since 1.8
  */
 @AModule
-public interface IPlayerData extends IData, ILoaded {
+public interface IPlayerData extends IData, ILoaded, IDataObserver {
 
 	/**
 	 * 初始化(当且仅当对象被创建时调用)
@@ -33,22 +33,6 @@ public interface IPlayerData extends IData, ILoaded {
 	 * @return 这个模块的类型
 	 */
 	String getModuleName();
-
-	/**
-	 * 上次计算的MD5
-	 * <p>
-	 * 通过比较两次计算得出的MD5值，决定这个模块数据是否需要存储
-	 *
-	 * @return 上次计算的MD5可能为空
-	 */
-	String getLastMd5();
-
-	/**
-	 * 设置上次计算的MD5
-	 *
-	 * @param lastMd5 模块的MD5值
-	 */
-	void setLastMd5(String lastMd5);
 
 	/**
 	 * 获取当前的玩家数据版本

@@ -2,9 +2,17 @@ package com.keimons.platform.player;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.unit.MD5Util;
 
 /**
  * 玩家数据
+ * <p>
+ * 玩家数据的一个抽象实现，实现了数据比对，数据版本记录
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @date 2019-10-02
+ * @since 1.0
  */
 public abstract class BasePlayerData implements IPlayerData {
 
@@ -22,22 +30,15 @@ public abstract class BasePlayerData implements IPlayerData {
 	 */
 	private volatile int version = KeimonsServer.VERSION;
 
-	/**
-	 * 获取上次计算的MD5
-	 *
-	 * @return MD5
-	 */
-	public String getLastMd5() {
-		return lastMd5;
-	}
-
-	/**
-	 * 设置本次计算的MD5
-	 *
-	 * @param lastMd5 模块的MD5值
-	 */
-	public void setLastMd5(String lastMd5) {
-		this.lastMd5 = lastMd5;
+	@Override
+	public byte[] latest(boolean notnull) {
+		byte[] bytes = ModuleUtil.encode(this);
+		String thisMd5 = MD5Util.md5(bytes);
+		if (!notnull && lastMd5 != null && lastMd5.equals(thisMd5)) {
+			return null;
+		}
+		lastMd5 = thisMd5;
+		return bytes;
 	}
 
 	@Override
