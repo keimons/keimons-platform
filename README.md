@@ -1,7 +1,7 @@
 # keimons-platform
 系统底层架构
 
-一个模块分为7部分，分别是：Manager、Service、Event、Processor、Data、CronJob、Log，将这7个模块接入到系统中即可完成模块安装
+一个模块分为7部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、CronJob、Logger，将这8个模块接入到系统中即可完成模块安装
 
 <h2>Manager静态数据管理接入</h2>
 Manager负责管理静态数据，新建类实现IManager接口，并标注@AManager注解，即可完成Manager接入。
@@ -17,11 +17,14 @@ Event事件系统负责处理玩家抛出的事件，目前，异步系统是完
 <h2>Processor消息处理接入</h2>
 新建类继承BaseProcessor类，标注@AProcessor接口，即可完成Processor接入。
 
-<h2>Data数据接入</h2>
-新建类继承BasePlayerData类，重写getModuleType()方法，即可完成Data接入。
+<h2>PlayerData数据接入</h2>
+新建类继承BasePlayerData类，重写getModuleName()方法，即可完成PlayerData接入。
+
+<h2>GameData数据接入</h2>
+新建类继承BaseGameData类，重写getModuleName()方法，即可完成GameData接入。
 
 <h2>CronJob定时任务接入</h2>
 新建类继承BaseJob类，即可完成CronJob接入。
 
-<h2>Log日志系统接入</h2>
+<h2>Logger日志系统接入</h2>
 初始化时指定日志名称即可接入。
