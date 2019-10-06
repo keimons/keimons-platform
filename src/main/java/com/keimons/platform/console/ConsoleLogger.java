@@ -1,5 +1,6 @@
 package com.keimons.platform.console;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ public enum ConsoleLogger {
 		public void log(final String message) {
 			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 			Logger logger = context.getLogger(ConsoleService.OUT_CONSOLE);
+			((ch.qos.logback.classic.Logger) logger).setLevel(Level.INFO);
 			logger.info(message);
 		}
 	},
@@ -34,6 +36,7 @@ public enum ConsoleLogger {
 		public void log(final String message) {
 			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 			Logger logger = context.getLogger(ConsoleService.ERR_CONSOLE);
+			((ch.qos.logback.classic.Logger) logger).setLevel(Level.ERROR);
 			logger.error(message);
 		}
 	};

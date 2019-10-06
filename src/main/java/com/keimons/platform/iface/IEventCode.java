@@ -8,5 +8,5 @@ package com.keimons.platform.iface;
  * @date 2019-09-19
  * @since 1.0
  */
-public interface IEventCode {
+public interface IEventCode<T extends Enum<T> & IEventCode> {
 }

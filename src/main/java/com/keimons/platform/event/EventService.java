@@ -58,24 +58,7 @@ public class EventService {
 	 * @param eventCode 事件号
 	 * @param params    参数列表
 	 */
-	public static void publicEvent(BasePlayer player, Enum<? extends IEventCode> eventCode, Object... params) {
-		try {
-			disruptor.publishEvent(EventService::translate, player, eventCode, params);
-		} catch (Exception e) {
-			LogService.error(e);
-		}
-	}
-
-	/**
-	 * 发布事件
-	 *
-	 * @param player    玩家
-	 * @param eventCode 事件号
-	 * @param params    参数列表
-	 * @deprecated 优化中，当前版本不可用
-	 */
-	@Deprecated
-	public static void publicEvent(BasePlayer player, String eventCode, Object... params) {
+	public static <T extends Enum<T> & IEventCode> void publicEvent(BasePlayer player, T eventCode, Object... params) {
 		try {
 			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
@@ -104,16 +87,9 @@ public class EventService {
 	 * @param eventCode 事件号
 	 * @param params    参数
 	 */
-	private static void translate(Event event, long sequence, BasePlayer player, Enum<? extends IEventCode> eventCode, Object... params) {
+	private static <T extends Enum<T> & IEventCode> void translate(Event event, long sequence, BasePlayer player, T eventCode, Object... params) {
 		event.setPlayer(player);
 		event.setEventCode(eventCode);
-		event.setParams(params);
-	}
-
-	@Deprecated
-	private static void translate(Event event, long sequence, BasePlayer player, String eventCode, Object... params) {
-		event.setPlayer(player);
-		event.setEventCode(null);
 		event.setParams(params);
 	}
 

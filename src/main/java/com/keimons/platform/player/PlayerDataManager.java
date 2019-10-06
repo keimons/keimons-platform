@@ -1,7 +1,6 @@
 package com.keimons.platform.player;
 
 import com.google.protobuf.MessageLite;
-import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IModule;
 import com.keimons.platform.iface.IPlayerData;
@@ -234,20 +233,24 @@ public class PlayerDataManager {
 		return (T) module;
 	}
 
-	public void init() {
-		String packageName = System.getProperty(KeimonsServer.PACKET);
-		List<Class<IPlayerData>> classes = ClassUtil.load(packageName, APlayerData.class, null);
+	/**
+	 * 增加一个玩家数据模块
+	 *
+	 * @param packageName 包名
+	 */
+	public static void addPlayerData(String packageName) {
+		List<Class<IPlayerData>> classes = ClassUtil.load(packageName, APlayerData.class);
 		for (Class<IPlayerData> clazz : classes) {
-			System.out.println("玩家数据模块：" + clazz.getName());
-			IPlayerData data = null;
+			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
 			try {
-				data = clazz.newInstance();
+				IPlayerData data = clazz.newInstance();
+				String moduleName = data.getModuleName();
+				modules.put(moduleName, clazz);
 			} catch (InstantiationException | IllegalAccessException e) {
 				LogService.error(e, "由于模块添加是由系统底层完成，所以需要提供默认构造方法，如有初始化操作，请重载init和loaded方法中");
 				System.exit(0);
 			}
-			String moduleName = data.getModuleName();
-			modules.put(moduleName, clazz);
+			System.out.println("成功安装独有数据模块：" + clazz.getSimpleName());
 		}
 	}
 

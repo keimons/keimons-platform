@@ -33,6 +33,11 @@ public class Event {
 	 */
 	private Object[] params;
 
+	@SuppressWarnings("unchecked")
+	public <T extends Enum<T> & IEventCode> T getEventCode() {
+		return (T) eventCode;
+	}
+
 	/**
 	 * 获取参数
 	 *

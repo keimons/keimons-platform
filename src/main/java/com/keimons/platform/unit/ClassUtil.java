@@ -27,16 +27,14 @@ public class ClassUtil {
 	 *
 	 * @param packageName 包名
 	 * @param annotation  注解
-	 * @param parent      父类
 	 * @return 使用该注解的类
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> List<Class<T>> load(String packageName, Class<? extends Annotation> annotation, Class<? extends T> parent) {
+	public static <T> List<Class<T>> load(String packageName, Class<? extends Annotation> annotation) {
 		return ClassUtil.getClasses(packageName)
 				.stream()
 				.filter(clazz -> clazz.isAnnotationPresent(annotation))
-				.filter(clazz -> parent == null || parent.isAssignableFrom(clazz))
-				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()) && Modifier.isInterface(clazz.getModifiers()))
+				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()))
 				.map(clazz -> (Class<T>) clazz)
 				.collect(Collectors.toList());
 	}
@@ -65,7 +63,6 @@ public class ClassUtil {
 				String protocol = url.getProtocol();
 				// 如果是以文件的形式保存在服务器上
 				if ("file".equals(protocol)) {
-					System.out.println("扫描类型: file");
 					// 获取包的物理路径
 					String filePath = URLDecoder.decode(url.getFile(), "UTF-8");
 					// 以文件的方式扫描整个包下的文件 并添加到集合中
@@ -73,7 +70,6 @@ public class ClassUtil {
 				} else if ("jar".equals(protocol)) {
 					// 如果是jar包文件
 					// 定义一个JarFile
-					System.out.println("扫描类型: jar");
 					JarFile jar;
 					try {
 						// 获取jar

@@ -10,7 +10,7 @@ package com.keimons.platform.iface;
  * @date 2019-09-22
  * @since 1.8
  */
-public interface IService {
+public interface IService extends IEventHandler {
 
 	/**
 	 * 模块启动

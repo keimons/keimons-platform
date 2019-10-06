@@ -1,6 +1,8 @@
 package com.keimons.platform.test;
 
-import com.keimons.platform.quartz.BaseJob;
+import com.keimons.platform.annotation.AJob;
+import com.keimons.platform.log.LogService;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -12,17 +14,11 @@ import org.quartz.JobExecutionException;
  * @date 2019-09-19
  * @since 1.0
  **/
-public class TestPrintJob extends BaseJob {
-
-	/**
-	 * 定时输出测试
-	 */
-	public TestPrintJob() {
-		super("KeimonsTestGroup", "KeimonsTimePrint", "0/5 * * * * ? ");
-	}
+@AJob(JobName = "TestPrint", JobCron = "0/5 * * * * ?")
+public class TestPrintJob implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		System.out.println("Job executed!");
+		LogService.info("login successful!");
 	}
 }

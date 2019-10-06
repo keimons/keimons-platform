@@ -26,7 +26,7 @@ public class ProcessorManager {
 	/**
 	 * 消息描述
 	 */
-	private static Map<Integer, AProcessor> msgCodeInfo;
+	private static Map<Integer, AProcessor> info;
 
 	/**
 	 * 获取消息处理器
@@ -45,41 +45,32 @@ public class ProcessorManager {
 	 * @return 消息描述
 	 */
 	public static AProcessor getMsgCodeInfo(int msgCode) {
-		return msgCodeInfo.get(msgCode);
+		return info.get(msgCode);
 	}
 
 	/**
-	 * 初始化消息处理器
+	 * 添加消息号
 	 *
-	 * @param packageName 包名
+	 * @param packageName 消息处理器
 	 */
-	public void init(String packageName) {
-		Map<Integer, AProcessor> processorsInfo = new HashMap<>();
-		System.out.print("消息处理器：");
-		List<Class<IProcessor>> classes = ClassUtil.load(packageName, AProcessor.class, IProcessor.class);
-		System.out.println("消息处理器：开始加载...");
+	public static void addProcessor(String packageName) {
+		List<Class<IProcessor>> classes = ClassUtil.load(packageName, AProcessor.class);
 		for (Class<IProcessor> clazz : classes) {
+			System.out.println("正在安装消息处理器：" + clazz.getSimpleName());
 			AProcessor msgCode = clazz.getAnnotation(AProcessor.class);
 			if (processors.containsKey(msgCode.MsgCode()) &&
 					!clazz.getName().equals(processors.get(msgCode.MsgCode()).getClass().getName())) {
 				LogService.error("重复的消息号：" + clazz.getName() + "，与：" + processors.get(msgCode.MsgCode()).getClass().getName());
-				System.exit(0);
 			}
 			try {
 				IProcessor processor = clazz.newInstance();
 				processors.put(msgCode.MsgCode(), processor);
-				processorsInfo.put(msgCode.MsgCode(), msgCode);
+				info.put(msgCode.MsgCode(), msgCode);
 				System.out.println("消息处理器：" + "消息号：" + msgCode.MsgCode() + "，描述：" + msgCode.Desc());
 			} catch (Exception e) {
-				LogService.error(e);
+				LogService.error(e, clazz.getSimpleName() + "安装消息处理器失败");
 			}
+			System.out.println("成功安装消息处理器：" + clazz.getSimpleName());
 		}
-		ProcessorManager.msgCodeInfo = processorsInfo;
-		System.out.println("消息处理器：加载完成...");
-		System.out.println();
-	}
-
-	public boolean shutdown() {
-		return true;
 	}
 }

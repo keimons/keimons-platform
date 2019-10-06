@@ -4,6 +4,9 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IGameData;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * 公共数据
  * <p>
@@ -16,6 +19,8 @@ import com.keimons.platform.iface.IGameData;
  */
 @AGameData
 public abstract class BaseGameData implements IGameData {
+
+	protected Lock lock = new ReentrantLock();
 
 	/**
 	 * 当前数据版本

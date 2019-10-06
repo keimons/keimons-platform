@@ -7,7 +7,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.ILogger;
-import com.keimons.platform.iface.ILoggerConfig;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
@@ -61,6 +60,7 @@ public class LogService {
 		Logger logger = context.getLogger(iLogger.getName() + "Logger");
 		// 设置不向上级打印信息
 		logger.setAdditive(false);
+		logger.setLevel(Level.INFO);
 		OutputStreamAppender<ILoggingEvent> appender = iLogger.build();
 		logger.addAppender(appender);
 		return logger;
@@ -70,23 +70,6 @@ public class LogService {
 	 * 所有日志
 	 */
 	private static Map<Object, Logger> loggers = new HashMap<>();
-
-	/**
-	 * 打印日志
-	 *
-	 * @param logType 日志类型
-	 * @param context 日志内容
-	 * @deprecated 不推荐使用，推荐直接使用字符串
-	 */
-	@Deprecated
-	public static <T extends Enum<T> & ILoggerConfig> void log(T logType, String context) {
-		Logger logger = loggers.get(logType.getLoggerName());
-		if (logger != null) {
-			logger.info(context);
-		} else {
-			error("尝试打印不存在的日志类型：" + logType);
-		}
-	}
 
 	/**
 	 * 打印日志
@@ -186,29 +169,14 @@ public class LogService {
 	}
 
 	/**
-	 * 初始化日志模块
-	 *
-	 * @param clazz 日志枚举类
-	 * @param <T>   实现了{@link ILoggerConfig}接口的日志枚举类
-	 * @deprecated 未完成的设计方案，谨慎使用
-	 */
-	@Deprecated
-	public static <T extends Enum<T> & ILoggerConfig> void init(Class<T> clazz) {
-		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
-		init();
-		if (clazz != null) {
-			T[] values = clazz.getEnumConstants();
-			for (T logType : values) {
-				loggers.put(logType.getLoggerName(), build(new DefaultRollingFileLogger(logPath, logType.getLoggerName(), logType.getLoggerLevel())));
-			}
-		}
-	}
-
-	/**
 	 * 初始化日志系统
 	 */
 	public static void init() {
 		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger root = context.getLogger("ROOT");
+		root.setLevel(Level.WARN);
 
 		if (info == null) {
 			info = build(new DefaultRollingFileLogger(logPath, "info", Level.INFO));

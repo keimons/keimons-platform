@@ -1,13 +1,16 @@
 package com.keimons.platform;
 
 import com.keimons.platform.annotation.AManager;
+import com.keimons.platform.annotation.AModule;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
-import com.keimons.platform.iface.IEventHandler;
+import com.keimons.platform.game.GameDataManager;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.player.PlayerDataManager;
+import com.keimons.platform.process.ProcessorManager;
 import com.keimons.platform.quartz.QuartzService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
@@ -32,16 +35,6 @@ public class KeimonsServer {
 	 * 日志路径
 	 */
 	public static final String PACKET = "Packet";
-
-	/**
-	 * 日志路径
-	 */
-	public static final String DEFAULT_PACKET = ".";
-
-	/**
-	 * 日志路径
-	 */
-	public static final String KEIMONS_PACKET = "com.keimons.platform";
 
 	/**
 	 * 控制台输出重定向
@@ -72,20 +65,6 @@ public class KeimonsServer {
 	 * 系统版本
 	 */
 	public volatile static int VERSION = 0;
-
-	/**
-	 * 初始化，初始化所有服务
-	 */
-	public static void init() {
-		checkConfig();
-		LogService.init();
-	}
-
-	public static void checkConfig() {
-		if (System.getProperty(LOG_PATH) == null) {
-			System.out.println("未配置的[日志目录]，默认目录：" + LogService.DEFAULT_LOG_PATH);
-		}
-	}
 
 	/**
 	 * 所有的管理器
@@ -136,11 +115,40 @@ public class KeimonsServer {
 			System.out.println("禁用控制台输出重定向！");
 		}
 		LogService.init();
-		EventService.init();
 		QuartzService.init();
-		initManager();
-		initService();
+		EventService.init();
+		List<Package> packages = new ArrayList<>();
+		for (Package pkg : Package.getPackages()) {
+			AModule module = pkg.getAnnotation(AModule.class);
+			if (module != null) {
+				packages.add(pkg);
+			}
+		}
+		packages.sort((Comparator.comparingInt(pkg -> pkg.getAnnotation(AModule.class).Priority())));
+		for (Package pkg : packages) {
+			System.out.println("************************* 开始安装模块 *************************");
+			AModule module = pkg.getAnnotation(AModule.class);
+			System.out.println("模块安装：" + module.Name() + "，安装顺序：" + module.Priority());
+			initModule(pkg.getName());
+			System.out.println("************************* 完成安装模块 *************************");
+		}
 		KeimonsTcpNet.init();
+	}
+
+	/**
+	 * 初始化所有模块
+	 *
+	 * @param packageName 包名
+	 */
+	private static void initModule(String packageName) {
+		// Logger、Processor、Job、PlayerData、GameData
+		KeimonsServer.addManager(packageName);
+		KeimonsServer.addService(packageName);
+
+		ProcessorManager.addProcessor(packageName);
+		QuartzService.addJobs(packageName);
+		PlayerDataManager.addPlayerData(packageName);
+		GameDataManager.addGameData(packageName);
 	}
 
 	/**
@@ -176,52 +184,37 @@ public class KeimonsServer {
 	/**
 	 * 初始化管理
 	 */
-	private static void initManager() {
-		List<Class<IManager>> list = ClassUtil.load(PackageName, AManager.class, IManager.class);
-
-		list.sort(Comparator.comparingInt((Class<?> o) -> o.getAnnotation(AManager.class).Priority()));
-
+	private static void addManager(String packageName) {
+		List<Class<IManager>> list = ClassUtil.load(packageName, AManager.class);
 		for (Class<IManager> clazz : list) {
+			System.out.println("正在安装模块管理器：" + clazz.getSimpleName());
 			try {
 				IManager manager = clazz.newInstance();
 				managers.put(manager.getClass(), manager);
-				if (manager instanceof IEventHandler) {
-					EventService.registerEvent((IEventHandler) manager);
-				}
 				manager.load();
-				AManager managerInfo = clazz.getAnnotation(AManager.class);
-				System.out.println("管理器: 加载顺序 " + managerInfo.Priority() + "，名称：" + managerInfo.Name() + "，描述：" + managerInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {
-				e.printStackTrace();
+				LogService.error(e, clazz.getSimpleName() + "安装模块管理器失败");
 			}
+			System.out.println("成功安装模块管理器：" + clazz.getSimpleName());
 		}
-
-		System.out.println();
 	}
 
 	/**
 	 * 初始化服务
 	 */
-	private static void initService() {
-		List<Class<IService>> list = ClassUtil.load(PackageName, AService.class, IService.class);
-
-		list.sort(Comparator.comparingInt((Class<?> o) -> o.getAnnotation(AService.class).Priority()));
-
+	private static void addService(String packageName) {
+		List<Class<IService>> list = ClassUtil.load(packageName, AService.class);
 		for (Class<IService> clazz : list) {
+			System.out.println("正在安装模块服务器：" + clazz.getSimpleName());
 			try {
 				IService service = clazz.newInstance();
 				services.put(service.getClass(), service);
-				if (service instanceof IEventHandler) {
-					EventService.registerEvent((IEventHandler) service);
-				}
+				EventService.registerEvent(service);
 				service.start();
-				AService serviceInfo = clazz.getAnnotation(AService.class);
-				System.out.println("服务: 加载顺序 " + serviceInfo.Priority() + "，名称：" + serviceInfo.Name() + "，描述：" + serviceInfo.Desc());
 			} catch (InstantiationException | IllegalAccessException e) {
-				LogService.error(e);
+				LogService.error(e, clazz.getSimpleName() + "安装模块服务器失败");
 			}
+			System.out.println("成功安装模块服务器：" + clazz.getSimpleName());
 		}
-
-		System.out.println();
 	}
 }

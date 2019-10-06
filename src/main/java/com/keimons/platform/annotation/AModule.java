@@ -27,20 +27,6 @@ public @interface AModule {
 	String Name();
 
 	/**
-	 * 模块包名，我们会依赖这个包名，对这个模块进行扫描
-	 *
-	 * @return 模块包名
-	 */
-	String Package();
-
-	/**
-	 * 模块描述
-	 *
-	 * @return 模块描述
-	 */
-	String Desc() default "";
-
-	/**
 	 * 模块加载优先级
 	 *
 	 * @return 加载优先级

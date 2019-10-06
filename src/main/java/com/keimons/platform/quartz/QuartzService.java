@@ -1,6 +1,5 @@
 package com.keimons.platform.quartz;
 
-import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AJob;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
@@ -10,7 +9,6 @@ import org.quartz.impl.StdSchedulerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * 定时任务系统
@@ -50,11 +48,8 @@ public class QuartzService {
 	private static void addJob(JobDetail jobDetail, Trigger trigger) {
 		try {
 			scheduler.scheduleJob(jobDetail, trigger);
-			if (!scheduler.isShutdown()) {
-				scheduler.start();
-			}
 		} catch (SchedulerException e) {
-			e.printStackTrace();
+			LogService.error(e);
 		}
 	}
 
@@ -70,7 +65,7 @@ public class QuartzService {
 		try {
 			return scheduler.getJobDetail(jobKey);
 		} catch (SchedulerException e) {
-			e.printStackTrace();
+			LogService.error(e);
 		}
 		return null;
 	}
@@ -78,18 +73,16 @@ public class QuartzService {
 	/**
 	 * 修改定时任务的描述
 	 *
-	 * @param name     任务名称
-	 * @param group    任务分组
-	 * @param consumer 操作方式
+	 * @param job 任务
 	 */
-	public static void modifyJobDetail(String name, String group, Consumer<JobDetail> consumer) {
-		JobKey jobKey = JobKey.jobKey(name, group);
-		TriggerKey triggerKey = TriggerKey.triggerKey(name, group);
+	public static void modifyJobDetail(BaseJob job) {
 		try {
+			TriggerKey triggerKey = TriggerKey.triggerKey(job.getName(), job.getGroup());
 			Trigger trigger = scheduler.getTrigger(triggerKey);
 			if (trigger == null) {
 				return;
 			}
+			JobKey jobKey = JobKey.jobKey(job.getName(), job.getGroup());
 			JobDetail detail = scheduler.getJobDetail(jobKey);
 			if (detail == null) {
 				return;
@@ -100,21 +93,10 @@ public class QuartzService {
 			scheduler.unscheduleJob(triggerKey);
 			// 删除任务
 			scheduler.deleteJob(jobKey);
-
-			consumer.accept(detail);
-			CronScheduleBuilder corn = (CronScheduleBuilder) trigger.getScheduleBuilder();
-			corn.withMisfireHandlingInstructionDoNothing();
-			trigger = TriggerBuilder.newTrigger()
-					.withIdentity(name, group)
-					.withSchedule(corn)
-					.startNow().build();
-
-			addJob(detail, trigger);
-
-			System.out.println("修改任务【" + name + "】");
+			addJob(job.getJobDetail(), job.getTrigger());
+			System.out.println("修改任务【" + job.getName() + "】");
 		} catch (SchedulerException e) {
-			System.err.println("修改任务失败【" + name + "】");
-			e.printStackTrace();
+			LogService.error(e, "修改任务失败【" + job.getGroup() + "】");
 		}
 	}
 
@@ -123,19 +105,23 @@ public class QuartzService {
 	 *
 	 * @param packageName 包名
 	 */
-	private static void loadJobs(String packageName) {
-		List<Class<BaseJob>> classes = ClassUtil.load(packageName, AJob.class, BaseJob.class);
-		for (Class<BaseJob> clazz : classes) {
+	public static void addJobs(String packageName) {
+		List<Class<Job>> classes = ClassUtil.load(packageName, AJob.class);
+		for (Class<Job> clazz : classes) {
 			if (loaded.contains(clazz)) {
 				continue;
 			}
+			System.out.println("正在安装定时任务：" + clazz.getSimpleName());
+
+			AJob info = clazz.getAnnotation(AJob.class);
 			try {
-				BaseJob job = clazz.newInstance();
+				BaseJob job = new BaseJob("Keimons", info.JobName(), info.JobCron(), clazz.newInstance());
 				addJob(job);
 				loaded.add(clazz);
 			} catch (InstantiationException | IllegalAccessException e) {
-				e.printStackTrace();
+				LogService.error(e);
 			}
+			System.out.println("成功安装定时任务：" + clazz.getSimpleName());
 		}
 	}
 
@@ -148,19 +134,6 @@ public class QuartzService {
 		// 允许Quartz启动10个线程，暂时不考虑修改
 		try {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
-		} catch (SchedulerException e) {
-			LogService.error(e);
-		}
-	}
-
-	/**
-	 * 启动定时任务系统
-	 */
-	public static void start() {
-		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.KEIMONS_PACKET));
-		loadJobs(System.getProperty(KeimonsServer.PACKET, KeimonsServer.DEFAULT_PACKET));
-		try {
-			// 启动
 			scheduler.start();
 		} catch (SchedulerException e) {
 			LogService.error(e);
@@ -174,7 +147,7 @@ public class QuartzService {
 		try {
 			scheduler.shutdown();
 		} catch (SchedulerException e) {
-			e.printStackTrace();
+			LogService.error(e);
 		}
 		return true;
 	}

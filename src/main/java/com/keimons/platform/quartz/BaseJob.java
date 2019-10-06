@@ -1,6 +1,5 @@
 package com.keimons.platform.quartz;
 
-import com.keimons.platform.annotation.AJob;
 import lombok.Getter;
 import org.quartz.*;
 
@@ -13,13 +12,17 @@ import org.quartz.*;
  * @since 1.0
  */
 @Getter
-@AJob
-public abstract class BaseJob implements Job {
+public class BaseJob {
 
 	/**
 	 * 任务名称
 	 */
 	private final String name;
+
+	/**
+	 * 任务分组
+	 */
+	private final String group;
 
 	/**
 	 * 任务定时
@@ -43,11 +46,12 @@ public abstract class BaseJob implements Job {
 	 * @param name  任务名
 	 * @param cron  任务触发表达式
 	 */
-	public BaseJob(String group, String name, String cron) {
+	public BaseJob(String group, String name, String cron, Job job) {
 		this.cron = CronScheduleBuilder.cronSchedule(cron);
 		this.name = name;
-		trigger = TriggerBuilder.newTrigger().withIdentity(name, group).withSchedule(this.cron).build();
-		jobDetail = JobBuilder.newJob(this.getClass()).withIdentity(name, group).build();
+		this.group = group;
+		trigger = TriggerBuilder.newTrigger().withIdentity(name, group).withSchedule(this.cron).forJob(JobKey.jobKey(name, group)).build();
+		jobDetail = JobBuilder.newJob(job.getClass()).withIdentity(name, group).build();
 	}
 
 	/**
