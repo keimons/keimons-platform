@@ -16,13 +16,15 @@ import java.nio.charset.Charset;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-17
  * @since 1.8
  */
 public class DefaultConsoleLogger extends BaseLogger {
 
 	/**
 	 * 控制台日志
+	 *
+	 * @param pattern 日志格式
+	 * @param level   日志级别
 	 */
 	public DefaultConsoleLogger(String pattern, Level level) {
 		super(".", null, level);

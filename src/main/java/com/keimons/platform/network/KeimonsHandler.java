@@ -22,7 +22,6 @@ import java.net.InetSocketAddress;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-22
  * @since 1.8
  */
 public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
@@ -125,8 +124,8 @@ public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 	/**
 	 * 水位线变化
 	 *
-	 * @param ctx
-	 * @throws Exception
+	 * @param ctx 通道
+	 * @throws Exception 错误
 	 */
 	@Override
 	public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {

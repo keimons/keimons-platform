@@ -7,13 +7,12 @@ import java.lang.annotation.Target;
 
 /**
  * 消息描述注解 服务器启动时会扫描所有实现这个注解类
- * <br />
+ * <p>
  * 这里描述了消息处理器的相关信息，在{@link com.keimons.platform.process.IProcessor}定义了业务如何处理，
  * 两个模块独立工作，不会合二为一
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-20
  * @since 1.8
  */
 @Target({ElementType.TYPE})

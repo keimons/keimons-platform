@@ -7,7 +7,6 @@ import ch.qos.logback.classic.Level;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-17
  * @since 1.8
  */
 public interface ILoggerConfig {

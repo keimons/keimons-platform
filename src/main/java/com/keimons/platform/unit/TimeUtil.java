@@ -10,7 +10,6 @@ import java.util.Date;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-25
  * @since 1.8
  */
 public class TimeUtil {
@@ -84,6 +83,7 @@ public class TimeUtil {
 	 * <p>
 	 * 采用的是线程安全的{@link DateTimeFormatter}实现
 	 *
+	 * @param time 时间刻度
 	 * @return 当前日期 日期格式："yyyy-MM-dd HH:mm:ss.SSS"
 	 */
 	public static String getDateTime(long time) {
@@ -160,13 +160,13 @@ public class TimeUtil {
 		return parse.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
-
 	/**
 	 * 获取一天的开始时间
 	 * <p>
 	 * yyyy-MM-dd 00:00:00.000
 	 *
-	 * @return 今天的开始时间
+	 * @param millis 时间刻度
+	 * @return 当天开始时间
 	 */
 	public static long beginTime(long millis) {
 		LocalDate date = Instant.ofEpochMilli(millis).query(TemporalQueries.localDate());
@@ -179,6 +179,7 @@ public class TimeUtil {
 	 * <p>
 	 * yyyy-MM-dd 23:59:59.999
 	 *
+	 * @param millis 时间刻度
 	 * @return 当天结束时间
 	 */
 	public static long endTime(long millis) {

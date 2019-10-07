@@ -14,7 +14,6 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-10-02
  * @since 1.0
  */
 @AGameData

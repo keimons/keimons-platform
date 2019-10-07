@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-19
  * @since 1.8
  **/
 @Target({ElementType.TYPE}) // 用于类、枚举
@@ -31,9 +30,14 @@ public @interface AJob {
 	 * <p>
 	 * Quartz规定每一个任务都要有一个组名，通过任务组+任务名来确定一个唯一的任务，同一个分组下，组名唯一
 	 *
-	 * @return
+	 * @return 任务名字
 	 */
 	String JobName();
 
+	/**
+	 * 任务执行表达式
+	 *
+	 * @return Cron表达式
+	 */
 	String JobCron();
 }

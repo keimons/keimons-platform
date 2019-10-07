@@ -18,7 +18,6 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-10-02
  * @since 1.8
  */
 @Setter
@@ -78,7 +77,7 @@ public abstract class BasePlayer {
 	/**
 	 * 增加玩家数据
 	 *
-	 * @param data
+	 * @param data 玩家私有数据模块
 	 */
 	public void addPlayerData(IPlayerData data) {
 		modules.put(data.getModuleName(), data);

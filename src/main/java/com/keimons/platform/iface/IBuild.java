@@ -14,8 +14,9 @@ public interface IBuild {
 	 * 构造物品的客户端数据
 	 *
 	 * @return 物品数据
+	 * @throws InvalidProtocolBufferException 构造数据失败
 	 */
-	default MessageLite build() {
+	default MessageLite build() throws InvalidProtocolBufferException {
 		return null;
 	}
 
@@ -32,6 +33,7 @@ public interface IBuild {
 	 *
 	 * @param bytes 公共部分数据
 	 * @return 物品数据
+	 * @throws InvalidProtocolBufferException 构造数据失败
 	 */
 	default MessageLite build(ByteString bytes) throws InvalidProtocolBufferException {
 		return build();
@@ -51,6 +53,7 @@ public interface IBuild {
 	 * @param player 玩家
 	 * @param bytes  公共部分数据
 	 * @return 物品数据
+	 * @throws InvalidProtocolBufferException 构造数据失败
 	 */
 	default MessageLite build(BasePlayer player, ByteString bytes) throws InvalidProtocolBufferException {
 		return build(bytes);

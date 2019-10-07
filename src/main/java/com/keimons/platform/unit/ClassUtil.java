@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-25
  * @since 1.8
  */
 public class ClassUtil {
@@ -27,6 +26,7 @@ public class ClassUtil {
 	 *
 	 * @param packageName 包名
 	 * @param annotation  注解
+	 * @param <T>         泛型类型
 	 * @return 使用该注解的类
 	 */
 	@SuppressWarnings("unchecked")

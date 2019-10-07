@@ -21,7 +21,6 @@ import java.util.function.Consumer;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-10-02
  * @since 1.8
  */
 public class PlayerDataManager {
@@ -98,7 +97,7 @@ public class PlayerDataManager {
 
 	/**
 	 * 踢玩家下线
-	 * 关闭Session -> 移除缓存 -> 保存玩家数据
+	 * 1.关闭Session 2.移除缓存 3.保存玩家数据
 	 *
 	 * @param player   玩家
 	 * @param kickType 1.异地登陆 2.强制下线
@@ -117,16 +116,15 @@ public class PlayerDataManager {
 	public void saveAllPlayer(boolean coercive) {
 		for (BasePlayer player : players.values()) {
 			if (player.getSession() == null && TimeUtil.currentTimeMillis() - player.getLastActiveTime() > TimeUtil.minuteToMillis(5)) {
-				if (savePlayer(player, true)) {
-					player.getLock().lock();
-					try {
-						// 数据缓存4个小时
+				savePlayer(player, true);
+				player.getLock().lock();
+				try {
+					// 数据缓存4个小时
 //						if (player.getRobotId() == 0 && TimeUtil.currentTimeMillis() - player.getLastActiveTime() > TimeUtil.houseToMillis(4)) {
 //							offlinePlayer(player);
 //						}
-					} finally {
-						player.getLock().unlock();
-					}
+				} finally {
+					player.getLock().unlock();
 				}
 			} else {
 				savePlayer(player, coercive);
@@ -164,7 +162,7 @@ public class PlayerDataManager {
 	 * @param player   玩家
 	 * @param coercive 是否强制存储
 	 */
-	public boolean savePlayer(BasePlayer player, boolean coercive) {
+	public void savePlayer(BasePlayer player, boolean coercive) {
 		if (player != null) {
 			try {
 				Map<byte[], byte[]> module = new HashMap<>();
@@ -180,10 +178,8 @@ public class PlayerDataManager {
 				}
 			} catch (Exception e) {
 				LogService.error(e, "存储玩家数据失败");
-				return false;
 			}
 		}
-		return true;
 	}
 
 	/**
@@ -220,6 +216,8 @@ public class PlayerDataManager {
 	 *
 	 * @param playerId   玩家ID
 	 * @param moduleName 模块
+	 * @param <T>        模块类型
+	 * @return 玩家私有数据模块
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends IPlayerData> T loadPlayer(long playerId, Enum<? extends IModule> moduleName) {

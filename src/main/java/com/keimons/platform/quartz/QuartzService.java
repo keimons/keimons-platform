@@ -15,7 +15,6 @@ import java.util.Set;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-19
  * @since 1.0
  */
 public class QuartzService {
@@ -143,12 +142,11 @@ public class QuartzService {
 	/**
 	 * 关闭定时任务系统
 	 */
-	public static boolean shutdown() {
+	public static void shutdown() {
 		try {
 			scheduler.shutdown();
 		} catch (SchedulerException e) {
 			LogService.error(e);
 		}
-		return true;
 	}
 }

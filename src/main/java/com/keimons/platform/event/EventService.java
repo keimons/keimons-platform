@@ -21,7 +21,6 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-19
  * @since 1.8
  */
 public class EventService {
@@ -57,6 +56,7 @@ public class EventService {
 	 * @param player    玩家
 	 * @param eventCode 事件号
 	 * @param params    参数列表
+	 * @param <T>       事件枚举
 	 */
 	public static <T extends Enum<T> & IEventCode> void publicEvent(BasePlayer player, T eventCode, Object... params) {
 		try {

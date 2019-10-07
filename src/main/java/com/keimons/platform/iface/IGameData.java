@@ -7,7 +7,6 @@ import com.keimons.platform.unit.CodeUtil;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-10-02
  * @since 1.8
  */
 public interface IGameData extends IData, IDataVersion {

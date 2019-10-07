@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-10-02
  * @since 1.8
  **/
 @Target({ElementType.PACKAGE})

@@ -9,7 +9,6 @@ import java.util.Set;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-20
  * @since 1.8
  */
 public class SessionManager {

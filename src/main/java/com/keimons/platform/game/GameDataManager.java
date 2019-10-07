@@ -16,7 +16,6 @@ import java.util.Map;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-10-02
  * @since 1.8
  */
 public class GameDataManager {
@@ -37,6 +36,8 @@ public class GameDataManager {
 	 * 加载一个玩家的数据
 	 *
 	 * @param moduleName 模块
+	 * @param <T>        模块类型
+	 * @return 玩家数据
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends IPlayerData> T loadGameData(String moduleName) {

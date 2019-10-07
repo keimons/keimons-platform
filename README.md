@@ -1,7 +1,8 @@
 # keimons-platform
-系统底层架构
+<h1>系统底层架构</h1>
 
-一个模块分为7部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、CronJob、Logger，将这8个模块接入到系统中即可完成模块安装
+一个模块分为8部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、CronJob、Logger，将这8个模块接入到系统中即可完成模块安装
+核心注解：@AModule，包注解，位于package-info.java中，标注一个包为一个模块，自动扫描该包下的每个模块。按照指定的模块加载顺序进行加载。
 
 <h2>Manager静态数据管理接入</h2>
 Manager负责管理静态数据，新建类实现IManager接口，并标注@AManager注解，即可完成Manager接入。

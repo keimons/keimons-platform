@@ -16,14 +16,13 @@ import java.lang.reflect.Type;
  * @param <T> 解码器 如果没有解码器则代码没有数据
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-20
  * @since 1.8
  */
 public abstract class BaseProcessor<T extends Message> implements IProcessor {
 
 	/**
 	 * 客户端数据解码器
-	 * <br />
+	 * <p>
 	 * 通过参数化类型，查找到该对象的class文件
 	 * 然后通过反射获取到该消息的解码器
 	 */
@@ -31,7 +30,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 
 	/**
 	 * 消息号
-	 * <br />
+	 * <p>
 	 * 消息号总是成对的，每一个下行消息都会对应一个上行消息
 	 */
 	protected final int msgCode;
@@ -106,6 +105,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * 玩家不存在时调用
 	 *
 	 * @param session 会话
+	 * @return 返回消息
 	 */
 	public Packet process(Session session) {
 		return null;
@@ -116,6 +116,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 *
 	 * @param session 会话
 	 * @param request 消息体
+	 * @return 返回消息
 	 */
 	public Packet process(Session session, T request) {
 		return null;
@@ -125,6 +126,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * 玩家存在时调用
 	 *
 	 * @param player 玩家
+	 * @return 返回消息
 	 */
 	public Packet process(BasePlayer player) {
 		return null;
@@ -133,7 +135,9 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	/**
 	 * 玩家存在时调用
 	 *
-	 * @param player 玩家
+	 * @param player  玩家
+	 * @param request 请求
+	 * @return 返回消息
 	 */
 	public Packet process(BasePlayer player, T request) {
 		return null;
@@ -154,7 +158,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 *
 	 * @param data     下行消息
 	 * @param errCodes 错误号
-	 * @return 消息体
+	 * @return 返回消息
 	 */
 	public Packet build(MessageLite data, String... errCodes) {
 		Packet packet = new Packet();

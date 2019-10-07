@@ -8,7 +8,6 @@ import org.quartz.*;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2019-09-19
  * @since 1.0
  */
 @Getter
@@ -45,6 +44,7 @@ public class BaseJob {
 	 * @param group 任务组
 	 * @param name  任务名
 	 * @param cron  任务触发表达式
+	 * @param job   任务
 	 */
 	public BaseJob(String group, String name, String cron, Job job) {
 		this.cron = CronScheduleBuilder.cronSchedule(cron);
