@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 定时任务 一旦被标注了定时任务，则会在启动的时候被夹在到内存中
+ * 调度任务 一旦被标注了定时任务，则会在启动的时候被加载到内存中
  *
  * @author monkey1993
  * @version 1.0

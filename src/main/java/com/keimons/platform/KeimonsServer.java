@@ -11,7 +11,7 @@ import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.PlayerDataManager;
 import com.keimons.platform.process.ProcessorManager;
-import com.keimons.platform.quartz.QuartzService;
+import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
 
@@ -115,7 +115,7 @@ public class KeimonsServer {
 			System.out.println("禁用控制台输出重定向！");
 		}
 		LogService.init();
-		QuartzService.init();
+		SchedulerService.init();
 		EventService.init();
 		List<Package> packages = new ArrayList<>();
 		for (Package pkg : Package.getPackages()) {
@@ -146,7 +146,7 @@ public class KeimonsServer {
 		KeimonsServer.addService(packageName);
 
 		ProcessorManager.addProcessor(packageName);
-		QuartzService.addJobs(packageName);
+		SchedulerService.addJobs(packageName);
 		PlayerDataManager.addPlayerData(packageName);
 		GameDataManager.addGameData(packageName);
 	}
