@@ -12,7 +12,7 @@ package com.keimons.platform.iface;
 public interface IPersistence {
 
 	/**
-	 * 序列化后的数据
+	 * 获取持久化数据
 	 *
 	 * @param notnull 是否强制获取数据
 	 * @return 最新数据{@code null}则表示无最新数据

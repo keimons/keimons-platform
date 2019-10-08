@@ -37,6 +37,7 @@ public abstract class BasePlayerData implements IPlayerData {
 		if (!notnull && lastMd5 != null && lastMd5.equals(thisMd5)) {
 			return null;
 		}
+		// 可能lastMd5所指向的对象已经进入老年代，所以仅在需要更新对象时才进行更新
 		lastMd5 = thisMd5;
 		return bytes;
 	}
