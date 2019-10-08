@@ -10,8 +10,6 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 import ch.qos.logback.core.util.OptionHelper;
 import com.keimons.platform.iface.ILogger;
-import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
@@ -23,8 +21,6 @@ import java.nio.charset.Charset;
  * @version 1.0
  * @since 1.8
  */
-@Setter
-@Getter
 public abstract class BaseLogger implements ILogger {
 
 	private final String name;
@@ -90,5 +86,27 @@ public abstract class BaseLogger implements ILogger {
 
 		appender.start();
 		return appender;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	public Level getLevel() {
+		return level;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public String getPattern() {
+		return pattern;
+	}
+
+	public BaseLogger setPattern(String pattern) {
+		this.pattern = pattern;
+		return this;
 	}
 }

@@ -1,8 +1,5 @@
 package com.keimons.platform.network;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * 数据传输结构
  * <p>
@@ -12,13 +9,47 @@ import lombok.Setter;
  * @version 1.0
  * @since 1.8
  */
-@Getter
-@Setter
 public class Packet {
 
+	/**
+	 * 消息号
+	 */
 	private int msgCode;
 
+	/**
+	 * 消息体
+	 */
 	private byte[] data;
 
+	/**
+	 * 错误号
+	 */
 	private String[] errCodes;
+
+	public int getMsgCode() {
+		return msgCode;
+	}
+
+	public Packet setMsgCode(int msgCode) {
+		this.msgCode = msgCode;
+		return this;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public Packet setData(byte[] data) {
+		this.data = data;
+		return this;
+	}
+
+	public String[] getErrCodes() {
+		return errCodes;
+	}
+
+	public Packet setErrCodes(String[] errCodes) {
+		this.errCodes = errCodes;
+		return this;
+	}
 }

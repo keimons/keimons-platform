@@ -168,7 +168,7 @@ public class PlayerDataManager {
 				Map<byte[], byte[]> module = new HashMap<>();
 				for (IPlayerData data : player.getModules()) {
 					data.encode();
-					byte[] bytes = data.latest(coercive);
+					byte[] bytes = data.persistence(coercive);
 					if (bytes != null) {
 						module.put(CharsetUtil.getUTF8(data.getModuleName()), bytes);
 					}

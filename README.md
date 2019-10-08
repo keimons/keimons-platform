@@ -1,11 +1,28 @@
 # keimons-platform
 ## 系统底层架构
 
-&emsp;&emsp;一个模块分为8部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、CronJob、Logger，将这8个模块接入到系统中即可完成模块安装。
+&emsp;&emsp;一个模块分为8部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、Scheduler、Logger，将这8个模块接入到系统中即可完成模块安装。
 
 &emsp;&emsp;模块标识注解：@AModule。AModale是一个包注解，位于package-info.java中，标注一个包为一个模块，自动扫描该包下的所有归属于一个模块的子系统。按照模块指定的加载顺序进行加载。
 
 ## 模块接入
+
+### 模块目录结构
+
+模块根目录  
+|  –  Manager    资源管理  
+|  –  Service    逻辑、事件  
+|  –  PlayerData 玩家私有数据  
+|  –  GameData   玩家共有数据  
+|  –  logger     日志  
+       |  – ALogger            A日志  
+       |  – BLogger            B日志  
+|  –  scheduler  调度任务  
+       |  – AJob               A定时任务  
+       |  – BJob               B定时任务  
+|  –  processor  消息处理器  
+       |  – ThisAProcessor1001 A消息处理器  
+       |  – ThisAProcessor1002 B消息处理器
 
 ### Manager
 

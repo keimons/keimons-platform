@@ -2,8 +2,6 @@ package com.keimons.platform.event;
 
 import com.keimons.platform.iface.IEventCode;
 import com.keimons.platform.player.BasePlayer;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 事件
@@ -13,8 +11,6 @@ import lombok.Setter;
  * @version 1.0
  * @since 1.8
  */
-@Setter
-@Getter
 public class Event {
 
 	/**
@@ -47,5 +43,24 @@ public class Event {
 	@SuppressWarnings("unchecked")
 	public <T> T getParams(int index) {
 		return (T) params[index];
+	}
+
+	public BasePlayer getPlayer() {
+		return player;
+	}
+
+	public Event setPlayer(BasePlayer player) {
+		this.player = player;
+		return this;
+	}
+
+	public Event setEventCode(Enum<? extends IEventCode> eventCode) {
+		this.eventCode = eventCode;
+		return this;
+	}
+
+	public Event setParams(Object[] params) {
+		this.params = params;
+		return this;
 	}
 }

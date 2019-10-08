@@ -1,6 +1,5 @@
 package com.keimons.platform.quartz;
 
-import lombok.Getter;
 import org.quartz.*;
 
 /**
@@ -10,7 +9,6 @@ import org.quartz.*;
  * @version 1.0
  * @since 1.0
  */
-@Getter
 public class BaseJob {
 
 	/**
@@ -70,5 +68,13 @@ public class BaseJob {
 	 */
 	public final Trigger getTrigger() {
 		return trigger;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getGroup() {
+		return group;
 	}
 }

@@ -11,7 +11,7 @@ import com.keimons.platform.player.BasePlayer;
  * @since 1.8
  */
 @APlayerData
-public interface IPlayerData extends IData, ILoaded, IDataVersion, IDataObserver {
+public interface IPlayerData extends IData, ILoaded, IDataVersion, IPersistence {
 
 	/**
 	 * 初始化(当且仅当对象被创建时调用)

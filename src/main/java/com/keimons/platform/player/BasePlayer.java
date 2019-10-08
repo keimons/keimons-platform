@@ -6,8 +6,6 @@ import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.CodeUtil;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -20,8 +18,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 1.0
  * @since 1.8
  */
-@Setter
-@Getter
 public abstract class BasePlayer {
 
 	/**
@@ -155,5 +151,27 @@ public abstract class BasePlayer {
 		if (session != null) {
 			session.send(msgCode, data, errCodes);
 		}
+	}
+
+	public Lock getLock() {
+		return lock;
+	}
+
+	public Session getSession() {
+		return session;
+	}
+
+	public BasePlayer setSession(Session session) {
+		this.session = session;
+		return this;
+	}
+
+	public long getLastActiveTime() {
+		return lastActiveTime;
+	}
+
+	public BasePlayer setLastActiveTime(long lastActiveTime) {
+		this.lastActiveTime = lastActiveTime;
+		return this;
 	}
 }

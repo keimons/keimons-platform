@@ -1,15 +1,13 @@
 package com.keimons.platform.session;
 
-import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.player.BasePlayer;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.GenericFutureListener;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 会话，每一个ctx都会附带一个会话，每一个玩家也会依赖于一个会话
@@ -25,8 +23,6 @@ import lombok.Setter;
  * @version 1.0
  * @since 1.8
  */
-@Setter
-@Getter
 public class Session {
 
 	/**
@@ -122,5 +118,45 @@ public class Session {
 				}
 			});
 		}
+	}
+
+	public ChannelHandlerContext getCtx() {
+		return ctx;
+	}
+
+	public long getLastActiveTime() {
+		return lastActiveTime;
+	}
+
+	public Session setLastActiveTime(long lastActiveTime) {
+		this.lastActiveTime = lastActiveTime;
+		return this;
+	}
+
+	public boolean isConnect() {
+		return connect;
+	}
+
+	public Session setConnect(boolean connect) {
+		this.connect = connect;
+		return this;
+	}
+
+	public boolean isLogined() {
+		return logined;
+	}
+
+	public Session setLogined(boolean logined) {
+		this.logined = logined;
+		return this;
+	}
+
+	public BasePlayer getPlayer() {
+		return player;
+	}
+
+	public Session setPlayer(BasePlayer player) {
+		this.player = player;
+		return this;
 	}
 }

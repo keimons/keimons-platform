@@ -31,7 +31,7 @@ public abstract class BasePlayerData implements IPlayerData {
 	private volatile int version = KeimonsServer.VERSION;
 
 	@Override
-	public byte[] latest(boolean notnull) {
+	public byte[] persistence(boolean notnull) {
 		byte[] bytes = CodeUtil.encode(this);
 		String thisMd5 = MD5Util.md5(bytes);
 		if (!notnull && lastMd5 != null && lastMd5.equals(thisMd5)) {
