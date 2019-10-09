@@ -25,7 +25,7 @@ public class ProcessorManager {
 	/**
 	 * 消息描述
 	 */
-	private static Map<Integer, AProcessor> info;
+	private static Map<Integer, AProcessor> info = new HashMap<>();
 
 	/**
 	 * 获取消息处理器
@@ -56,16 +56,16 @@ public class ProcessorManager {
 		List<Class<IProcessor>> classes = ClassUtil.load(packageName, AProcessor.class);
 		for (Class<IProcessor> clazz : classes) {
 			System.out.println("正在安装消息处理器：" + clazz.getSimpleName());
-			AProcessor msgCode = clazz.getAnnotation(AProcessor.class);
-			if (processors.containsKey(msgCode.MsgCode()) &&
-					!clazz.getName().equals(processors.get(msgCode.MsgCode()).getClass().getName())) {
-				LogService.error("重复的消息号：" + clazz.getName() + "，与：" + processors.get(msgCode.MsgCode()).getClass().getName());
+			AProcessor info = clazz.getAnnotation(AProcessor.class);
+			if (processors.containsKey(info.MsgCode()) &&
+					!clazz.getName().equals(processors.get(info.MsgCode()).getClass().getName())) {
+				LogService.error("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
 			try {
 				IProcessor processor = clazz.newInstance();
-				processors.put(msgCode.MsgCode(), processor);
-				info.put(msgCode.MsgCode(), msgCode);
-				System.out.println("消息处理器：" + "消息号：" + msgCode.MsgCode() + "，描述：" + msgCode.Desc());
+				processors.put(info.MsgCode(), processor);
+				ProcessorManager.info.put(info.MsgCode(), info);
+				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
 			} catch (Exception e) {
 				LogService.error(e, clazz.getSimpleName() + "安装消息处理器失败");
 			}

@@ -22,11 +22,27 @@ import java.util.Locale;
  */
 public class ConsoleService extends PrintStream {
 
-	public static final String OUT_CONSOLE = "OutConsole";
-	public static final String ERR_CONSOLE = "ErrConsole";
+	/**
+	 * 输出日志重定向
+	 */
+	static final String OUT_CONSOLE = "OutConsole";
 
+	/**
+	 * 错误日志重定向
+	 */
+	static final String ERR_CONSOLE = "ErrConsole";
+
+	/**
+	 * 输出流
+	 */
 	private final PrintStream printStream;
+
+	/**
+	 * 日志
+	 */
 	private final ConsoleLogger logger;
+
+	private static boolean initialized = false;
 
 	/**
 	 * 重定向方案
@@ -214,13 +230,20 @@ public class ConsoleService extends PrintStream {
 	 * 重定向System.out和System.out到Logback
 	 */
 	public static void init() {
-		// 初始化System.out和System.err日志
-		init(ConsoleService.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
-		init(ConsoleService.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
+		if (!initialized) {
+			synchronized (ConsoleService.class) {
+				if (!initialized) {
+					initialized = true;
+					// 初始化System.out和System.err日志
+					init(ConsoleService.OUT_CONSOLE, "%blue([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %msg%n", Level.INFO);
+					init(ConsoleService.ERR_CONSOLE, "%red([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %highlight(%msg%n)", Level.ERROR);
 
-		// 重定向System.out和System.err到日志
-		System.setOut(new ConsoleService(System.out, ConsoleLogger.INFO));
-		System.setErr(new ConsoleService(System.err, ConsoleLogger.ERROR));
+					// 重定向System.out和System.err到日志
+					System.setOut(new ConsoleService(System.out, ConsoleLogger.INFO));
+					System.setErr(new ConsoleService(System.err, ConsoleLogger.ERROR));
+				}
+			}
+		}
 	}
 
 	/**

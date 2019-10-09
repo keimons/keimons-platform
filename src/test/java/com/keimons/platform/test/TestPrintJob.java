@@ -2,7 +2,6 @@ package com.keimons.platform.test;
 
 import com.keimons.platform.annotation.AJob;
 import com.keimons.platform.log.LogService;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -15,9 +14,8 @@ import org.quartz.JobExecutionException;
  * @since 1.0
  **/
 @AJob(JobName = "TestPrint", JobCron = "0/5 * * * * ?")
-public class TestPrintJob implements Job {
+public class TestPrintJob {
 
-	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		LogService.info("login successful!");
 	}

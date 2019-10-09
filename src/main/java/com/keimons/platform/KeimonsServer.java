@@ -3,7 +3,6 @@ package com.keimons.platform;
 import com.keimons.platform.annotation.AManager;
 import com.keimons.platform.annotation.AModule;
 import com.keimons.platform.annotation.AService;
-import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
 import com.keimons.platform.game.GameDataManager;
 import com.keimons.platform.iface.IManager;
@@ -27,39 +26,9 @@ import java.util.*;
 public class KeimonsServer {
 
 	/**
-	 * 日志路径
+	 * 系统配置文件
 	 */
-	public static final String LOG_PATH = "LogPath";
-
-	/**
-	 * 日志路径
-	 */
-	public static final String PACKET = "Packet";
-
-	/**
-	 * 控制台输出重定向
-	 */
-	public static final String KEIMONS_CONSOLE_REDIRECT = "ConsoleRedirect";
-
-	/**
-	 * 服务器ID （游戏服，世界服）
-	 */
-	public static int ServerId;
-
-	/**
-	 * 是否Debug模式
-	 */
-	public static boolean Debug;
-
-	/**
-	 * 运行中
-	 */
-	public static boolean RUNNING = true;
-
-	/**
-	 * 包名 程序运行中会扫描这个包下的文件
-	 */
-	public static String PackageName = ".";
+	public static KeimonsConfig KeimonsConfig;
 
 	/**
 	 * 系统版本
@@ -106,11 +75,35 @@ public class KeimonsServer {
 
 	/**
 	 * 启动入口
+	 * <p>
+	 * 采用默认的配置
 	 */
 	public static void start() {
-		if (System.getProperty(KEIMONS_CONSOLE_REDIRECT, String.valueOf(true)).equals("true")) {
-			ConsoleService.init();
-			System.out.print("启用控制台输出重定向！");
+		start(com.keimons.platform.KeimonsConfig.defaultConfig());
+	}
+
+	/**
+	 * 启动入口
+	 * <p>
+	 * 采用默认的配置文件
+	 *
+	 * @param path 文件路径
+	 * @deprecated 暂未完成
+	 */
+	@Deprecated
+	public static void start(String path) {
+
+	}
+
+	/**
+	 * 启动入口
+	 *
+	 * @param keimonsConfig 启动入口
+	 */
+	public static void start(KeimonsConfig keimonsConfig) {
+		KeimonsConfig = keimonsConfig;
+		if (keimonsConfig.isConsoleRedirect()) {
+			System.out.println("启用控制台输出重定向！");
 		} else {
 			System.out.println("禁用控制台输出重定向！");
 		}

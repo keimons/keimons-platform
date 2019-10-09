@@ -79,7 +79,7 @@ public class LogService {
 	public static void log(String logName, String context) {
 		Logger logger = loggers.get(logName);
 		if (logger == null) {
-			String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+			String logPath = KeimonsServer.KeimonsConfig.getLogPath();
 			logger = build(new DefaultRollingFileLogger(logPath, logName, Level.INFO));
 			loggers.put(logName, logger);
 		}
@@ -171,7 +171,9 @@ public class LogService {
 	 * 初始化日志系统
 	 */
 	public static void init() {
-		String logPath = System.getProperty(KeimonsServer.LOG_PATH, DEFAULT_LOG_PATH);
+		String logPath = KeimonsServer.KeimonsConfig.getLogPath();
+
+		System.out.println("日志输出路径：" + logPath);
 
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		Logger root = context.getLogger("ROOT");
