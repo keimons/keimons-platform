@@ -1,8 +1,12 @@
 package com.keimons.platform.process;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
+import com.keimons.platform.unit.Entry;
+import com.sun.tools.javac.util.IntHashTable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +66,7 @@ public class ProcessorManager {
 				LogService.error("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
 			try {
-				IProcessor processor = clazz.newInstance();
+				IProcessor processor = clazz.getDeclaredConstructor().newInstance();
 				processors.put(info.MsgCode(), processor);
 				ProcessorManager.info.put(info.MsgCode(), info);
 				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());

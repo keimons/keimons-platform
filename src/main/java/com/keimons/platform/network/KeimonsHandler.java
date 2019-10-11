@@ -37,14 +37,19 @@ public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
+			AProcessor info = ProcessorManager.getMsgCodeInfo(packet.getMsgCode());
+			long lastRequestTime = session.getLastRequestTime(packet.getMsgCode());
+			if (TimeUtil.currentTimeMillis() - lastRequestTime < info.Interval()) {
+				session.send(info.MsgCode(), null, "FrequentRequestError");
+				return;
+			}
 			IProcessor processor = ProcessorManager.getProcessor(packet.getMsgCode());
 			if (processor != null) {
 				long start = TimeUtil.currentTimeMillis();
-				AProcessor aProcessor = ProcessorManager.getMsgCodeInfo(packet.getMsgCode());
 				processor.processor(session, packet);
 				long end = TimeUtil.currentTimeMillis();
 				if (end - start > 100) {
-					LogService.info(TimeUtil.getDateTime() + " 超长消息执行：" + aProcessor.MsgCode() + "，执行时长：" + (end - start));
+					LogService.info(TimeUtil.getDateTime() + " 超长消息执行：" + info.MsgCode() + "，执行时长：" + (end - start));
 				}
 			} else {
 				LogService.error("不存在的消息号：" + packet.getMsgCode());

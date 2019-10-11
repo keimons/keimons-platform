@@ -9,6 +9,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.GenericFutureListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 会话，每一个ctx都会附带一个会话，每一个玩家也会依赖于一个会话
  * <p>
@@ -53,8 +56,38 @@ public class Session {
 	 */
 	private BasePlayer player;
 
+	/**
+	 * 消息号请求时间
+	 */
+	private Map<Integer, Long> requestTime = new HashMap<>();
+
+	/**
+	 * 构造方法
+	 *
+	 * @param ctx 客户端-服务器连接
+	 */
 	public Session(ChannelHandlerContext ctx) {
 		this.ctx = ctx;
+	}
+
+	/**
+	 * 获取上次请求时间
+	 *
+	 * @param msgCode 协议号
+	 * @return 上次请求时间
+	 */
+	public long getLastRequestTime(int msgCode) {
+		return requestTime.getOrDefault(msgCode, 0L);
+	}
+
+	/**
+	 * 设置本次请求时间
+	 *
+	 * @param msgCode 协议号
+	 * @param time    请求时间
+	 */
+	public void setThisRequestTime(int msgCode, long time) {
+		requestTime.put(msgCode, time);
 	}
 
 	/**

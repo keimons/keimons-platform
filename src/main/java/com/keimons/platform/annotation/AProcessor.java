@@ -1,5 +1,7 @@
 package com.keimons.platform.annotation;
 
+import com.keimons.platform.process.ThreadLevel;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,4 +53,23 @@ public @interface AProcessor {
 	 * @return 描述
 	 */
 	String Desc() default "没有描述";
+
+	/**
+	 * 线程优先级，系统允许每个协议自定义自己运行的线程优先级，
+	 * 如果没有指定线程优先级，将采用自动的动态优先级，根据配置
+	 * 文件和程序运行时消息处理速度，自动的进行运行优先级的升级
+	 *
+	 * @return 自动升级线程池
+	 * @deprecated 该功能暂时不支持
+	 */
+	@Deprecated
+	ThreadLevel ThreadLevel() default ThreadLevel.AUTO;
+
+	/**
+	 * 线程组
+	 *
+	 * @return 线程组
+	 */
+	@Deprecated
+	int ThreadGroup() default 0;
 }
