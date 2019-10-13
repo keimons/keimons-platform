@@ -90,8 +90,9 @@ public class Session {
 	 * 客户端消息过于频繁的错误号。这个间隔默认是50ms，也就是说，消息每秒最多被请求
 	 * 20次，涉及消耗过大的操作，需要适当延长这个时间。
 	 *
-	 * @param msgCode 协议号
-	 * @param timeNow 当前时间
+	 * @param msgCode  协议号
+	 * @param timeNow  当前时间
+	 * @param interval 间隔时间
 	 * @return true.请求频率超过安全范围。false.请求频率在安全范围内。
 	 */
 	public boolean intervalVerifyAndUpdate(int msgCode, long timeNow, int interval) {

@@ -161,7 +161,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取Multimap中某一个字段的所有值
 	 *
-	 * @param codec 解码方式
+	 * @param codec 解码器
 	 * @param key   键
 	 * @param field 字段
 	 * @param <F>   返回键类型
@@ -176,7 +176,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取Multimap中某一个字段的所有值
 	 *
-	 * @param codec 解码方式
+	 * @param codec 解码器
 	 * @param key   键
 	 * @param <F>   返回键类型
 	 * @param <V>   返回值类型
@@ -214,6 +214,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取指定计分排序集中元素
 	 *
+	 * @param codec      解码器
 	 * @param key        键
 	 * @param startScore 最低分
 	 * @param endScore   最高分
@@ -228,6 +229,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取指定计分排序集中元素
 	 *
+	 * @param codec      编码解码器
 	 * @param key        键
 	 * @param startIndex 最低分
 	 * @param endIndex   最高分
@@ -242,7 +244,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取指定计分排序集中元素
 	 *
-	 * @param codec 编码方式
+	 * @param codec 编码解码器
 	 * @param key   键
 	 * @param value 键
 	 * @param <V>   返回值类型
@@ -260,6 +262,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取指定计分排序集中元素 倒序
 	 *
+	 * @param codec      编码解码器
 	 * @param key        键
 	 * @param startIndex 开始下标
 	 * @param endIndex   结束下标
@@ -342,6 +345,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 设置一个键值对
 	 *
+	 * @param codec 编码解码器
 	 * @param key   键
 	 * @param value 值
 	 * @param <V>   返回值类型
@@ -354,9 +358,11 @@ public class RedissonManager implements IManager {
 	/**
 	 * 设置一个键值对
 	 *
-	 * @param key   键
-	 * @param value 值
-	 * @param <V>   返回值类型
+	 * @param codec   编码解码器
+	 * @param key     键
+	 * @param value   值
+	 * @param seconds 过期时间(秒)
+	 * @param <V>     返回值类型
 	 */
 	public static <V> void set(Codec codec, String key, V value, int seconds) {
 		RBucket<V> bucket = redisson.getBucket(key, codec);
@@ -366,21 +372,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * Redis中的哈希桶
 	 *
-	 * @param key   键
-	 * @param field 字段
-	 * @param value 值
-	 * @param <F>   返回键类型
-	 * @param <V>   返回值类型
-	 */
-	public static <F, V> void setMapValue(RedissonClient redisson, String key, F field, V value) {
-		RMap<F, V> map = redisson.getMap(key);
-		map.put(field, value);
-	}
-
-	/**
-	 * Redis中的哈希桶
-	 *
-	 * @param codec 编码器
+	 * @param codec 编码解码器
 	 * @param key   键
 	 * @param field 字段
 	 * @param value 值
@@ -408,6 +400,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * Redis中的哈希桶
 	 *
+	 * @param codec  编码解码器
 	 * @param key    键
 	 * @param values 值
 	 * @param <F>    返回键类型
@@ -416,20 +409,6 @@ public class RedissonManager implements IManager {
 	public static <F, V> void setMapValues(Codec codec, String key, Map<F, V> values) {
 		RMap<F, V> map = redisson.getMap(key, codec);
 		map.putAll(values);
-	}
-
-	/**
-	 * Redis中的哈希桶
-	 *
-	 * @param key   键
-	 * @param field 字段
-	 * @param value 值
-	 * @param <F>   返回键类型
-	 * @param <V>   返回值类型
-	 */
-	public static <F, V> void setSetMultimapValue(RedissonClient redisson, String key, F field, V value) {
-		RSetMultimap<F, V> map = redisson.getSetMultimap(key);
-		map.put(field, value);
 	}
 
 	/**
@@ -476,7 +455,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 添加数据指定过期时间
 	 *
-	 * @param codec      编码方式
+	 * @param codec      编码解码器
 	 * @param key        键
 	 * @param value      值
 	 * @param expireTime 过期时间
@@ -551,6 +530,7 @@ public class RedissonManager implements IManager {
 	/**
 	 * 获取指定Set下所有的值
 	 *
+	 * @param codec 编码解码器
 	 * @param key   键
 	 * @param value 值
 	 * @param <V>   返回值类型
@@ -587,22 +567,10 @@ public class RedissonManager implements IManager {
 		}
 	}
 
-
-	/**
-	 * 新增指定计分排序集中元素
-	 *
-	 * @param key   键
-	 * @param value 值
-	 * @param <V>   返回值类型
-	 */
-	public static <V> boolean delScoredSortedSetValue(RedissonClient redisson, String key, V value) {
-		RScoredSortedSet<V> set = redisson.getScoredSortedSet(key);
-		return set.remove(value);
-	}
-
 	/**
 	 * Redis中的哈希桶
 	 *
+	 * @param codec 编码解码器
 	 * @param key   键
 	 * @param field 字段
 	 */
