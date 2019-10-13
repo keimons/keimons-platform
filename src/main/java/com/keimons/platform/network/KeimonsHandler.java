@@ -1,9 +1,9 @@
 package com.keimons.platform.network;
 
-import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.process.IProcessor;
+import com.keimons.platform.process.ProcessorInfo;
 import com.keimons.platform.process.ProcessorManager;
+import com.keimons.platform.process.ProcessorModel;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.session.SessionManager;
 import com.keimons.platform.unit.NetUtil;
@@ -37,19 +37,21 @@ public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			AProcessor info = ProcessorManager.getMsgCodeInfo(packet.getMsgCode());
-			long lastRequestTime = session.getLastRequestTime(packet.getMsgCode());
-			if (TimeUtil.currentTimeMillis() - lastRequestTime < info.Interval()) {
-				session.send(info.MsgCode(), null, "FrequentRequestError");
-				return;
-			}
-			IProcessor processor = ProcessorManager.getProcessor(packet.getMsgCode());
-			if (processor != null) {
-				long start = TimeUtil.currentTimeMillis();
-				processor.processor(session, packet);
-				long end = TimeUtil.currentTimeMillis();
-				if (end - start > 100) {
-					LogService.info(TimeUtil.getDateTime() + " 超长消息执行：" + info.MsgCode() + "，执行时长：" + (end - start));
+			int msgCode = packet.getMsgCode();
+			ProcessorInfo processorInfo = ProcessorManager.getProcessor(msgCode);
+
+			if (processorInfo != null) {
+				switch (processorInfo.selectThreadLevel()) {
+					case H_LEVEL:
+						processorInfo.processor(session, packet);
+						break;
+					case M_LEVEL:
+						ProcessorModel.addMidProcessor(session, processorInfo, packet);
+						break;
+					case L_LEVEL:
+						ProcessorModel.addLowProcessor(session, processorInfo, packet);
+						break;
+					default:
 				}
 			} else {
 				LogService.error("不存在的消息号：" + packet.getMsgCode());

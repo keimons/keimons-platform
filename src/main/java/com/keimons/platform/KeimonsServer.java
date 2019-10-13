@@ -3,6 +3,7 @@ package com.keimons.platform;
 import com.keimons.platform.annotation.AManager;
 import com.keimons.platform.annotation.AModule;
 import com.keimons.platform.annotation.AService;
+import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
 import com.keimons.platform.game.GameDataManager;
 import com.keimons.platform.iface.IManager;
@@ -10,6 +11,7 @@ import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.PlayerDataManager;
 import com.keimons.platform.process.ProcessorManager;
+import com.keimons.platform.process.ProcessorModel;
 import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
@@ -103,6 +105,7 @@ public class KeimonsServer {
 	public static void start(KeimonsConfig keimonsConfig) {
 		KeimonsConfig = keimonsConfig;
 		if (keimonsConfig.isConsoleRedirect()) {
+			ConsoleService.init();
 			System.out.println("启用控制台输出重定向！");
 		} else {
 			System.out.println("禁用控制台输出重定向！");
@@ -125,6 +128,7 @@ public class KeimonsServer {
 			initModule(pkg.getName());
 			System.out.println("************************* 完成安装模块 *************************");
 		}
+		ProcessorModel.init();
 		KeimonsTcpNet.init();
 	}
 

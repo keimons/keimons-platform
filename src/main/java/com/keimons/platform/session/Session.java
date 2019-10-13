@@ -11,6 +11,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 会话，每一个ctx都会附带一个会话，每一个玩家也会依赖于一个会话
@@ -27,6 +28,11 @@ import java.util.Map;
  * @since 1.8
  */
 public class Session {
+
+	/**
+	 * 会话的自增ID
+	 */
+	private static final AtomicInteger sessionIndex = new AtomicInteger();
 
 	/**
 	 * 客户端-服务器连接
@@ -62,32 +68,39 @@ public class Session {
 	private Map<Integer, Long> requestTime = new HashMap<>();
 
 	/**
+	 * 会话唯一ID
+	 */
+	private final int sessionId;
+
+	/**
 	 * 构造方法
 	 *
 	 * @param ctx 客户端-服务器连接
 	 */
 	public Session(ChannelHandlerContext ctx) {
 		this.ctx = ctx;
+		this.sessionId = sessionIndex.getAndIncrement();
 	}
 
 	/**
-	 * 获取上次请求时间
+	 * 请求间隔的验证和更新
+	 * <p>
+	 * 服务器防刷的一道验证，同时也是防止某些，消耗（IO，CPU，RAM等）过大的消息频繁
+	 * 的被请求，造成服务器资源被耗尽。如果客户端请求过于频繁，将抛弃这条消息，并返回
+	 * 客户端消息过于频繁的错误号。这个间隔默认是50ms，也就是说，消息每秒最多被请求
+	 * 20次，涉及消耗过大的操作，需要适当延长这个时间。
 	 *
 	 * @param msgCode 协议号
-	 * @return 上次请求时间
+	 * @param timeNow 当前时间
+	 * @return true.请求频率超过安全范围。false.请求频率在安全范围内。
 	 */
-	public long getLastRequestTime(int msgCode) {
-		return requestTime.getOrDefault(msgCode, 0L);
-	}
-
-	/**
-	 * 设置本次请求时间
-	 *
-	 * @param msgCode 协议号
-	 * @param time    请求时间
-	 */
-	public void setThisRequestTime(int msgCode, long time) {
-		requestTime.put(msgCode, time);
+	public boolean intervalVerifyAndUpdate(int msgCode, long timeNow, int interval) {
+		long lastRequestTime = requestTime.getOrDefault(msgCode, 0L);
+		requestTime.put(msgCode, timeNow);
+		if (timeNow - lastRequestTime > interval) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -191,5 +204,9 @@ public class Session {
 	public Session setPlayer(BasePlayer player) {
 		this.player = player;
 		return this;
+	}
+
+	public int getSessionId() {
+		return sessionId;
 	}
 }

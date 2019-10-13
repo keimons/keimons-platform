@@ -1,5 +1,7 @@
 package com.keimons.platform;
 
+import groovy.lang.GroovyShell;
+
 import java.util.Properties;
 
 /**
@@ -19,22 +21,62 @@ public class KeimonsConfig {
 	public static final String LOG_PATH = "keimons.log.path";
 
 	/**
-	 * 日志路径
-	 */
-	public static final String DEBUG = "keimons.debug";
-
-	/**
-	 * 日志路径
-	 */
-	public static final String CONSOLE_REDIRECT = "keimons.console.redirect";
-
-	/**
 	 * 默认日志路径
 	 */
 	public static final String DEFAULT_LOG_PATH = "./logs/";
 
 	/**
-	 * 是否Debug模式运行
+	 * 是否调试模式运行
+	 */
+	public static final String DEBUG = "keimons.debug";
+
+	/**
+	 * 默认是否调试模式运行
+	 */
+	public static final String DEFAULT_DEBUG = "true";
+
+	/**
+	 * 是否启用控制台重定向
+	 */
+	public static final String CONSOLE_REDIRECT = "keimons.console.redirect";
+
+	/**
+	 * 默认是否启用控制台重定向
+	 */
+	public static final String DEFAULT_CONSOLE_REDIRECT = "true";
+
+	/**
+	 * 是否自适应逻辑处理线程级别
+	 */
+	public static final String NET_THREAD_AUTO = "keimons.net.thread.auto";
+
+	/**
+	 * 默认是否自适应逻辑处理线程级别
+	 */
+	public static final String DEFAULT_NET_THREAD_AUTO = "true";
+
+	/**
+	 * 线程数量
+	 */
+	public static final String NET_THREAD_COUNT = "keimons.net.thread.count";
+
+	/**
+	 * 默认日志路径
+	 */
+	public static final String DEFAULT_NET_THREAD_COUNT = "cpu*2,cpu*1,cpu*1";
+
+	/**
+	 * 多级线程池
+	 */
+	public static final String NET_THREAD_LEVEL = "keimons.net.thread.level";
+
+	/**
+	 * 默认多级线程池
+	 */
+	public static final String DEFAULT_NET_THREAD_LEVEL = "20,50";
+
+	/**
+	 * 是否启用Debug模式运行
 	 */
 	private boolean debug;
 
@@ -44,9 +86,24 @@ public class KeimonsConfig {
 	private String logPath;
 
 	/**
-	 * 控制台输出重定向
+	 * 是否启用控制台输出重定向
 	 */
 	private boolean consoleRedirect;
+
+	/**
+	 * 是否启动多级线程池
+	 */
+	private boolean autoThreadLevel;
+
+	/**
+	 * 高中低线程的线程数量
+	 */
+	private int[] netThreadCount = new int[3];
+
+	/**
+	 * 跳线程的线程运行级别
+	 */
+	private int[] netThreadLevel = new int[2];
 
 	/**
 	 * 配置文件
@@ -54,9 +111,47 @@ public class KeimonsConfig {
 	 * @param config 配置文件
 	 */
 	public KeimonsConfig(Properties config) {
-		this.debug = Boolean.valueOf(config.getProperty(DEBUG, "true"));
-		this.logPath = config.getProperty(LOG_PATH, DEFAULT_LOG_PATH);
-		this.consoleRedirect = Boolean.valueOf(config.getProperty(CONSOLE_REDIRECT, "true"));
+		String property;
+		// 是否Debug模式运行
+		property = config.getProperty(DEBUG, DEFAULT_DEBUG);
+		this.debug = Boolean.valueOf(property);
+
+		// 日志路径
+		property = config.getProperty(LOG_PATH, DEFAULT_LOG_PATH);
+		this.logPath = property;
+
+		// 是否控制台重定向
+		property = config.getProperty(CONSOLE_REDIRECT, DEFAULT_CONSOLE_REDIRECT);
+		this.consoleRedirect = Boolean.valueOf(property);
+
+		// 是否自适应逻辑线程运行级别
+		property = config.getProperty(NET_THREAD_AUTO, DEFAULT_NET_THREAD_AUTO);
+		this.autoThreadLevel = Boolean.valueOf(property);
+
+		property = config.getProperty(NET_THREAD_COUNT, DEFAULT_NET_THREAD_COUNT);
+		String[] counts = property.split(",");
+		for (int i = 0; i < counts.length; i++) {
+			netThreadCount[i] = getThreadCount(counts[i]);
+		}
+
+		property = config.getProperty(NET_THREAD_LEVEL, DEFAULT_NET_THREAD_LEVEL);
+		String[] levels = property.split(",");
+		for (int i = 0; i < levels.length && i < counts.length; i++) {
+			netThreadLevel[i] = Integer.parseInt(levels[i]);
+		}
+	}
+
+	/**
+	 * 获取线程数量
+	 *
+	 * @param expression 表达式 允许的特殊字符 "cpu"
+	 * @return 线程数量
+	 */
+	public static int getThreadCount(String expression) {
+		String cpu = String.valueOf(Runtime.getRuntime().availableProcessors());
+		expression = expression.trim().replaceAll(" ", "").replace("cpu", cpu);
+		GroovyShell shell = new GroovyShell();
+		return Math.max(1, (int) shell.evaluate(expression));
 	}
 
 	/**
@@ -65,10 +160,7 @@ public class KeimonsConfig {
 	 * @return 系统配置
 	 */
 	public static KeimonsConfig defaultConfig() {
-		KeimonsConfig config = new KeimonsConfig();
-		config.debug = true;
-		config.logPath = "./logs/";
-		return config;
+		return new KeimonsConfig(new Properties());
 	}
 
 	/**
@@ -130,5 +222,17 @@ public class KeimonsConfig {
 
 	public boolean isConsoleRedirect() {
 		return consoleRedirect;
+	}
+
+	public boolean isAutoThreadLevel() {
+		return autoThreadLevel;
+	}
+
+	public int[] getNetThreadCount() {
+		return netThreadCount;
+	}
+
+	public int[] getNetThreadLevel() {
+		return netThreadLevel;
 	}
 }

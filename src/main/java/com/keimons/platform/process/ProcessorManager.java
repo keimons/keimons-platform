@@ -1,12 +1,11 @@
 package com.keimons.platform.process;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import com.keimons.platform.KeimonsConfig;
+import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AProcessor;
+import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
-import com.keimons.platform.unit.Entry;
-import com.sun.tools.javac.util.IntHashTable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +23,7 @@ public class ProcessorManager {
 	/**
 	 * 消息处理器
 	 */
-	private static Map<Integer, IProcessor> processors = new HashMap<>();
-
-	/**
-	 * 消息描述
-	 */
-	private static Map<Integer, AProcessor> info = new HashMap<>();
+	private static Map<Integer, ProcessorInfo> processors = new HashMap<>();
 
 	/**
 	 * 获取消息处理器
@@ -37,18 +31,8 @@ public class ProcessorManager {
 	 * @param msgCode 消息号
 	 * @return 消息处理器
 	 */
-	public static IProcessor getProcessor(int msgCode) {
+	public static ProcessorInfo getProcessor(int msgCode) {
 		return processors.get(msgCode);
-	}
-
-	/**
-	 * 获取消息描述
-	 *
-	 * @param msgCode 消息号
-	 * @return 消息描述
-	 */
-	public static AProcessor getMsgCodeInfo(int msgCode) {
-		return info.get(msgCode);
 	}
 
 	/**
@@ -61,14 +45,26 @@ public class ProcessorManager {
 		for (Class<IProcessor> clazz : classes) {
 			System.out.println("正在安装消息处理器：" + clazz.getSimpleName());
 			AProcessor info = clazz.getAnnotation(AProcessor.class);
+			if (info.ThreadLevel() == ThreadLevel.AUTO &&
+					!KeimonsServer.KeimonsConfig.isAutoThreadLevel()) {
+				throw new ModuleException("消息处理器不允许配置自适应线程池，因为未启用配置项：" + KeimonsConfig.DEFAULT_NET_THREAD_AUTO);
+			}
+			if ((info.ThreadLevel() == ThreadLevel.M_LEVEL &&
+					KeimonsServer.KeimonsConfig.getNetThreadCount()[1] <= 0) ||
+					KeimonsServer.KeimonsConfig.getNetThreadLevel()[1] < 0) {
+				throw new ModuleException("消息处理器不允许配置中执行速度线程池，因为中执行速度线程池未开启");
+			}
+			if (info.ThreadLevel() == ThreadLevel.L_LEVEL &&
+					KeimonsServer.KeimonsConfig.getNetThreadCount()[2] <= 0) {
+				throw new ModuleException("消息处理器不允许配置低执行速度线程池，因为低执行速度线程池未开启");
+			}
 			if (processors.containsKey(info.MsgCode()) &&
 					!clazz.getName().equals(processors.get(info.MsgCode()).getClass().getName())) {
-				LogService.error("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
+				throw new ModuleException("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
 			try {
 				IProcessor processor = clazz.getDeclaredConstructor().newInstance();
-				processors.put(info.MsgCode(), processor);
-				ProcessorManager.info.put(info.MsgCode(), info);
+				processors.put(info.MsgCode(), new ProcessorInfo(info, processor));
 				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
 			} catch (Exception e) {
 				LogService.error(e, clazz.getSimpleName() + "安装消息处理器失败");

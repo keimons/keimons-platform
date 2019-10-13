@@ -44,7 +44,7 @@ public class HotClassLoader extends ClassLoader {
 	/**
 	 * 把CLASS文件转成BYTE
 	 *
-	 * @throws Exception
+	 * @throws Exception 读取异常
 	 */
 	private byte[] getClassFileBytes(File file) throws Exception {
 		//采用NIO读取
@@ -53,7 +53,7 @@ public class HotClassLoader extends ClassLoader {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		WritableByteChannel outC = Channels.newChannel(baos);
 		ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
-		while (true) {
+		for (; ; ) {
 			int i = fileC.read(buffer);
 			if (i == 0 || i == -1) {
 				break;

@@ -10,7 +10,7 @@ public class ClientRequestFrameDecoder extends ByteToMessageDecoder {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
-		while (true) {
+		for (; ; ) {
 			in.markReaderIndex();
 			if (in.readableBytes() < 5) {
 				return;

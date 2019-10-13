@@ -1,6 +1,7 @@
 package com.keimons.platform.quartz;
 
 import com.keimons.platform.annotation.AJob;
+import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
 import org.quartz.*;
@@ -72,8 +73,7 @@ public class SchedulerService {
 			}
 			AJob info = clazz.getAnnotation(AJob.class);
 			if (!Job.class.isAssignableFrom(clazz)) {
-				System.err.println("Group: " + info.JobGroup() + ", Name: " + info.JobName() + ", 调度任务安装失败！未实现Job接口！");
-				continue;
+				throw new ModuleException("Group: " + info.JobGroup() + ", Name: " + info.JobName() + ", 调度任务安装失败！未实现Job接口！");
 			}
 			Class<Job> clazz1 = (Class<Job>) clazz;
 			System.out.println("正在安装定时任务：" + clazz.getSimpleName());

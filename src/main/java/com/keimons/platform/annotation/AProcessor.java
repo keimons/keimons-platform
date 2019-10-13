@@ -37,12 +37,13 @@ public @interface AProcessor {
 	/**
 	 * 协议接受的间隔时间
 	 * <p>
-	 * 服务器中防止客户端频繁的消息请求，每个消息都有接收间隔，
-	 * 如果没有间隔代表该消息可以无任何限制的请求。
+	 * 有一些消息对于服务器资源消耗很大，例如：IO，短信验证码等。
+	 * 服务器中防止客户端频繁的消息请求，每个消息都有接收间隔，如
+	 * 果没有间隔代表该消息可以无任何限制的请求。
 	 *
 	 * @return 间隔时间
 	 */
-	int Interval() default 200;
+	int Interval() default 50;
 
 	/**
 	 * 协议描述
@@ -60,16 +61,17 @@ public @interface AProcessor {
 	 * 文件和程序运行时消息处理速度，自动的进行运行优先级的升级
 	 *
 	 * @return 自动升级线程池
-	 * @deprecated 该功能暂时不支持
 	 */
-	@Deprecated
 	ThreadLevel ThreadLevel() default ThreadLevel.AUTO;
 
 	/**
-	 * 线程组
+	 * 采样频率
+	 * <p>
+	 * 允许自适应线程等级的协议自定义采样频率，该值必须是2的整数
+	 * 次幂。采样频率越多，则消息升级越慢，所以不建议将该值设置过
+	 * 大。
 	 *
-	 * @return 线程组
+	 * @return 采样频率
 	 */
-	@Deprecated
-	int ThreadGroup() default 0;
+	int Sampling() default 16;
 }
