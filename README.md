@@ -10,19 +10,19 @@
 ### 模块目录结构
 
 模块根目录  
-|  –  Manager    资源管理  
-|  –  Service    逻辑、事件  
-|  –  PlayerData 玩家私有数据  
-|  –  GameData   玩家共有数据  
-|  –  logger     日志  
-       |  – ALogger            A日志  
-       |  – BLogger            B日志  
-|  –  scheduler  调度任务  
-       |  – AJob               A定时任务  
-       |  – BJob               B定时任务  
-|  –  processor  消息处理器  
-       |  – ThisAProcessor1001 A消息处理器  
-       |  – ThisAProcessor1002 B消息处理器
+|&nbsp;&nbsp;–&nbsp;&nbsp;Manager    资源管理  
+|&nbsp;&nbsp;–&nbsp;&nbsp;Service    逻辑、事件  
+|&nbsp;&nbsp;–&nbsp;&nbsp;PlayerData 玩家私有数据  
+|&nbsp;&nbsp;–&nbsp;&nbsp;GameData   玩家共有数据  
+|&nbsp;&nbsp;–&nbsp;&nbsp;logger     日志  
+|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;ALogger            A日志  
+|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;BLogger            B日志  
+|&nbsp;&nbsp;–&nbsp;&nbsp;scheduler  调度任务  
+|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;AJob               A定时任务  
+|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;BJob               B定时任务  
+|&nbsp;&nbsp;–&nbsp;&nbsp;processor  消息处理器  
+|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;ThisAProcessor1001 A消息处理器  
+|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;ThisAProcessor1002 B消息处理器
 
 ### Manager
 
