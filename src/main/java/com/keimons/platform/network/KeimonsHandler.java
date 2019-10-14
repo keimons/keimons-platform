@@ -1,9 +1,7 @@
 package com.keimons.platform.network;
 
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.process.ProcessorInfo;
 import com.keimons.platform.process.ProcessorManager;
-import com.keimons.platform.process.ProcessorModel;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.session.SessionManager;
 import com.keimons.platform.unit.NetUtil;
@@ -37,25 +35,7 @@ public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			int msgCode = packet.getMsgCode();
-			ProcessorInfo processorInfo = ProcessorManager.getProcessor(msgCode);
-
-			if (processorInfo != null) {
-				switch (processorInfo.selectThreadLevel()) {
-					case H_LEVEL:
-						processorInfo.processor(session, packet);
-						break;
-					case M_LEVEL:
-						ProcessorModel.addMidProcessor(session, processorInfo, packet);
-						break;
-					case L_LEVEL:
-						ProcessorModel.addLowProcessor(session, processorInfo, packet);
-						break;
-					default:
-				}
-			} else {
-				LogService.error("不存在的消息号：" + packet.getMsgCode());
-			}
+			ProcessorManager.selectProcessor(session, packet);
 		} catch (Exception e) {
 			String info = "错误号：" + packet.getMsgCode() + "，会话ID：" + ctx.channel().attr(SESSION).get();
 			LogService.error(e, info);

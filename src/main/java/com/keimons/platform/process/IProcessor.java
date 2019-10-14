@@ -17,7 +17,7 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  */
-public interface IProcessor {
+public interface IProcessor extends IRoute {
 
 	/**
 	 * 处理消息

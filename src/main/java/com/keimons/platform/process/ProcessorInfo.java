@@ -136,6 +136,12 @@ public class ProcessorInfo {
 		}
 	}
 
+	/**
+	 * 处理业务逻辑
+	 *
+	 * @param session 会话
+	 * @param packet  消息
+	 */
 	public void processor(Session session, Packet packet) {
 		try {
 			long requestTime = TimeUtil.currentTimeMillis();
@@ -153,11 +159,7 @@ public class ProcessorInfo {
 		}
 	}
 
-	public int getInterval() {
-		return interval;
-	}
-
-	public IProcessor getProcessor() {
-		return processor;
+	public int getRoute(Session session, Packet packet, int maxIndex) {
+		return processor.route(session, packet, maxIndex);
 	}
 }

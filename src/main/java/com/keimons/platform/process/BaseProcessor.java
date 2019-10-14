@@ -26,7 +26,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * 通过参数化类型，查找到该对象的class文件
 	 * 然后通过反射获取到该消息的解码器
 	 */
-	private final Parser<? extends Message> parser;
+	protected final Parser<? extends Message> parser;
 
 	/**
 	 * 消息号
@@ -90,14 +90,12 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 				errCodes[0] = "ExecutorError";
 			}
 			// 通知客户端服务器错误
-			Packet pt = new Packet();
-			pt.setErrCodes(errCodes);
-			pt.setMsgCode(msgCode + 1);
-			session.send(pt);
-			return;
+			msg = new Packet();
+			msg.setErrCodes(errCodes);
 		}
 		if (msg != null) {
-			session.send(msg.setMsgCode(msgCode + 1));
+			msg.setMsgCode(msgCode);
+			session.send(msg);
 		}
 	}
 

@@ -5,6 +5,8 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.network.Packet;
+import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.ClassUtil;
 
 import java.util.HashMap;
@@ -26,13 +28,31 @@ public class ProcessorManager {
 	private static Map<Integer, ProcessorInfo> processors = new HashMap<>();
 
 	/**
-	 * 获取消息处理器
+	 * 选择适当的执行器
 	 *
-	 * @param msgCode 消息号
-	 * @return 消息处理器
+	 * @param session 会话
+	 * @param packet  消息体
 	 */
-	public static ProcessorInfo getProcessor(int msgCode) {
-		return processors.get(msgCode);
+	public static void selectProcessor(Session session, Packet packet) {
+		int msgCode = packet.getMsgCode();
+		ProcessorInfo processorInfo = processors.get(msgCode);
+
+		if (processorInfo != null) {
+			switch (processorInfo.selectThreadLevel()) {
+				case H_LEVEL:
+					processorInfo.processor(session, packet);
+					break;
+				case M_LEVEL:
+					ProcessorModel.asyncMidProcessor(session, processorInfo, packet);
+					break;
+				case L_LEVEL:
+					ProcessorModel.asyncLowProcessor(session, processorInfo, packet);
+					break;
+				default:
+			}
+		} else {
+			LogService.error("不存在的消息号：" + packet.getMsgCode());
+		}
 	}
 
 	/**

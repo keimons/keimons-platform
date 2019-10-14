@@ -34,12 +34,15 @@ public class ProcessorModel {
 	/**
 	 * 中执行耗时线程队列
 	 */
-	private static ProcessorExecutor[] midExecutors;
+	private static ProcessorQueue[] midProcessorQueue;
 
 	/**
 	 * 低执行耗时线程队列
 	 */
-	private static ProcessorExecutor[] lowExecutors;
+	private static ProcessorQueue[] lowProcessorQueue;
+
+	private static int MID_MAX;
+	private static int LOW_MAX;
 
 	/**
 	 * 初始化消息处理线程模型
@@ -51,26 +54,26 @@ public class ProcessorModel {
 
 		int[] levels = KeimonsServer.KeimonsConfig.getNetThreadLevel();
 
-		int midThreadCount = KeimonsServer.KeimonsConfig.getNetThreadCount()[1];
-		if (midThreadCount > 0) {
-			mid = (ThreadPoolExecutor) Executors.newFixedThreadPool(midThreadCount);
-			midExecutors = new ProcessorExecutor[midThreadCount];
-			for (int i = 0; i < midThreadCount; i++) {
-				midExecutors[i] = new ProcessorExecutor();
-				mid.execute(midExecutors[i]);
+		MID_MAX = KeimonsServer.KeimonsConfig.getNetThreadCount()[1];
+		if (MID_MAX > 0) {
+			mid = (ThreadPoolExecutor) Executors.newFixedThreadPool(MID_MAX);
+			midProcessorQueue = new ProcessorQueue[MID_MAX];
+			for (int i = 0; i < MID_MAX; i++) {
+				midProcessorQueue[i] = new ProcessorQueue();
+				mid.execute(midProcessorQueue[i]);
 			}
 		}
 
-		int lowThreadCount = KeimonsServer.KeimonsConfig.getNetThreadCount()[2];
-		if (lowThreadCount == 0 && levels[0] == -1 && levels[1] == -1) {
+		LOW_MAX = KeimonsServer.KeimonsConfig.getNetThreadCount()[2];
+		if (LOW_MAX == 0 && levels[0] == -1 && levels[1] == -1) {
 			throw new KeimonsConfigException(KeimonsConfig.NET_THREAD_COUNT);
 		}
-		if (lowThreadCount > 0) {
-			low = (ThreadPoolExecutor) Executors.newFixedThreadPool(lowThreadCount);
-			lowExecutors = new ProcessorExecutor[lowThreadCount];
-			for (int i = 0; i < lowThreadCount; i++) {
-				lowExecutors[i] = new ProcessorExecutor();
-				low.execute(lowExecutors[i]);
+		if (LOW_MAX > 0) {
+			low = (ThreadPoolExecutor) Executors.newFixedThreadPool(LOW_MAX);
+			lowProcessorQueue = new ProcessorQueue[LOW_MAX];
+			for (int i = 0; i < LOW_MAX; i++) {
+				lowProcessorQueue[i] = new ProcessorQueue();
+				low.execute(lowProcessorQueue[i]);
 			}
 		}
 	}
@@ -82,22 +85,20 @@ public class ProcessorModel {
 	 * @param info    消息处理器
 	 * @param packet  消息体
 	 */
-	public static void addMidProcessor(Session session, ProcessorInfo info, Packet packet) {
-		midExecutors[session.getSessionId() / midExecutors.length].add(
-				() -> info.processor(session, packet)
-		);
+	public static void asyncMidProcessor(Session session, ProcessorInfo info, Packet packet) {
+		int route = info.getRoute(session, packet, MID_MAX);
+		midProcessorQueue[route].add(() -> info.processor(session, packet));
 	}
 
 	/**
 	 * 新增一个低速消息
 	 *
-	 * @param session   会话
-	 * @param info 消息处理器
-	 * @param packet    消息体
+	 * @param session 会话
+	 * @param info    消息处理器
+	 * @param packet  消息体
 	 */
-	public static void addLowProcessor(Session session, ProcessorInfo info, Packet packet) {
-		lowExecutors[session.getSessionId() / lowExecutors.length].add(
-				() -> info.processor(session, packet)
-		);
+	public static void asyncLowProcessor(Session session, ProcessorInfo info, Packet packet) {
+		int route = info.getRoute(session, packet, LOW_MAX);
+		lowProcessorQueue[route].add(() -> info.processor(session, packet));
 	}
 }
