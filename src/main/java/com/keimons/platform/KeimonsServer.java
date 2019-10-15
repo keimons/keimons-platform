@@ -11,7 +11,7 @@ import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.PlayerDataManager;
 import com.keimons.platform.process.ProcessorManager;
-import com.keimons.platform.process.ProcessorModel;
+import com.keimons.platform.process.KeimonsExecutor;
 import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
@@ -128,7 +128,7 @@ public class KeimonsServer {
 			initModule(pkg.getName());
 			System.out.println("************************* 完成安装模块 *************************");
 		}
-		ProcessorModel.init();
+		KeimonsExecutor.init();
 		KeimonsTcpNet.init();
 	}
 

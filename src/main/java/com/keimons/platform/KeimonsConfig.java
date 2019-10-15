@@ -1,5 +1,6 @@
 package com.keimons.platform;
 
+import com.keimons.platform.exception.KeimonsConfigException;
 import groovy.lang.GroovyShell;
 
 import java.util.Properties;
@@ -76,6 +77,16 @@ public class KeimonsConfig {
 	public static final String DEFAULT_NET_THREAD_LEVEL = "20,50";
 
 	/**
+	 * 多级线程池
+	 */
+	public static final String NET_THREAD_SIMPLE = "keimons.net.thread.simple";
+
+	/**
+	 * 默认多级线程池
+	 */
+	public static final String DEFAULT_NET_THREAD_SIMPLE = "";
+
+	/**
 	 * 是否启用Debug模式运行
 	 */
 	private boolean debug;
@@ -106,6 +117,11 @@ public class KeimonsConfig {
 	private int[] netThreadLevel = new int[2];
 
 	/**
+	 * 单线程线程名字
+	 */
+	private String[] netThreadNames;
+
+	/**
 	 * 配置文件
 	 *
 	 * @param config 配置文件
@@ -134,10 +150,23 @@ public class KeimonsConfig {
 			netThreadCount[i] = getThreadCount(counts[i]);
 		}
 
+		if (netThreadCount[0] == 0) {
+			throw new KeimonsConfigException(NET_THREAD_COUNT);
+		}
+
 		property = config.getProperty(NET_THREAD_LEVEL, DEFAULT_NET_THREAD_LEVEL);
 		String[] levels = property.split(",");
 		for (int i = 0; i < levels.length && i < counts.length; i++) {
 			netThreadLevel[i] = Integer.parseInt(levels[i]);
+		}
+
+		property = config.getProperty(NET_THREAD_LEVEL, DEFAULT_NET_THREAD_LEVEL);
+		if (!property.equals("")) {
+			String[] names = property.split(",");
+			netThreadNames = new String[names.length];
+			for (int i = 0; i < names.length; i++) {
+				netThreadNames[i] = names[i];
+			}
 		}
 	}
 
@@ -148,6 +177,9 @@ public class KeimonsConfig {
 	 * @return 线程数量
 	 */
 	public static int getThreadCount(String expression) {
+		if (expression.equals("0")) {
+			return 0;
+		}
 		String cpu = String.valueOf(Runtime.getRuntime().availableProcessors());
 		expression = expression.trim().replaceAll(" ", "").replace("cpu", cpu);
 		GroovyShell shell = new GroovyShell();
@@ -234,5 +266,9 @@ public class KeimonsConfig {
 
 	public int[] getNetThreadLevel() {
 		return netThreadLevel;
+	}
+
+	public String[] getNetThreadNames() {
+		return netThreadNames;
 	}
 }

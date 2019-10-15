@@ -30,7 +30,7 @@ public class KeimonsTcpNet {
 			workerGroup = new EpollEventLoopGroup();
 		} else {
 			bossGroup = new NioEventLoopGroup();
-			workerGroup = new NioEventLoopGroup();
+			workerGroup = new NioEventLoopGroup(KeimonsServer.KeimonsConfig.getNetThreadCount()[0]);
 		}
 		try {
 

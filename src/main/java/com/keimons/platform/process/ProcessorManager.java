@@ -12,6 +12,8 @@ import com.keimons.platform.unit.ClassUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 消息处理管理器
@@ -33,26 +35,43 @@ public class ProcessorManager {
 	 * @param session 会话
 	 * @param packet  消息体
 	 */
-	public static void selectProcessor(Session session, Packet packet) {
+	public static void executeProcessor(Session session, Packet packet) {
 		int msgCode = packet.getMsgCode();
 		ProcessorInfo processorInfo = processors.get(msgCode);
 
 		if (processorInfo != null) {
 			switch (processorInfo.selectThreadLevel()) {
 				case H_LEVEL:
-					processorInfo.processor(session, packet);
+					KeimonsExecutor.asyncTopProcessor(session, processorInfo, packet);
 					break;
 				case M_LEVEL:
-					ProcessorModel.asyncMidProcessor(session, processorInfo, packet);
+					KeimonsExecutor.asyncMidProcessor(session, processorInfo, packet);
 					break;
 				case L_LEVEL:
-					ProcessorModel.asyncLowProcessor(session, processorInfo, packet);
+					KeimonsExecutor.asyncLowProcessor(session, processorInfo, packet);
 					break;
 				default:
 			}
 		} else {
 			LogService.error("不存在的消息号：" + packet.getMsgCode());
 		}
+	}
+
+	/**
+	 * 选择执行器并执行消息体
+	 *
+	 * @param threadName 线程名
+	 * @param callable   执行内容
+	 * @param <T>        返回值类型
+	 * @return 执行结果
+	 */
+	public static <T> T executeProcessor(String threadName, Callable<T> callable) {
+		try {
+			return KeimonsExecutor.syncProcessor(threadName, callable);
+		} catch (ExecutionException | InterruptedException e) {
+			LogService.error(e);
+		}
+		return null;
 	}
 
 	/**
