@@ -4,7 +4,6 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.network.Packet;
 import com.keimons.platform.player.IPlayer;
-import com.keimons.platform.player.Player;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -203,7 +202,7 @@ public class Session {
 		return player;
 	}
 
-	public Session setPlayer(Player player) {
+	public Session setPlayer(IPlayer player) {
 		this.player = player;
 		return this;
 	}

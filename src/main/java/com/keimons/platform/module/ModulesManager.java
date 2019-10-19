@@ -8,7 +8,6 @@ import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.CharsetUtil;
 import com.keimons.platform.unit.ClassUtil;
 import org.redisson.client.codec.ByteArrayCodec;
-import org.redisson.client.codec.StringCodec;
 
 import java.util.HashMap;
 import java.util.List;
@@ -42,28 +41,6 @@ public class ModulesManager {
 	 * 版本自动升级，一旦发现新加载上来的class文件有变动，则升级版本号
 	 */
 	private static Map<String, Integer> versions = new HashMap<>();
-
-	/**
-	 * 创建一个唯一ID
-	 * <p>
-	 * 这个ID是唯一的，允许同名存在也
-	 *
-	 * @param redisKey   key类型
-	 * @param identifier 不重复标识 例如玩家昵称不能重复
-	 * @return -1.标识符已经存在 不为0则表示唯一标识符
-	 */
-	public long defaultUniqueId(String redisKey, String identifier) {
-		Long oldValue = RedissonManager.getMapValue(redisKey, identifier);
-		if (oldValue != null) {
-			return -1;
-		}
-		long playerId = RedissonManager.incrementAndGet(redisKey);
-		oldValue = RedissonManager.setMapValueIfAbsent(StringCodec.INSTANCE, redisKey, identifier, playerId);
-		if (oldValue != null) {
-			return -1;
-		}
-		return playerId;
-	}
 
 	/**
 	 * 保存所有玩家数据 如果玩家已经下线，则移除玩家
@@ -100,6 +77,20 @@ public class ModulesManager {
 				LogService.error(e, "存储玩家数据失败");
 			}
 		}
+	}
+
+	/**
+	 * 创建并缓存模块数据
+	 *
+	 * @param player 玩家
+	 * @return 模块数据
+	 */
+	public static Modules createModules(IPlayer player) {
+		Modules modules = new Modules(player.getIdentifier());
+		modules.checkPlayerData();
+		player.setModules(modules);
+		cacheModules(player.getIdentifier(), modules);
+		return modules;
 	}
 
 	/**

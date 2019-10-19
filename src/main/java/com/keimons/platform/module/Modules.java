@@ -4,6 +4,7 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.CodeUtil;
+import com.keimons.platform.unit.TimeUtil;
 
 import java.util.*;
 
@@ -29,7 +30,7 @@ public class Modules {
 	/**
 	 * 最后活跃时间
 	 */
-	protected volatile long lastTime;
+	protected volatile long lastTime = TimeUtil.currentTimeMillis();
 
 	/**
 	 * 构造函数

@@ -1,7 +1,7 @@
 package com.keimons.platform.event;
 
 import com.keimons.platform.iface.IEventCode;
-import com.keimons.platform.player.Player;
+import com.keimons.platform.player.IPlayer;
 
 /**
  * 事件
@@ -16,7 +16,7 @@ public class Event {
 	/**
 	 * 玩家Uuid
 	 */
-	private Player player;
+	private IPlayer player;
 
 	/**
 	 * 事件号
@@ -45,11 +45,11 @@ public class Event {
 		return (T) params[index];
 	}
 
-	public Player getPlayer() {
+	public IPlayer getPlayer() {
 		return player;
 	}
 
-	public Event setPlayer(Player player) {
+	public Event setPlayer(IPlayer player) {
 		this.player = player;
 		return this;
 	}

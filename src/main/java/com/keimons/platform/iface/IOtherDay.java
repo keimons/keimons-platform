@@ -1,6 +1,6 @@
 package com.keimons.platform.iface;
 
-import com.keimons.platform.player.Player;
+import com.keimons.platform.player.IPlayer;
 
 /**
  * 跨天刷新模块
@@ -18,7 +18,7 @@ public interface IOtherDay {
 	 * @param otherWeek  是否跨周
 	 * @param otherMonth 是否跨月
 	 */
-	default void otherDay0(Player player, boolean otherWeek, boolean otherMonth) {
+	default void otherDay0(IPlayer player, boolean otherWeek, boolean otherMonth) {
 	}
 
 	/**
@@ -28,6 +28,6 @@ public interface IOtherDay {
 	 * @param otherWeek  是否跨周
 	 * @param otherMonth 是否跨月
 	 */
-	default void otherDay5(Player player, boolean otherWeek, boolean otherMonth) {
+	default void otherDay5(IPlayer player, boolean otherWeek, boolean otherMonth) {
 	}
 }

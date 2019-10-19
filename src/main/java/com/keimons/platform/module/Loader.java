@@ -92,14 +92,16 @@ public class Loader implements Runnable {
 				modules = new Modules(identifier);
 				int size = 0;
 				Map<byte[], byte[]> bytes = RedissonManager.getMapValues(ByteArrayCodec.INSTANCE, identifier);
-				for (Map.Entry<byte[], byte[]> entry : bytes.entrySet()) {
-					size += entry.getKey().length;
-					size += entry.getValue().length;
-					String moduleName = CharsetUtil.getUTF8(entry.getKey());
-					// 反序列化
-					IPlayerData data = CodeUtil.decode(ModulesManager.classes.get(moduleName), entry.getValue());
-					if (data != null) {
-						modules.addPlayerData(data);
+				if (bytes != null) {
+					for (Map.Entry<byte[], byte[]> entry : bytes.entrySet()) {
+						size += entry.getKey().length;
+						size += entry.getValue().length;
+						String moduleName = CharsetUtil.getUTF8(entry.getKey());
+						// 反序列化
+						IPlayerData data = CodeUtil.decode(ModulesManager.classes.get(moduleName), entry.getValue());
+						if (data != null) {
+							modules.addPlayerData(data);
+						}
 					}
 				}
 				if (KeimonsServer.KeimonsConfig.isDebug()) {

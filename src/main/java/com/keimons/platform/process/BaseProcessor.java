@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
  * @version 1.0
  * @since 1.8
  */
-public abstract class BaseProcessor<T extends Message> implements IProcessor {
+public abstract class BaseProcessor<T extends Message, P extends IPlayer> implements IProcessor {
 
 	/**
 	 * 客户端数据解码器
@@ -57,7 +57,8 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 
 	@Override
 	public void processor(Session session, Packet packet) {
-		IPlayer player = session.getPlayer();
+		@SuppressWarnings("unchecked")
+		P player = (P) session.getPlayer();
 		if (session.isLogined() && player == null) {
 			session.disconnect();
 			LogService.error("极限情况，连接已经关闭但是仍有未处理完的消息");
@@ -105,9 +106,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * @param session 会话
 	 * @return 返回消息
 	 */
-	public Packet process(Session session) {
-		return null;
-	}
+	public abstract Packet process(Session session);
 
 	/**
 	 * 玩家不存在时调用
@@ -116,9 +115,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * @param request 消息体
 	 * @return 返回消息
 	 */
-	public Packet process(Session session, T request) {
-		return null;
-	}
+	public abstract Packet process(Session session, T request);
 
 	/**
 	 * 玩家存在时调用
@@ -126,9 +123,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * @param player 玩家
 	 * @return 返回消息
 	 */
-	public Packet process(IPlayer player) {
-		return null;
-	}
+	public abstract Packet process(P player);
 
 	/**
 	 * 玩家存在时调用
@@ -137,9 +132,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * @param request 请求
 	 * @return 返回消息
 	 */
-	public Packet process(IPlayer player, T request) {
-		return null;
-	}
+	public abstract Packet process(P player, T request);
 
 	/**
 	 * 构造返回消息
