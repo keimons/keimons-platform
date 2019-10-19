@@ -1,7 +1,7 @@
 package com.keimons.platform.iface;
 
 import com.keimons.platform.annotation.APlayerData;
-import com.keimons.platform.player.BasePlayer;
+import com.keimons.platform.module.Modules;
 
 /**
  * 玩家数据模块
@@ -23,7 +23,7 @@ public interface IPlayerData extends IData, ILoaded, IDataVersion, IPersistence 
 	 *
 	 * @param player 玩家
 	 */
-	void init(BasePlayer player);
+	void init(Modules player);
 
 	/**
 	 * 模块类型

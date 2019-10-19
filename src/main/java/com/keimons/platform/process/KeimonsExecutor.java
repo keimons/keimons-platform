@@ -130,6 +130,16 @@ public class KeimonsExecutor {
 	}
 
 	/**
+	 * 排队执行任务
+	 *
+	 * @param threadName 线程名
+	 * @param runnable   执行消息体
+	 */
+	public static void syncProcessor(String threadName, Runnable runnable) {
+		singleThreads.get(threadName).add(runnable);
+	}
+
+	/**
 	 * 消息执行队列
 	 *
 	 * @author monkey1993

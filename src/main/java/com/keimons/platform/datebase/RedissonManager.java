@@ -384,6 +384,22 @@ public class RedissonManager implements IManager {
 		map.put(field, value);
 	}
 
+	/**
+	 * Redis中的哈希桶
+	 *
+	 * @param codec 编码解码器
+	 * @param key   键
+	 * @param field 字段
+	 * @param value 值
+	 * @param <F>   返回键类型
+	 * @param <V>   返回值类型
+	 * @return 值
+	 */
+	public static <F, V> V setMapValueIfAbsent(Codec codec, String key, F field, V value) {
+		RMap<F, V> map = redisson.getMap(key, codec);
+		return map.putIfAbsent(field, value);
+	}
+
 
 	/**
 	 * Redis中的哈希桶

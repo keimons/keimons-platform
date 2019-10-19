@@ -3,7 +3,7 @@ package com.keimons.platform.event;
 import com.keimons.platform.iface.IEventCode;
 import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.player.BasePlayer;
+import com.keimons.platform.player.Player;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -58,7 +58,7 @@ public class EventService {
 	 * @param params    参数列表
 	 * @param <T>       事件枚举
 	 */
-	public static <T extends Enum<T> & IEventCode> void publicEvent(BasePlayer player, T eventCode, Object... params) {
+	public static <T extends Enum<T> & IEventCode> void publicEvent(Player player, T eventCode, Object... params) {
 		try {
 			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
@@ -87,7 +87,7 @@ public class EventService {
 	 * @param eventCode 事件号
 	 * @param params    参数
 	 */
-	private static <T extends Enum<T> & IEventCode> void translate(Event event, long sequence, BasePlayer player, T eventCode, Object... params) {
+	private static <T extends Enum<T> & IEventCode> void translate(Event event, long sequence, Player player, T eventCode, Object... params) {
 		event.setPlayer(player);
 		event.setEventCode(eventCode);
 		event.setParams(params);

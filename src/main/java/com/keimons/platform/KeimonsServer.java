@@ -1,7 +1,7 @@
 package com.keimons.platform;
 
 import com.keimons.platform.annotation.AManager;
-import com.keimons.platform.annotation.AModule;
+import com.keimons.platform.annotation.AModular;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
@@ -9,7 +9,7 @@ import com.keimons.platform.game.GameDataManager;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.player.PlayerDataManager;
+import com.keimons.platform.module.ModulesManager;
 import com.keimons.platform.process.ProcessorManager;
 import com.keimons.platform.process.KeimonsExecutor;
 import com.keimons.platform.quartz.SchedulerService;
@@ -113,18 +113,19 @@ public class KeimonsServer {
 		LogService.init();
 		SchedulerService.init();
 		EventService.init();
+		ModulesManager.init();
 		List<Package> packages = new ArrayList<>();
 		for (Package pkg : Package.getPackages()) {
-			AModule module = pkg.getAnnotation(AModule.class);
-			if (module != null) {
+			AModular modular = pkg.getAnnotation(AModular.class);
+			if (modular != null) {
 				packages.add(pkg);
 			}
 		}
-		packages.sort((Comparator.comparingInt(pkg -> pkg.getAnnotation(AModule.class).Priority())));
+		packages.sort((Comparator.comparingInt(pkg -> pkg.getAnnotation(AModular.class).Priority())));
 		for (Package pkg : packages) {
 			System.out.println("************************* 开始安装模块 *************************");
-			AModule module = pkg.getAnnotation(AModule.class);
-			System.out.println("模块安装：" + module.Name() + "，安装顺序：" + module.Priority());
+			AModular modular = pkg.getAnnotation(AModular.class);
+			System.out.println("模块安装：" + modular.Name() + "，安装顺序：" + modular.Priority());
 			initModule(pkg.getName());
 			System.out.println("************************* 完成安装模块 *************************");
 		}
@@ -144,7 +145,7 @@ public class KeimonsServer {
 
 		ProcessorManager.addProcessor(packageName);
 		SchedulerService.addJobs(packageName);
-		PlayerDataManager.addPlayerData(packageName);
+		ModulesManager.addPlayerData(packageName);
 		GameDataManager.addGameData(packageName);
 	}
 

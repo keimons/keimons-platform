@@ -3,7 +3,7 @@ package com.keimons.platform.iface;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
-import com.keimons.platform.player.BasePlayer;
+import com.keimons.platform.player.Player;
 
 /**
  * 如果这个道具需要展示给客户端看的话，需要实现这个接口
@@ -55,7 +55,7 @@ public interface IBuild {
 	 * @return 物品数据
 	 * @throws InvalidProtocolBufferException 构造数据失败
 	 */
-	default MessageLite build(BasePlayer player, ByteString bytes) throws InvalidProtocolBufferException {
+	default MessageLite build(Player player, ByteString bytes) throws InvalidProtocolBufferException {
 		return build(bytes);
 	}
 }

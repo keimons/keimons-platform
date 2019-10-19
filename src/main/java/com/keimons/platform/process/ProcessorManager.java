@@ -75,6 +75,16 @@ public class ProcessorManager {
 	}
 
 	/**
+	 * 选择执行器并执行消息体
+	 *
+	 * @param threadName 线程名
+	 * @param runnable   执行内容
+	 */
+	public static void executeProcessor(String threadName, Runnable runnable) {
+		KeimonsExecutor.syncProcessor(threadName, runnable);
+	}
+
+	/**
 	 * 添加消息号
 	 *
 	 * @param packageName 消息处理器

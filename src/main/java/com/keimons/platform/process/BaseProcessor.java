@@ -4,7 +4,7 @@ import com.google.protobuf.*;
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.Packet;
-import com.keimons.platform.player.BasePlayer;
+import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.session.Session;
 
 import java.lang.reflect.ParameterizedType;
@@ -57,7 +57,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 
 	@Override
 	public void processor(Session session, Packet packet) {
-		BasePlayer player = session.getPlayer();
+		IPlayer player = session.getPlayer();
 		if (session.isLogined() && player == null) {
 			session.disconnect();
 			LogService.error("极限情况，连接已经关闭但是仍有未处理完的消息");
@@ -126,7 +126,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * @param player 玩家
 	 * @return 返回消息
 	 */
-	public Packet process(BasePlayer player) {
+	public Packet process(IPlayer player) {
 		return null;
 	}
 
@@ -137,7 +137,7 @@ public abstract class BaseProcessor<T extends Message> implements IProcessor {
 	 * @param request 请求
 	 * @return 返回消息
 	 */
-	public Packet process(BasePlayer player, T request) {
+	public Packet process(IPlayer player, T request) {
 		return null;
 	}
 

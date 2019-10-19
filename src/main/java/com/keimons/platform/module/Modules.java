@@ -1,44 +1,44 @@
-package com.keimons.platform.player;
+package com.keimons.platform.module;
 
-import com.google.protobuf.MessageLite;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.CodeUtil;
 
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 玩家数据
+ * 玩家所有模块数据
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
- */
-public abstract class BasePlayer {
+ **/
+public class Modules {
 
 	/**
-	 * 玩家锁，玩家上线下线时用
+	 * 数据唯一标识
 	 */
-	private Lock lock = new ReentrantLock();
-
-	/**
-	 * 会话
-	 */
-	protected Session session;
+	private final String identifier;
 
 	/**
 	 * 储存玩家所有数据
 	 */
-	protected HashMap<String, IPlayerData> modules = new HashMap<>();
+	private HashMap<String, IPlayerData> modules = new HashMap<>();
 
 	/**
 	 * 最后活跃时间
 	 */
-	private volatile long lastActiveTime;
+	protected volatile long lastTime;
+
+	/**
+	 * 构造函数
+	 *
+	 * @param identifier 数据唯一表示
+	 */
+	public Modules(String identifier) {
+		this.identifier = identifier;
+	}
 
 	/**
 	 * 获取玩家的一个模块
@@ -104,7 +104,7 @@ public abstract class BasePlayer {
 	public void checkPlayerData() {
 		try {
 			List<IPlayerData> init = new ArrayList<>();
-			for (Map.Entry<String, Class<? extends IPlayerData>> entry : PlayerDataManager.modules.entrySet()) {
+			for (Map.Entry<String, Class<? extends IPlayerData>> entry : ModulesManager.classes.entrySet()) {
 				if (!hasModule(entry.getKey())) {
 					IPlayerData data = entry.getValue().newInstance();
 					addPlayerData(data);
@@ -119,59 +119,16 @@ public abstract class BasePlayer {
 		}
 	}
 
-	/**
-	 * 发送消息至客户端
-	 *
-	 * @param msgCode  消息号
-	 * @param errCodes 错误号
-	 */
-	public void send(int msgCode, String... errCodes) {
-		send(msgCode, (byte[]) null, errCodes);
+	public String getIdentifier() {
+		return identifier;
 	}
 
-	/**
-	 * 发送消息至客户端
-	 *
-	 * @param msgCode  消息号
-	 * @param msg      消息体
-	 * @param errCodes 错误号
-	 */
-	public void send(int msgCode, MessageLite msg, String... errCodes) {
-		send(msgCode, msg == null ? null : msg.toByteArray(), errCodes);
+	public long getLastTime() {
+		return lastTime;
 	}
 
-	/**
-	 * 发送消息至客户端
-	 *
-	 * @param msgCode  消息号
-	 * @param data     数据体
-	 * @param errCodes 错误号
-	 */
-	public void send(int msgCode, byte[] data, String... errCodes) {
-		if (session != null) {
-			session.send(msgCode, data, errCodes);
-		}
-	}
-
-	public Lock getLock() {
-		return lock;
-	}
-
-	public Session getSession() {
-		return session;
-	}
-
-	public BasePlayer setSession(Session session) {
-		this.session = session;
-		return this;
-	}
-
-	public long getLastActiveTime() {
-		return lastActiveTime;
-	}
-
-	public BasePlayer setLastActiveTime(long lastActiveTime) {
-		this.lastActiveTime = lastActiveTime;
+	public Modules setLastTime(long lastTime) {
+		this.lastTime = lastTime;
 		return this;
 	}
 }

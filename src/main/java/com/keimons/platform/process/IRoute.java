@@ -22,7 +22,7 @@ public interface IRoute {
 	 * @param session  会话
 	 * @param packet   消息体
 	 * @param maxIndex 最大下标
-	 * @return
+	 * @return 线程index
 	 */
 	default int route(Session session, Packet packet, int maxIndex) {
 		return session.getSessionId() % maxIndex;
