@@ -4,7 +4,6 @@ import com.keimons.platform.KeimonsConfig;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.exception.KeimonsConfigException;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.Packet;
 import com.keimons.platform.session.Session;
 
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import java.util.concurrent.*;
  * @version 1.0
  * @since 1.8
  **/
-public class KeimonsExecutor {
+public class KeimonsExecutor<T> {
 
 	/**
 	 * 中执行耗时线程队列
@@ -37,6 +36,20 @@ public class KeimonsExecutor {
 
 	private static int MID_MAX;
 	private static int LOW_MAX;
+
+	private static KeimonsExecutor instance;
+
+	private KeimonsExecutor() {
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> KeimonsExecutor<T> getInstance() {
+		if (instance == null) {
+			instance = new KeimonsExecutor();
+		}
+		return instance;
+	}
 
 	/**
 	 * 初始化消息处理线程模型
@@ -72,7 +85,7 @@ public class KeimonsExecutor {
 		}
 
 		for (String threadName : KeimonsServer.KeimonsConfig.getNetThreadNames()) {
-			ThreadPoolExecutor single = (ThreadPoolExecutor) Executors.newSingleThreadExecutor();
+			java.util.concurrent.Executor single = Executors.newSingleThreadExecutor();
 			Executor queue = new Executor();
 			single.execute(queue);
 			singleThreads.put(threadName, queue);
@@ -86,7 +99,7 @@ public class KeimonsExecutor {
 	 * @param info    消息处理器
 	 * @param packet  消息体
 	 */
-	public static void asyncTopProcessor(Session session, ProcessorInfo info, Packet packet) {
+	public void asyncTopProcessor(Session session, ProcessorInfo<T> info, T packet) {
 		info.processor(session, packet);
 	}
 
@@ -97,7 +110,7 @@ public class KeimonsExecutor {
 	 * @param info    消息处理器
 	 * @param packet  消息体
 	 */
-	public static void asyncMidProcessor(Session session, ProcessorInfo info, Packet packet) {
+	public void asyncMidProcessor(Session session, ProcessorInfo<T> info, T packet) {
 		int route = info.getRoute(session, packet, MID_MAX);
 		midExecutor[route].add(() -> info.processor(session, packet));
 	}
@@ -109,7 +122,7 @@ public class KeimonsExecutor {
 	 * @param info    消息处理器
 	 * @param packet  消息体
 	 */
-	public static void asyncLowProcessor(Session session, ProcessorInfo info, Packet packet) {
+	public void asyncLowProcessor(Session session, ProcessorInfo<T> info, T packet) {
 		int route = info.getRoute(session, packet, LOW_MAX);
 		lowExecutor[route].add(() -> info.processor(session, packet));
 	}

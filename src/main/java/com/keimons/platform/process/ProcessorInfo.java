@@ -3,7 +3,6 @@ package com.keimons.platform.process;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.Packet;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.TimeUtil;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 1.0
  * @since 1.8
  **/
-public class ProcessorInfo {
+public class ProcessorInfo<T> {
 
 	/**
 	 * 分界线 1级线程和2级线程的分界线
@@ -57,7 +56,7 @@ public class ProcessorInfo {
 	/**
 	 * 消息处理器
 	 */
-	private IProcessor processor;
+	private IProcessor<T> processor;
 
 	/**
 	 * 总的执行时间
@@ -79,7 +78,7 @@ public class ProcessorInfo {
 	 */
 	private int AND;
 
-	public ProcessorInfo(AProcessor info, IProcessor processor) {
+	public ProcessorInfo(AProcessor info, IProcessor<T> processor) {
 		if (info.ThreadLevel() == ThreadLevel.AUTO &&
 				(info.Sampling() <= 0 || (info.Sampling() & (info.Sampling() - 1)) != 0)) {
 			throw new NumberFormatException("必须是2的整数次幂");
@@ -142,11 +141,11 @@ public class ProcessorInfo {
 	 * @param session 会话
 	 * @param packet  消息
 	 */
-	public void processor(Session session, Packet packet) {
+	public void processor(Session session, T packet) {
 		try {
 			long requestTime = TimeUtil.currentTimeMillis();
 			if (session.intervalVerifyAndUpdate(msgCode, requestTime, interval)) {
-				session.send(msgCode, null, "FrequentRequestError");
+				// TODO session.send(msgCode, null, "FrequentRequestError");
 				return;
 			}
 			processor.processor(session, packet);
@@ -159,7 +158,7 @@ public class ProcessorInfo {
 		}
 	}
 
-	public int getRoute(Session session, Packet packet, int maxIndex) {
+	public int getRoute(Session session, T packet, int maxIndex) {
 		return processor.route(session, packet, maxIndex);
 	}
 }

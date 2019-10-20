@@ -22,12 +22,16 @@ import java.net.InetSocketAddress;
  * @version 1.0
  * @since 1.8
  */
-public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
+public class KeimonsHandler<T> extends SimpleChannelInboundHandler<T> {
 
 	public static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
 
+	public KeimonsHandler(Class<? extends T> type) {
+		super(type);
+	}
+
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, Packet packet) {
+	public void channelRead0(ChannelHandlerContext ctx, T packet) {
 		try {
 			Session session = ctx.channel().attr(SESSION).get();
 			if (session == null) {
@@ -35,9 +39,10 @@ public class KeimonsHandler extends SimpleChannelInboundHandler<Packet> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			ProcessorManager.executeProcessor(session, packet);
+			ProcessorManager<T> instance = ProcessorManager.getInstance();
+			instance.executeProcessor(session, packet);
 		} catch (Exception e) {
-			String info = "错误号：" + packet.getMsgCode() + "，会话ID：" + ctx.channel().attr(SESSION).get();
+			String info = "会话ID：" + ctx.channel().attr(SESSION).get();
 			LogService.error(e, info);
 		}
 	}

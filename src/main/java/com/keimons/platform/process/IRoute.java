@@ -1,6 +1,5 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.network.Packet;
 import com.keimons.platform.session.Session;
 
 /**
@@ -10,7 +9,7 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  **/
-public interface IRoute {
+public interface IRoute<T> {
 
 	/**
 	 * 协议路由规则
@@ -24,7 +23,7 @@ public interface IRoute {
 	 * @param maxIndex 最大下标
 	 * @return 线程index
 	 */
-	default int route(Session session, Packet packet, int maxIndex) {
+	default int route(Session session, T packet, int maxIndex) {
 		return session.getSessionId() % maxIndex;
 	}
 }

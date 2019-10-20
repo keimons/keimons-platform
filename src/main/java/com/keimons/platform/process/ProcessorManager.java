@@ -5,7 +5,7 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.Packet;
+import com.keimons.platform.network.ICoder;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -22,38 +22,56 @@ import java.util.concurrent.ExecutionException;
  * @version 1.0
  * @since 1.8
  */
-public class ProcessorManager {
+public class ProcessorManager<T> {
 
 	/**
 	 * 消息处理器
 	 */
-	private static Map<Integer, ProcessorInfo> processors = new HashMap<>();
+	private Map<Integer, ProcessorInfo<T>> processors = new HashMap<>();
+
+	/**
+	 * 获取消息号
+	 */
+	private static ICoder<?, Integer> msg_code;
+
+	private static ProcessorManager instance = new ProcessorManager<>();
+
+	@SuppressWarnings("unchecked")
+	public static <T> ProcessorManager<T> getInstance() {
+		return instance;
+	}
+
+	public static <T> void setMsgCode(ICoder<T, Integer> msg_code) {
+		ProcessorManager.msg_code = msg_code;
+	}
 
 	/**
 	 * 选择适当的执行器
 	 *
 	 * @param session 会话
 	 * @param packet  消息体
+	 * @throws Exception 转码错误
 	 */
-	public static void executeProcessor(Session session, Packet packet) {
-		int msgCode = packet.getMsgCode();
-		ProcessorInfo processorInfo = processors.get(msgCode);
-
+	@SuppressWarnings("unchecked")
+	public void executeProcessor(Session session, T packet) throws Exception {
+		int msgCode = ((ICoder<T, Integer>) msg_code).coder(packet);
+		ProcessorInfo<T> processorInfo = processors.get(msgCode);
+		KeimonsExecutor<T> instance = KeimonsExecutor.getInstance();
 		if (processorInfo != null) {
 			switch (processorInfo.selectThreadLevel()) {
 				case H_LEVEL:
-					KeimonsExecutor.asyncTopProcessor(session, processorInfo, packet);
+					instance.asyncTopProcessor(session, processorInfo, packet);
 					break;
 				case M_LEVEL:
-					KeimonsExecutor.asyncMidProcessor(session, processorInfo, packet);
+					instance.asyncMidProcessor(session, processorInfo, packet);
 					break;
 				case L_LEVEL:
-					KeimonsExecutor.asyncLowProcessor(session, processorInfo, packet);
+					instance.asyncLowProcessor(session, processorInfo, packet);
 					break;
 				default:
 			}
 		} else {
-			LogService.error("不存在的消息号：" + packet.getMsgCode());
+			LogService.error("不存在的消息号：" + msgCode);
 		}
 	}
 
@@ -89,7 +107,7 @@ public class ProcessorManager {
 	 *
 	 * @param packageName 消息处理器
 	 */
-	public static void addProcessor(String packageName) {
+	public void addProcessor(String packageName) {
 		List<Class<IProcessor>> classes = ClassUtil.load(packageName, AProcessor.class);
 		for (Class<IProcessor> clazz : classes) {
 			System.out.println("正在安装消息处理器：" + clazz.getSimpleName());
@@ -112,8 +130,9 @@ public class ProcessorManager {
 				throw new ModuleException("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
 			try {
-				IProcessor processor = clazz.getDeclaredConstructor().newInstance();
-				processors.put(info.MsgCode(), new ProcessorInfo(info, processor));
+				@SuppressWarnings("unchecked")
+				IProcessor<T> processor = (IProcessor<T>) clazz.getDeclaredConstructor().newInstance();
+				processors.put(info.MsgCode(), new ProcessorInfo<>(info, processor));
 				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
 			} catch (Exception e) {
 				LogService.error(e, clazz.getSimpleName() + "安装消息处理器失败");

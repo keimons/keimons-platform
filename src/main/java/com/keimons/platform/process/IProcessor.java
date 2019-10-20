@@ -1,6 +1,5 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.network.Packet;
 import com.keimons.platform.session.Session;
 
 /**
@@ -17,7 +16,7 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  */
-public interface IProcessor extends IRoute {
+public interface IProcessor<T> extends IRoute<T> {
 
 	/**
 	 * 处理消息
@@ -27,5 +26,5 @@ public interface IProcessor extends IRoute {
 	 * @param session 客户端-服务器 会话
 	 * @param packet  客户端发送过来的数据
 	 */
-	void processor(Session session, Packet packet);
+	void processor(Session session, T packet);
 }

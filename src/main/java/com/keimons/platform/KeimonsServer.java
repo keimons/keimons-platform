@@ -10,6 +10,7 @@ import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.ModulesManager;
+import com.keimons.platform.network.ICoder;
 import com.keimons.platform.process.ProcessorManager;
 import com.keimons.platform.process.KeimonsExecutor;
 import com.keimons.platform.quartz.SchedulerService;
@@ -79,9 +80,18 @@ public class KeimonsServer {
 	 * 启动入口
 	 * <p>
 	 * 采用默认的配置
+	 *
+	 * @param clazz    数据载体泛型
+	 * @param decode   解码方式
+	 * @param encode   编码方式
+	 * @param msg2code 消息中获取消息号
+	 * @param <T>      输入/输出类型
 	 */
-	public static void start() {
-		start(com.keimons.platform.KeimonsConfig.defaultConfig());
+	public static <T> void start(Class<T> clazz,
+								 ICoder<byte[], T> decode,
+								 ICoder<T, byte[]> encode,
+								 ICoder<T, Integer> msg2code) {
+		start(com.keimons.platform.KeimonsConfig.defaultConfig(), clazz, decode, encode, msg2code);
 	}
 
 	/**
@@ -89,11 +99,20 @@ public class KeimonsServer {
 	 * <p>
 	 * 采用默认的配置文件
 	 *
-	 * @param path 文件路径
+	 * @param path     文件路径
+	 * @param clazz    数据载体泛型
+	 * @param decode   解码方式
+	 * @param encode   编码方式
+	 * @param msg2code 消息中获取消息号
+	 * @param <T>      输入/输出类型
 	 * @deprecated 暂未完成
 	 */
 	@Deprecated
-	public static void start(String path) {
+	public static <T> void start(String path,
+								 Class<T> clazz,
+								 ICoder<byte[], T> decode,
+								 ICoder<Object, byte[]> encode,
+								 ICoder<T, Integer> msg2code) {
 
 	}
 
@@ -101,8 +120,17 @@ public class KeimonsServer {
 	 * 启动入口
 	 *
 	 * @param keimonsConfig 启动入口
+	 * @param clazz         数据载体泛型
+	 * @param decode        解码方式
+	 * @param encode        编码方式
+	 * @param msg2code      编码方式
+	 * @param <T>           输入/输出类型
 	 */
-	public static void start(KeimonsConfig keimonsConfig) {
+	public static <T> void start(KeimonsConfig keimonsConfig,
+								 Class<T> clazz,
+								 ICoder<byte[], T> decode,
+								 ICoder<T, byte[]> encode,
+								 ICoder<T, Integer> msg2code) {
 		KeimonsConfig = keimonsConfig;
 		if (keimonsConfig.isConsoleRedirect()) {
 			ConsoleService.init();
@@ -110,6 +138,7 @@ public class KeimonsServer {
 		} else {
 			System.out.println("禁用控制台输出重定向！");
 		}
+		ProcessorManager.setMsgCode(msg2code);
 		LogService.init();
 		SchedulerService.init();
 		EventService.init();
@@ -130,7 +159,7 @@ public class KeimonsServer {
 			System.out.println("************************* 完成安装模块 *************************");
 		}
 		KeimonsExecutor.init();
-		KeimonsTcpNet.init();
+		KeimonsTcpNet.init(clazz, decode, encode);
 	}
 
 	/**
@@ -142,8 +171,7 @@ public class KeimonsServer {
 		// Logger、Processor、Job、PlayerData、GameData
 		KeimonsServer.addManager(packageName);
 		KeimonsServer.addService(packageName);
-
-		ProcessorManager.addProcessor(packageName);
+		ProcessorManager.getInstance().addProcessor(packageName);
 		SchedulerService.addJobs(packageName);
 		ModulesManager.addPlayerData(packageName);
 		GameDataManager.addGameData(packageName);
@@ -181,6 +209,8 @@ public class KeimonsServer {
 
 	/**
 	 * 初始化管理
+	 *
+	 * @param packageName 包名
 	 */
 	private static void addManager(String packageName) {
 		List<Class<IManager>> list = ClassUtil.load(packageName, AManager.class);
@@ -199,6 +229,8 @@ public class KeimonsServer {
 
 	/**
 	 * 初始化服务
+	 *
+	 * @param packageName 包名
 	 */
 	private static void addService(String packageName) {
 		List<Class<IService>> list = ClassUtil.load(packageName, AService.class);

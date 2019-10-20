@@ -1,6 +1,7 @@
 package com.keimons.platform;
 
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.network.ICoder;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -18,12 +19,41 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @version 1.0
  * @since 1.8
  */
-public class KeimonsTcpNet {
+public class KeimonsTcpNet<T> {
+
+	/**
+	 * 解码器
+	 */
+	private static ICoder<byte[], ?> decode;
+
+	/**
+	 * 编码器
+	 */
+	private static ICoder<?, byte[]> encode;
 
 	private static EventLoopGroup bossGroup;
 	private static EventLoopGroup workerGroup;
 
-	private static void start() {
+	private Class<T> clazz;
+
+	@SuppressWarnings("unchecked")
+	public static <T> ICoder<byte[], T> DECODE() {
+		return (ICoder<byte[], T>) decode;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> ICoder<T, byte[]> ENCODE() {
+		return (ICoder<T, byte[]>) encode;
+	}
+
+	@SuppressWarnings("unchecked")
+	private KeimonsTcpNet(Class<T> clazz, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
+		KeimonsTcpNet.decode = decode;
+		KeimonsTcpNet.encode = encode;
+		this.clazz = clazz;
+	}
+
+	private void start() {
 		String osName = System.getProperty("os.name");
 		if (osName.contains("Linux")) {
 			bossGroup = new EpollEventLoopGroup();
@@ -33,16 +63,14 @@ public class KeimonsTcpNet {
 			workerGroup = new NioEventLoopGroup(KeimonsServer.KeimonsConfig.getNetThreadCount()[0]);
 		}
 		try {
-
 			ServerBootstrap b = new ServerBootstrap();
-
 			if (osName.contains("Linux")) {
 				b.channel(EpollServerSocketChannel.class);
 			} else {
 				b.channel(NioServerSocketChannel.class);
 			}
 			b.group(bossGroup, workerGroup);
-			b.childHandler(new KeimonsServiceInitializer());
+			b.childHandler(new KeimonsServiceInitializer(clazz));
 			b.option(ChannelOption.SO_BACKLOG, 1024);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.childOption(ChannelOption.TCP_NODELAY, true); // 关闭Nagle的算法
@@ -71,9 +99,15 @@ public class KeimonsTcpNet {
 
 	/**
 	 * 初始化通讯模块
+	 *
+	 * @param clazz  数据载体泛型
+	 * @param decode 解码方式
+	 * @param encode 编码方式
+	 * @param <T>    输入/输出类型
 	 */
-	public static void init() {
-		Thread thread = new Thread(KeimonsTcpNet::start, "TCP-SERVER");
+	public static <T> void init(Class<T> clazz, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
+		KeimonsTcpNet<T> net = new KeimonsTcpNet<>(clazz, decode, encode);
+		Thread thread = new Thread(net::start, "TCP-SERVER");
 		thread.start();
 	}
 }

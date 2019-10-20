@@ -10,6 +10,12 @@ import io.netty.handler.timeout.IdleStateHandler;
  */
 public class KeimonsServiceInitializer extends ChannelInitializer<SocketChannel> {
 
+	private static Class<?> clazz;
+
+	public KeimonsServiceInitializer(Class<?> clazz) {
+		KeimonsServiceInitializer.clazz = clazz;
+	}
+
 	@Override
 	protected void initChannel(SocketChannel ch) {
 		ch.pipeline()
@@ -17,7 +23,7 @@ public class KeimonsServiceInitializer extends ChannelInitializer<SocketChannel>
 				.addLast("FramerDecoder", new ClientRequestFrameDecoder())
 				.addLast("RequestDecoder", new ClientRequestDecoder())
 				.addLast("FramerEncoder", new ServerResponseFrameEncoder())
-				.addLast("RequestEncoder", new ServerResponseEncoder())
-				.addLast("KeimonsHandler", new KeimonsHandler());
+				.addLast("RequestEncoder", new ServerResponseEncoder<>(clazz))
+				.addLast("KeimonsHandler", new KeimonsHandler<>(clazz));
 	}
 }

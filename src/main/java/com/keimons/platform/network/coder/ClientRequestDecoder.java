@@ -1,14 +1,14 @@
 package com.keimons.platform.network.coder;
 
-import com.alibaba.fastjson.JSONObject;
-import com.keimons.platform.network.Packet;
+import com.keimons.platform.KeimonsTcpNet;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
 import java.util.List;
 
-// @Sharable
+@Sharable
 public class ClientRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
 
 	@Override
@@ -21,6 +21,6 @@ public class ClientRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
 			array = new byte[length];
 			msg.getBytes(msg.readerIndex(), array, 0, length);
 		}
-		out.add(JSONObject.parseObject(array, Packet.class));
+		out.add(KeimonsTcpNet.DECODE().coder(array));
 	}
 }

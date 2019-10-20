@@ -2,12 +2,9 @@ package com.keimons.platform.session;
 
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
-import com.keimons.platform.network.Packet;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.TimeUtil;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.GenericFutureListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,7 +93,7 @@ public class Session {
 	 * @return true.请求频率超过安全范围。false.请求频率在安全范围内。
 	 */
 	public boolean intervalVerifyAndUpdate(int msgCode, long timeNow, int interval) {
-		long lastRequestTime = requestTime.getOrDefault(msgCode, 0L);
+		long lastRequestTime = requestTime.getOrDefault(msgCode, TimeUtil.currentTimeMillis());
 		requestTime.put(msgCode, timeNow);
 		if (timeNow - lastRequestTime > interval) {
 			return true;
@@ -134,36 +131,14 @@ public class Session {
 	}
 
 	/**
-	 * 发送消息到客户端
-	 *
-	 * @param msgCode 消息号
-	 * @param data    数据
-	 * @param errCode 错误号
-	 */
-	public void send(int msgCode, byte[] data, String... errCode) {
-		Packet packet = new Packet();
-		packet.setMsgCode(msgCode);
-		if (data != null) {
-			packet.setData(data);
-		}
-		packet.setErrCodes(errCode);
-		send(packet);
-	}
-
-	/**
 	 * 发送消息
 	 *
 	 * @param msg 消息
-	 * @param <T> 实现
+	 * @param <T> 发送消息体
 	 */
-	public <T extends Packet> void send(T msg) {
+	public <T> void send(T msg) {
 		if (connect && msg != null && ctx != null) {
-			ctx.writeAndFlush(msg).addListener((GenericFutureListener<ChannelFuture>) future -> {
-				// 发送失败，打印错误信息
-				if (!future.isSuccess()) {
-					LogService.error(future.cause());
-				}
-			});
+			ctx.writeAndFlush(msg);
 		}
 	}
 
