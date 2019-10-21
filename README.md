@@ -3,7 +3,7 @@
 
 &emsp;&emsp;一个模块分为8部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、Scheduler、Logger，将这8个模块接入到系统中即可完成模块安装。
 
-&emsp;&emsp;模块标识注解：@AModule。AModale是一个包注解，位于package-info.java中，标注一个包为一个模块，自动扫描该包下的所有归属于一个模块的子系统。按照模块指定的加载顺序进行加载。
+&emsp;&emsp;模块标识注解：@AModular。AModular是一个包注解，位于package-info.java中，标注一个包为一个模块，自动扫描该包下的所有归属于一个模块的子系统。按照模块指定的加载顺序进行加载。
 
 ## 模块接入
 
