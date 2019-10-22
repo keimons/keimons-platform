@@ -64,7 +64,7 @@ public class KeimonsConfig {
 	/**
 	 * 默认日志路径
 	 */
-	public static final String DEFAULT_NET_THREAD_COUNT = "cpu*2,cpu*1,cpu*1";
+	public static final String DEFAULT_NET_THREAD_COUNT = "cpu+1,cpu*2,cpu*3";
 
 	/**
 	 * 多级线程池
