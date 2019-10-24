@@ -66,7 +66,7 @@ public class SchedulerService {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void addJobs(String packageName) {
-		List<Class<Object>> classes = ClassUtil.load(packageName, AJob.class);
+		List<Class<Object>> classes = ClassUtil.loadClasses(packageName, AJob.class);
 		for (Class<?> clazz : classes) {
 			if (loaded.contains(clazz)) {
 				continue;

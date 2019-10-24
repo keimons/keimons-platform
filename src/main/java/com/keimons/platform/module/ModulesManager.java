@@ -154,7 +154,7 @@ public class ModulesManager {
 	 * @param packageName 包名
 	 */
 	public static void addPlayerData(String packageName) {
-		List<Class<IPlayerData>> classes = ClassUtil.load(packageName, APlayerData.class);
+		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
 		for (Class<IPlayerData> clazz : classes) {
 			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
 			try {

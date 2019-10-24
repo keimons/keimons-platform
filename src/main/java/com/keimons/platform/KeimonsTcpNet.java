@@ -34,7 +34,7 @@ public class KeimonsTcpNet<T> {
 	private static EventLoopGroup bossGroup;
 	private static EventLoopGroup workerGroup;
 
-	private Class<T> clazz;
+	private Class<T> carrier;
 
 	@SuppressWarnings("unchecked")
 	public static <T> ICoder<byte[], T> DECODE() {
@@ -46,11 +46,10 @@ public class KeimonsTcpNet<T> {
 		return (ICoder<T, byte[]>) encode;
 	}
 
-	@SuppressWarnings("unchecked")
-	private KeimonsTcpNet(Class<T> clazz, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
+	private KeimonsTcpNet(Class<T> carrier, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
 		KeimonsTcpNet.decode = decode;
 		KeimonsTcpNet.encode = encode;
-		this.clazz = clazz;
+		this.carrier = carrier;
 	}
 
 	private void start() {
@@ -70,7 +69,7 @@ public class KeimonsTcpNet<T> {
 				b.channel(NioServerSocketChannel.class);
 			}
 			b.group(bossGroup, workerGroup);
-			b.childHandler(new KeimonsServiceInitializer(clazz));
+			b.childHandler(new KeimonsServiceInitializer(carrier));
 			b.option(ChannelOption.SO_BACKLOG, 1024);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.childOption(ChannelOption.TCP_NODELAY, true); // 关闭Nagle的算法
@@ -100,13 +99,13 @@ public class KeimonsTcpNet<T> {
 	/**
 	 * 初始化通讯模块
 	 *
-	 * @param clazz  数据载体泛型
-	 * @param decode 解码方式
-	 * @param encode 编码方式
-	 * @param <T>    输入/输出类型
+	 * @param carrier 数据载体泛型
+	 * @param decode  解码方式
+	 * @param encode  编码方式
+	 * @param <T>     输入/输出类型
 	 */
-	public static <T> void init(Class<T> clazz, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
-		KeimonsTcpNet<T> net = new KeimonsTcpNet<>(clazz, decode, encode);
+	public static <T> void init(Class<T> carrier, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
+		KeimonsTcpNet<T> net = new KeimonsTcpNet<>(carrier, decode, encode);
 		Thread thread = new Thread(net::start, "TCP-SERVER");
 		thread.start();
 	}

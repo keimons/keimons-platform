@@ -57,7 +57,7 @@ public class GameDataManager {
 	 * @param packageName 包名
 	 */
 	public static void addGameData(String packageName) {
-		List<Class<IGameData>> classes = ClassUtil.load(packageName, AGameData.class);
+		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
 		for (Class<IGameData> clazz : classes) {
 			System.out.println("正在安装共有数据模块：" + clazz.getSimpleName());
 			try {

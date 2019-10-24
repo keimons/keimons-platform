@@ -39,6 +39,11 @@ public class KeimonsServer {
 	public volatile static int VERSION = 0;
 
 	/**
+	 * 底层传输载体格式
+	 */
+	public static Class<?> carrier;
+
+	/**
 	 * 所有的管理器
 	 */
 	private static Map<Class<?>, IManager> managers = new HashMap<>();
@@ -81,17 +86,17 @@ public class KeimonsServer {
 	 * <p>
 	 * 采用默认的配置
 	 *
-	 * @param clazz    数据载体泛型
+	 * @param carrier  数据载体泛型
 	 * @param decode   解码方式
 	 * @param encode   编码方式
 	 * @param msg2code 消息中获取消息号
 	 * @param <T>      输入/输出类型
 	 */
-	public static <T> void start(Class<T> clazz,
+	public static <T> void start(Class<T> carrier,
 								 ICoder<byte[], T> decode,
 								 ICoder<T, byte[]> encode,
 								 ICoder<T, Integer> msg2code) {
-		start(com.keimons.platform.KeimonsConfig.defaultConfig(), clazz, decode, encode, msg2code);
+		start(com.keimons.platform.KeimonsConfig.defaultConfig(), carrier, decode, encode, msg2code);
 	}
 
 	/**
@@ -100,7 +105,7 @@ public class KeimonsServer {
 	 * 采用默认的配置文件
 	 *
 	 * @param path     文件路径
-	 * @param clazz    数据载体泛型
+	 * @param carrier  数据载体泛型
 	 * @param decode   解码方式
 	 * @param encode   编码方式
 	 * @param msg2code 消息中获取消息号
@@ -109,7 +114,7 @@ public class KeimonsServer {
 	 */
 	@Deprecated
 	public static <T> void start(String path,
-								 Class<T> clazz,
+								 Class<T> carrier,
 								 ICoder<byte[], T> decode,
 								 ICoder<Object, byte[]> encode,
 								 ICoder<T, Integer> msg2code) {
@@ -120,17 +125,18 @@ public class KeimonsServer {
 	 * 启动入口
 	 *
 	 * @param keimonsConfig 启动入口
-	 * @param clazz         数据载体泛型
+	 * @param carrier         数据载体泛型
 	 * @param decode        解码方式
 	 * @param encode        编码方式
 	 * @param msg2code      编码方式
 	 * @param <T>           输入/输出类型
 	 */
 	public static <T> void start(KeimonsConfig keimonsConfig,
-								 Class<T> clazz,
+								 Class<T> carrier,
 								 ICoder<byte[], T> decode,
 								 ICoder<T, byte[]> encode,
 								 ICoder<T, Integer> msg2code) {
+		KeimonsServer.carrier = carrier;
 		KeimonsConfig = keimonsConfig;
 		if (keimonsConfig.isConsoleRedirect()) {
 			ConsoleService.init();
@@ -144,7 +150,7 @@ public class KeimonsServer {
 		EventService.init();
 		ModulesManager.init();
 		List<Package> packages = new ArrayList<>();
-		for (Package pkg : Package.getPackages()) {
+		for (Package pkg : ClassUtil.getPackages("")) {
 			AModular modular = pkg.getAnnotation(AModular.class);
 			if (modular != null) {
 				packages.add(pkg);
@@ -159,7 +165,7 @@ public class KeimonsServer {
 			System.out.println("************************* 完成安装模块 *************************");
 		}
 		KeimonsExecutor.init();
-		KeimonsTcpNet.init(clazz, decode, encode);
+		KeimonsTcpNet.init(carrier, decode, encode);
 	}
 
 	/**
@@ -171,7 +177,7 @@ public class KeimonsServer {
 		// Logger、Processor、Job、PlayerData、GameData
 		KeimonsServer.addManager(packageName);
 		KeimonsServer.addService(packageName);
-		ProcessorManager.getInstance().addProcessor(packageName);
+		ProcessorManager.addProcessor(packageName);
 		SchedulerService.addJobs(packageName);
 		ModulesManager.addPlayerData(packageName);
 		GameDataManager.addGameData(packageName);
@@ -189,7 +195,7 @@ public class KeimonsServer {
 			// 暂停15秒以便Netty处理完剩余逻辑
 			Thread.sleep(15000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			LogService.error(e);
 		}
 		long time = TimeUtil.currentTimeMillis();
 		for (IService service : services.values()) {
@@ -213,7 +219,7 @@ public class KeimonsServer {
 	 * @param packageName 包名
 	 */
 	private static void addManager(String packageName) {
-		List<Class<IManager>> list = ClassUtil.load(packageName, AManager.class);
+		List<Class<IManager>> list = ClassUtil.loadClasses(packageName, AManager.class);
 		for (Class<IManager> clazz : list) {
 			System.out.println("正在安装模块管理器：" + clazz.getSimpleName());
 			try {
@@ -233,7 +239,7 @@ public class KeimonsServer {
 	 * @param packageName 包名
 	 */
 	private static void addService(String packageName) {
-		List<Class<IService>> list = ClassUtil.load(packageName, AService.class);
+		List<Class<IService>> list = ClassUtil.loadClasses(packageName, AService.class);
 		for (Class<IService> clazz : list) {
 			System.out.println("正在安装模块服务器：" + clazz.getSimpleName());
 			try {

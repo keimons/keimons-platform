@@ -22,24 +22,17 @@ import java.util.concurrent.ExecutionException;
  * @version 1.0
  * @since 1.8
  */
-public class ProcessorManager<T> {
+public class ProcessorManager {
 
 	/**
 	 * 消息处理器
 	 */
-	private Map<Integer, ProcessorInfo<T>> processors = new HashMap<>();
+	private static Map<Integer, ProcessorInfo<?>> processors = new HashMap<>();
 
 	/**
 	 * 获取消息号
 	 */
 	private static ICoder<?, Integer> msg_code;
-
-	private static ProcessorManager instance = new ProcessorManager<>();
-
-	@SuppressWarnings("unchecked")
-	public static <T> ProcessorManager<T> getInstance() {
-		return instance;
-	}
 
 	public static <T> void setMsgCode(ICoder<T, Integer> msg_code) {
 		ProcessorManager.msg_code = msg_code;
@@ -50,12 +43,13 @@ public class ProcessorManager<T> {
 	 *
 	 * @param session 会话
 	 * @param packet  消息体
+	 * @param <T>     参数类型
 	 * @throws Exception 转码错误
 	 */
 	@SuppressWarnings("unchecked")
-	public void executeProcessor(Session session, T packet) throws Exception {
+	public static <T> void execute(Session session, T packet) throws Exception {
 		int msgCode = ((ICoder<T, Integer>) msg_code).coder(packet);
-		ProcessorInfo<T> processorInfo = processors.get(msgCode);
+		ProcessorInfo<T> processorInfo = (ProcessorInfo<T>) processors.get(msgCode);
 		KeimonsExecutor<T> instance = KeimonsExecutor.getInstance();
 		if (processorInfo != null) {
 			switch (processorInfo.selectThreadLevel()) {
@@ -83,7 +77,7 @@ public class ProcessorManager<T> {
 	 * @param <T>        返回值类型
 	 * @return 执行结果
 	 */
-	public static <T> T executeProcessor(String threadName, Callable<T> callable) {
+	public static <T> T execute(String threadName, Callable<T> callable) {
 		try {
 			return KeimonsExecutor.syncProcessor(threadName, callable);
 		} catch (ExecutionException | InterruptedException e) {
@@ -98,7 +92,7 @@ public class ProcessorManager<T> {
 	 * @param threadName 线程名
 	 * @param runnable   执行内容
 	 */
-	public static void executeProcessor(String threadName, Runnable runnable) {
+	public static void execute(String threadName, Runnable runnable) {
 		KeimonsExecutor.syncProcessor(threadName, runnable);
 	}
 
@@ -107,10 +101,9 @@ public class ProcessorManager<T> {
 	 *
 	 * @param packageName 消息处理器
 	 */
-	public void addProcessor(String packageName) {
-		List<Class<IProcessor>> classes = ClassUtil.load(packageName, AProcessor.class);
-		for (Class<IProcessor> clazz : classes) {
-			System.out.println("正在安装消息处理器：" + clazz.getSimpleName());
+	public static void addProcessor(String packageName) {
+		List<Class<IProcessor<?>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
+		for (Class<IProcessor<?>> clazz : classes) {
 			AProcessor info = clazz.getAnnotation(AProcessor.class);
 			if (info.ThreadLevel() == ThreadLevel.AUTO &&
 					!KeimonsServer.KeimonsConfig.isAutoThreadLevel()) {
@@ -130,8 +123,7 @@ public class ProcessorManager<T> {
 				throw new ModuleException("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
 			try {
-				@SuppressWarnings("unchecked")
-				IProcessor<T> processor = (IProcessor<T>) clazz.getDeclaredConstructor().newInstance();
+				IProcessor<?> processor = clazz.getDeclaredConstructor().newInstance();
 				processors.put(info.MsgCode(), new ProcessorInfo<>(info, processor));
 				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
 			} catch (Exception e) {

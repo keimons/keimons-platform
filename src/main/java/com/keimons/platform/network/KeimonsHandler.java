@@ -39,8 +39,7 @@ public class KeimonsHandler<T> extends SimpleChannelInboundHandler<T> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			ProcessorManager<T> instance = ProcessorManager.getInstance();
-			instance.executeProcessor(session, packet);
+			ProcessorManager.execute(session, packet);
 		} catch (Exception e) {
 			String info = "会话ID：" + ctx.channel().attr(SESSION).get();
 			LogService.error(e, info);
