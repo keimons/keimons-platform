@@ -7,4 +7,5 @@ gradlew.bat
 build/*
 logs/*
 publish/*
+src/test/*
 keimons-platform.iml
