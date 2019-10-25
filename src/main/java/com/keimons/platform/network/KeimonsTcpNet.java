@@ -1,8 +1,9 @@
-package com.keimons.platform;
+package com.keimons.platform.network;
 
+import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.ICoder;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
+import com.keimons.platform.process.ProcessorManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -22,36 +23,27 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 public class KeimonsTcpNet<T> {
 
 	/**
-	 * 解码器
+	 * BossGroup线程池
 	 */
-	private static ICoder<byte[], ?> decode;
+	private EventLoopGroup bossGroup;
 
 	/**
-	 * 编码器
+	 * 业务逻辑线程池
 	 */
-	private static ICoder<?, byte[]> encode;
+	private EventLoopGroup workerGroup;
 
-	private static EventLoopGroup bossGroup;
-	private static EventLoopGroup workerGroup;
+	private final MessageConverter<T> converter;
 
-	private Class<T> carrier;
+	private final ProcessorManager<T> executor;
 
-	@SuppressWarnings("unchecked")
-	public static <T> ICoder<byte[], T> DECODE() {
-		return (ICoder<byte[], T>) decode;
+	public KeimonsTcpNet(MessageConverter<T> converter, ProcessorManager<T> executor) {
+		this.converter = converter;
+		this.executor = executor;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T> ICoder<T, byte[]> ENCODE() {
-		return (ICoder<T, byte[]>) encode;
-	}
-
-	private KeimonsTcpNet(Class<T> carrier, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
-		KeimonsTcpNet.decode = decode;
-		KeimonsTcpNet.encode = encode;
-		this.carrier = carrier;
-	}
-
+	/**
+	 * 启动网络层
+	 */
 	private void start() {
 		String osName = System.getProperty("os.name");
 		if (osName.contains("Linux")) {
@@ -69,7 +61,7 @@ public class KeimonsTcpNet<T> {
 				b.channel(NioServerSocketChannel.class);
 			}
 			b.group(bossGroup, workerGroup);
-			b.childHandler(new KeimonsServiceInitializer(carrier));
+			b.childHandler(new KeimonsServiceInitializer<>(converter, executor));
 			b.option(ChannelOption.SO_BACKLOG, 1024);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.childOption(ChannelOption.TCP_NODELAY, true); // 关闭Nagle的算法
@@ -91,22 +83,16 @@ public class KeimonsTcpNet<T> {
 	/**
 	 * 关闭Netty的线程池
 	 */
-	public static void close() {
+	public void close() {
 		bossGroup.shutdownGracefully();
 		workerGroup.shutdownGracefully();
 	}
 
 	/**
 	 * 初始化通讯模块
-	 *
-	 * @param carrier 数据载体泛型
-	 * @param decode  解码方式
-	 * @param encode  编码方式
-	 * @param <T>     输入/输出类型
 	 */
-	public static <T> void init(Class<T> carrier, ICoder<byte[], T> decode, ICoder<T, byte[]> encode) {
-		KeimonsTcpNet<T> net = new KeimonsTcpNet<>(carrier, decode, encode);
-		Thread thread = new Thread(net::start, "TCP-SERVER");
+	public void init() {
+		Thread thread = new Thread(this::start, "TCP-SERVER");
 		thread.start();
 	}
 }

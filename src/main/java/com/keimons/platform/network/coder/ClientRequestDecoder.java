@@ -1,6 +1,6 @@
 package com.keimons.platform.network.coder;
 
-import com.keimons.platform.KeimonsTcpNet;
+import com.keimons.platform.network.IMessageConverter;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,10 +9,16 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
 
 @Sharable
-public class ClientRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
+public class ClientRequestDecoder<I> extends MessageToMessageDecoder<ByteBuf> {
+
+	private final IMessageConverter<byte[], I> converter;
+
+	public ClientRequestDecoder(IMessageConverter<byte[], I> converter) {
+		this.converter = converter;
+	}
 
 	@Override
-	protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+	protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
 		final byte[] array;
 		if (msg.hasArray()) {
 			array = msg.array();
@@ -21,6 +27,6 @@ public class ClientRequestDecoder extends MessageToMessageDecoder<ByteBuf> {
 			array = new byte[length];
 			msg.getBytes(msg.readerIndex(), array, 0, length);
 		}
-		out.add(KeimonsTcpNet.DECODE().coder(array));
+		out.add(converter.converter(ctx, array));
 	}
 }

@@ -23,26 +23,45 @@ import java.util.concurrent.*;
 public class KeimonsExecutor<T> {
 
 	/**
-	 * 中执行耗时线程队列
+	 * 中耗时线程队列
 	 */
 	private static Executor[] midExecutor;
 
 	/**
-	 * 低执行耗时线程队列
+	 * 长耗时线程队列
 	 */
 	private static Executor[] lowExecutor;
 
+	/**
+	 * 单线程队列
+	 */
 	private static Map<String, Executor> singleThreads = new HashMap<>();
 
+	/**
+	 * 中耗时线程数量
+	 */
 	private static int MID_MAX;
+
+	/**
+	 * 长耗时线程数量
+	 */
 	private static int LOW_MAX;
 
+	/**
+	 * 单利
+	 */
 	private static KeimonsExecutor instance;
 
 	private KeimonsExecutor() {
 
 	}
 
+	/**
+	 * 单利模式 业务执行器
+	 *
+	 * @param <T> 类型
+	 * @return 执行器
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> KeimonsExecutor<T> getInstance() {
 		if (instance == null) {
@@ -161,8 +180,16 @@ public class KeimonsExecutor<T> {
 	 **/
 	static class Executor implements Runnable {
 
+		/**
+		 * 线程安全的阻塞队列
+		 */
 		private final BlockingDeque<Runnable> queue;
 
+		/**
+		 * 执行器
+		 * <p>
+		 * 消息的真正执行者
+		 */
 		public Executor() {
 			queue = new LinkedBlockingDeque<>();
 		}

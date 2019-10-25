@@ -1,6 +1,6 @@
 package com.keimons.platform.network.coder;
 
-import com.keimons.platform.KeimonsTcpNet;
+import com.keimons.platform.network.IMessageConverter;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
@@ -8,15 +8,16 @@ import io.netty.handler.codec.MessageToMessageEncoder;
 import java.util.List;
 
 @Sharable
-public class ServerResponseEncoder<T> extends MessageToMessageEncoder<T> {
+public class ServerResponseEncoder<I> extends MessageToMessageEncoder<I> {
 
-	public ServerResponseEncoder(Class<? extends T> outboundMessageType) {
-		super(outboundMessageType);
+	private final IMessageConverter<I, byte[]> converter;
+
+	public ServerResponseEncoder(IMessageConverter<I, byte[]> converter) {
+		this.converter = converter;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	protected void encode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
-		out.add(KeimonsTcpNet.ENCODE().coder(msg));
+	protected void encode(ChannelHandlerContext ctx, I msg, List<Object> out) {
+		out.add(converter.converter(ctx, msg));
 	}
 }
