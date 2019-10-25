@@ -1,10 +1,6 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.session.Session;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 /**
  * 消息处理器
@@ -22,20 +18,12 @@ import java.lang.reflect.Type;
  */
 public abstract class BaseProcessor<T> implements IRoute<T> {
 
-	@SuppressWarnings("unchecked")
-	public final Class<T> getMessageType() {
-		Type type = getClass().getGenericSuperclass();
-		if (type instanceof ParameterizedType) {
-			ParameterizedType superclass = (ParameterizedType) type;
-			if (superclass.getActualTypeArguments().length > 0) {
-				return (Class<T>) superclass.getActualTypeArguments()[0];
-			} else {
-				throw new ModuleException("未找到有效的系统底层数据传输载体");
-			}
-		} else {
-			throw new ModuleException("未找到有效的系统底层数据传输载体");
-		}
-	}
+	/**
+	 * 获取入站出站消息类型
+	 *
+	 * @return 入站出站消息类型
+	 */
+	public abstract Class<T> getMessageType();
 
 	/**
 	 * 处理消息

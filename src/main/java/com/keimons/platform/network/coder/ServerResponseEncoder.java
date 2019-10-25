@@ -12,7 +12,8 @@ public class ServerResponseEncoder<I> extends MessageToMessageEncoder<I> {
 
 	private final IMessageConverter<I, byte[]> converter;
 
-	public ServerResponseEncoder(IMessageConverter<I, byte[]> converter) {
+	public ServerResponseEncoder(Class<I> messageType, IMessageConverter<I, byte[]> converter) {
+		super(messageType);
 		this.converter = converter;
 	}
 
