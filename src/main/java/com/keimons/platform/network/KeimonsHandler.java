@@ -28,8 +28,8 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 
 	private final ProcessorManager<I> executor;
 
-	public KeimonsHandler(ProcessorManager<I> executor) {
-		super();
+	public KeimonsHandler(Class<I> messageType, ProcessorManager<I> executor) {
+		super(messageType);
 		this.executor = executor;
 	}
 

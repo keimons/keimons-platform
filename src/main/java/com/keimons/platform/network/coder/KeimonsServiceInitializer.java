@@ -32,7 +32,7 @@ public class KeimonsServiceInitializer<I> extends ChannelInitializer<SocketChann
 				.addLast("FramerDecoder", new ClientRequestFrameDecoder())
 				.addLast("RequestDecoder", new ClientRequestDecoder<>(converter.getInboundConverter()))
 				.addLast("FramerEncoder", new ServerResponseFrameEncoder())
-				.addLast("RequestEncoder", new ServerResponseEncoder<>(converter.getOutboundConverter()))
-				.addLast("KeimonsHandler", new KeimonsHandler<>(executor));
+				.addLast("RequestEncoder", new ServerResponseEncoder<>(converter.getMessageType(), converter.getOutboundConverter()))
+				.addLast("KeimonsHandler", new KeimonsHandler<>(converter.getMessageType(), executor));
 	}
 }
