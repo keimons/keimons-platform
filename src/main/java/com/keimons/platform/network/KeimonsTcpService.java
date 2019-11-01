@@ -20,7 +20,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @version 1.0
  * @since 1.8
  */
-public class KeimonsTcpNet<T> {
+public class KeimonsTcpService<T> {
 
 	/**
 	 * BossGroup线程池
@@ -36,7 +36,7 @@ public class KeimonsTcpNet<T> {
 
 	private final ProcessorManager<T> executor;
 
-	public KeimonsTcpNet(MessageConverter<T> converter, ProcessorManager<T> executor) {
+	public KeimonsTcpService(MessageConverter<T> converter, ProcessorManager<T> executor) {
 		this.converter = converter;
 		this.executor = executor;
 	}
@@ -68,7 +68,7 @@ public class KeimonsTcpNet<T> {
 			b.childOption(ChannelOption.SO_RCVBUF, 64 * 1024);
 			b.childOption(ChannelOption.SO_SNDBUF, 1024 * 1024);
 			b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(64 * 1024, 10 * 1024 * 1024));
-			ChannelFuture channelFuture = b.bind(8080).addListener((ChannelFutureListener) future -> System.out.println("服务监听端口：" + 8080)).sync();
+			ChannelFuture channelFuture = b.bind(KeimonsServer.KeimonsConfig.getPort()).addListener((ChannelFutureListener) future -> System.out.println("服务监听端口：" + 8080)).sync();
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {

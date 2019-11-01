@@ -1,6 +1,5 @@
 package com.keimons.platform.datebase;
 
-import com.keimons.platform.iface.IManager;
 import org.redisson.Redisson;
 import org.redisson.api.*;
 import org.redisson.client.codec.Codec;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * 数据库管理
  */
-public class RedissonManager implements IManager {
+public class RedissonManager {
 
 	/**
 	 * 连接实例

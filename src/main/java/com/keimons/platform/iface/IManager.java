@@ -3,7 +3,7 @@ package com.keimons.platform.iface;
 /**
  * 静态数据管理
  * <p>
- * 一般都会在这里存放静态的表数据，静态数据声明周期中总共会发生4个事件
+ * 一般都会在这里存放静态的表数据，静态数据声明周期中总共会发生3个事件
  * 1.load   初始化
  * 2.reload 重加载
  * 3.unload 卸载
@@ -19,8 +19,7 @@ public interface IManager {
 	 * <p>
 	 * 将数据从txt、json、xml、db中加载到内存数据
 	 */
-	default void load() {
-	}
+	void load();
 
 	/**
 	 * 重加载

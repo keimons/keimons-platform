@@ -6,11 +6,12 @@ import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
 import com.keimons.platform.game.GameDataManager;
+import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.ModulesManager;
-import com.keimons.platform.network.KeimonsTcpNet;
+import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.MessageConverter;
 import com.keimons.platform.process.KeimonsExecutor;
 import com.keimons.platform.process.ProcessorManager;
@@ -41,7 +42,7 @@ public class KeimonsPlatform<I> {
 
 	MessageConverter<I> converter;
 
-	KeimonsTcpNet<I> net;
+	KeimonsTcpService<I> net;
 
 	ProcessorManager<I> executor;
 
@@ -49,7 +50,7 @@ public class KeimonsPlatform<I> {
 		this.config = config;
 		this.converter = converter;
 		executor = new ProcessorManager<>(converter.getMsg2CodeConverter(), converter.getMessageType());
-		net = new KeimonsTcpNet<>(converter, executor);
+		net = new KeimonsTcpService<>(converter, executor);
 	}
 
 	public void start() {
@@ -108,13 +109,6 @@ public class KeimonsPlatform<I> {
 		// 关闭Netty
 		System.out.println("服务器准备关闭！");
 		net.close();
-
-		try {
-			// 暂停15秒以便Netty处理完剩余逻辑
-			Thread.sleep(15000);
-		} catch (InterruptedException e) {
-			LogService.error(e);
-		}
 		long time = TimeUtil.currentTimeMillis();
 		for (IService service : services.values()) {
 			service.shutdown();
@@ -154,7 +148,9 @@ public class KeimonsPlatform<I> {
 			try {
 				IService service = clazz.newInstance();
 				services.put(service.getClass(), service);
-				EventService.registerEvent(service);
+				if (service instanceof IEventHandler) {
+					EventService.registerEvent((IEventHandler) service);
+				}
 				service.start();
 			} catch (InstantiationException | IllegalAccessException e) {
 				LogService.error(e, clazz.getSimpleName() + "安装模块服务器失败");

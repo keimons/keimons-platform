@@ -3,13 +3,13 @@ package com.keimons.platform.iface;
 /**
  * 业务逻辑管理
  * <p>
- * 在这里管理该模块的业务逻辑部分
+ * 在这里管理该模块的业务逻辑部分。
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
- */
-public interface IService extends IEventHandler {
+ **/
+public interface IService {
 
 	/**
 	 * 模块启动

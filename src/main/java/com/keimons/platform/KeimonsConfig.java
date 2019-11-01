@@ -57,6 +57,16 @@ public class KeimonsConfig {
 	public static final String DEFAULT_NET_THREAD_AUTO = "true";
 
 	/**
+	 * 端口号
+	 */
+	public static final String NET_POTR = "keimons.net.port";
+
+	/**
+	 * 默认端口号
+	 */
+	public static final String DEFAULT_NET_POTR = "6364";
+
+	/**
 	 * 线程数量
 	 */
 	public static final String NET_THREAD_COUNT = "keimons.net.thread.count";
@@ -102,6 +112,11 @@ public class KeimonsConfig {
 	private boolean consoleRedirect;
 
 	/**
+	 * 端口号
+	 */
+	private int port;
+
+	/**
 	 * 是否启动多级线程池
 	 */
 	private boolean autoThreadLevel;
@@ -144,6 +159,7 @@ public class KeimonsConfig {
 		property = config.getProperty(NET_THREAD_AUTO, DEFAULT_NET_THREAD_AUTO);
 		this.autoThreadLevel = Boolean.valueOf(property);
 
+		// 线程数量
 		property = config.getProperty(NET_THREAD_COUNT, DEFAULT_NET_THREAD_COUNT);
 		String[] counts = property.split(",");
 		for (int i = 0; i < counts.length; i++) {
@@ -154,6 +170,7 @@ public class KeimonsConfig {
 			throw new KeimonsConfigException(NET_THREAD_COUNT);
 		}
 
+		// 多级线程池
 		property = config.getProperty(NET_THREAD_LEVEL, DEFAULT_NET_THREAD_LEVEL);
 		String[] levels = property.split(",");
 		for (int i = 0; i < levels.length && i < counts.length; i++) {
@@ -168,6 +185,10 @@ public class KeimonsConfig {
 				netThreadNames[i] = names[i];
 			}
 		}
+
+		// 端口号
+		property = config.getProperty(NET_POTR, DEFAULT_NET_POTR);
+		this.port = Integer.parseInt(property);
 	}
 
 	/**
@@ -258,6 +279,10 @@ public class KeimonsConfig {
 
 	public boolean isAutoThreadLevel() {
 		return autoThreadLevel;
+	}
+
+	public int getPort() {
+		return port;
 	}
 
 	public int[] getNetThreadCount() {
