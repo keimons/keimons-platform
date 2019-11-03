@@ -1,6 +1,6 @@
 package com.keimons.platform.iface;
 
-import com.keimons.platform.module.Modules;
+import com.keimons.platform.player.IPlayer;
 
 /**
  * 玩家数据加载成功接口
@@ -15,6 +15,7 @@ public interface ILoaded {
 	 * 数据成功加载
 	 *
 	 * @param player 玩家
+	 * @param <T>    玩家类型
 	 */
-	void loaded(Modules player);
+	<T extends IPlayer> void loaded(T player);
 }

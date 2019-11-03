@@ -19,11 +19,14 @@ public class Modules {
 
 	/**
 	 * 数据唯一标识
+	 * <p>
+	 * 当从数据库取出数据时，需要使用唯一标识符获取数据，当对数据进行持久化时，需要使用唯一标识符作为
+	 * 主键，将数据存入数据库。
 	 */
 	private final String identifier;
 
 	/**
-	 * 储存玩家所有数据
+	 * 玩家数据 Key:数据名称 Value:数据
 	 */
 	private HashMap<String, IPlayerData> modules = new HashMap<>();
 

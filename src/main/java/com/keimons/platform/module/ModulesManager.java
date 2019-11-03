@@ -86,10 +86,10 @@ public class ModulesManager {
 	 * @return 模块数据
 	 */
 	public static Modules createModules(IPlayer player) {
-		Modules modules = new Modules(player.getIdentifier());
+		Modules modules = new Modules(player.uuid());
 		modules.checkPlayerData();
 		player.setModules(modules);
-		cacheModules(player.getIdentifier(), modules);
+		cacheModules(player.uuid(), modules);
 		return modules;
 	}
 
@@ -100,10 +100,9 @@ public class ModulesManager {
 	 * @param consumer 消费函数
 	 */
 	public static void loadAndExecute(IPlayer player, Consumer<IPlayer> consumer) {
-		Loader.slowLoad(player.getIdentifier(), (modules) -> {
-			player.setModules(modules);
+		Loader.slowLoad(player, (p) -> {
 			if (consumer != null) {
-				consumer.accept(player);
+				consumer.accept(p);
 			}
 		});
 	}
@@ -115,7 +114,7 @@ public class ModulesManager {
 	 * @return 玩家所有模块
 	 */
 	public static Modules load(IPlayer player) {
-		return Loader.fastLoad(player.getIdentifier());
+		return Loader.fastLoad(player);
 	}
 
 	/**

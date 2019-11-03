@@ -4,6 +4,7 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.datebase.RedissonManager;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.CharsetUtil;
 import com.keimons.platform.unit.CodeUtil;
 import org.redisson.client.codec.ByteArrayCodec;
@@ -33,12 +34,12 @@ public class Loader implements Runnable {
 	/**
 	 * 立即加载玩家数据（阻塞加载）
 	 *
-	 * @param identifier 玩家唯一标识
+	 * @param player 玩家唯一标识
 	 * @return 玩家所有模块
 	 */
-	public static Modules fastLoad(String identifier) {
+	public static Modules fastLoad(IPlayer player) {
 		AtomicReference<Modules> reference = new AtomicReference<>();
-		FutureTask<Void> task = new FutureTask<>(getLoader(identifier, null, reference), null);
+		FutureTask<Void> task = new FutureTask<>(getLoader(player, null, reference), null);
 		loading.offerFirst(task);
 		return reference.get();
 	}
@@ -46,11 +47,11 @@ public class Loader implements Runnable {
 	/**
 	 * 排队加载玩家数据
 	 *
-	 * @param identifier 玩家唯一标识
-	 * @param consumer   消费函数
+	 * @param player   玩家
+	 * @param consumer 消费函数
 	 */
-	public static void slowLoad(String identifier, Consumer<Modules> consumer) {
-		loading.add(getLoader(identifier, consumer, null));
+	public static void slowLoad(IPlayer player, Consumer<IPlayer> consumer) {
+		loading.add(getLoader(player, consumer, null));
 	}
 
 	/**
@@ -80,13 +81,17 @@ public class Loader implements Runnable {
 	/**
 	 * 解码器
 	 *
-	 * @param identifier 玩家唯一表示
-	 * @param consumer   加载成功后消费函数
-	 * @param reference  引用
+	 * @param player    玩家
+	 * @param consumer  加载成功后消费函数
+	 * @param reference 引用
 	 * @return 解码器
 	 */
-	public static Runnable getLoader(String identifier, Consumer<Modules> consumer, AtomicReference<Modules> reference) {
+	public static Runnable getLoader(IPlayer player, Consumer<IPlayer> consumer, AtomicReference<Modules> reference) {
 		return () -> {
+			if (player.isLoaded()) {
+				LogService.warn("当前玩家已经加载过数据，正在重复加载：" + player.uuid());
+			}
+			String identifier = player.uuid();
 			Modules modules = ModulesManager.getModules(identifier);
 			if (modules == null) {
 				modules = new Modules(identifier);
@@ -117,8 +122,10 @@ public class Loader implements Runnable {
 			}
 			ModulesManager.cacheModules(identifier, modules);
 			if (consumer != null) {
-				consumer.accept(modules);
+				consumer.accept(player);
 			}
+			player.setLoaded(true);
+			player.setModules(modules);
 			if (reference != null) {
 				reference.set(modules);
 			}
