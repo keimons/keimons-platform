@@ -33,7 +33,7 @@ public class Modules {
 	/**
 	 * 最后活跃时间
 	 */
-	protected volatile long lastTime = TimeUtil.currentTimeMillis();
+	protected volatile long activeTime = TimeUtil.currentTimeMillis();
 
 	/**
 	 * 构造函数
@@ -127,12 +127,11 @@ public class Modules {
 		return identifier;
 	}
 
-	public long getLastTime() {
-		return lastTime;
+	public long getActiveTime() {
+		return activeTime;
 	}
 
-	public Modules setLastTime(long lastTime) {
-		this.lastTime = lastTime;
-		return this;
+	public void setActiveTime(long activeTime) {
+		this.activeTime = activeTime;
 	}
 }

@@ -27,6 +27,13 @@ public interface IPlayer {
 	String uuid();
 
 	/**
+	 * 设置session
+	 *
+	 * @param session 客户端-服务器会话
+	 */
+	void setSession(Session session);
+
+	/**
 	 * 设置是否已加载
 	 *
 	 * @param loaded true.已加载 false.未加载
@@ -48,13 +55,6 @@ public interface IPlayer {
 	void setModules(Modules modules);
 
 	/**
-	 * 设置session
-	 *
-	 * @param session 客户端-服务器会话
-	 */
-	void setSession(Session session);
-
-	/**
 	 * 获取玩家的一个模块
 	 *
 	 * @param moduleName 模块名称
@@ -69,4 +69,18 @@ public interface IPlayer {
 	 * @return 玩家所有模块数据
 	 */
 	Collection<IPlayerData> getModules();
+
+	/**
+	 * 设置活跃时间
+	 *
+	 * @param activeTime
+	 */
+	void setActiveTime(long activeTime);
+
+	/**
+	 * 获取活跃时间
+	 *
+	 * @return 活跃时间
+	 */
+	long getActiveTime();
 }
