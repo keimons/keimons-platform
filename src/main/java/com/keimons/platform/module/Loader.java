@@ -117,7 +117,7 @@ public class Loader implements Runnable {
 					module.decode();
 				}
 				for (IPlayerData data : modules.getModules()) {
-					data.loaded(modules);
+					data.loaded(player);
 				}
 			}
 			ModulesManager.cacheModules(identifier, modules);

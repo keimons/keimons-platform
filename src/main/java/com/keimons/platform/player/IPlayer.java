@@ -73,7 +73,7 @@ public interface IPlayer {
 	/**
 	 * 设置活跃时间
 	 *
-	 * @param activeTime
+	 * @param activeTime 活跃时间
 	 */
 	void setActiveTime(long activeTime);
 
