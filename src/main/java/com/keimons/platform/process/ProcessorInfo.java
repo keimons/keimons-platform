@@ -56,7 +56,7 @@ public class ProcessorInfo<T> {
 	/**
 	 * 消息处理器
 	 */
-	private BaseProcessor<T> processor;
+	private IProcessor<T> processor;
 
 	/**
 	 * 总的执行时间
@@ -78,7 +78,7 @@ public class ProcessorInfo<T> {
 	 */
 	private int AND;
 
-	public ProcessorInfo(AProcessor info, BaseProcessor<T> processor) {
+	public ProcessorInfo(AProcessor info, IProcessor<T> processor) {
 		if (info.ThreadLevel() == ThreadLevel.AUTO &&
 				(info.Sampling() <= 0 || (info.Sampling() & (info.Sampling() - 1)) != 0)) {
 			throw new NumberFormatException("必须是2的整数次幂");
@@ -164,9 +164,13 @@ public class ProcessorInfo<T> {
 	 * @param session  会话
 	 * @param packet   消息体
 	 * @param maxIndex 最大线程ID
-	 * @return 线程ID
+	 * @return 线程index
 	 */
 	public int getRoute(Session session, T packet, int maxIndex) {
-		return processor.route(session, packet, maxIndex);
+		if (processor instanceof IThreadRoute) {
+			return ((IThreadRoute) processor).route(session, packet, maxIndex);
+		} else {
+			return session.getSessionId() % maxIndex;
+		}
 	}
 }

@@ -3,13 +3,16 @@ package com.keimons.platform.process;
 import com.keimons.platform.session.Session;
 
 /**
- * 路由规则
+ * 自定义的路有规则
+ * <p>
+ * 系统允许开发人员自定义路由规则，路由规则是整个线程模型中最核心的点。通过用户自定义的路由
+ * 规则，将不同的协议交由不同的线程进行处理。
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  **/
-public interface IRoute<T> {
+interface IThreadRoute {
 
 	/**
 	 * 协议路由规则
@@ -23,7 +26,5 @@ public interface IRoute<T> {
 	 * @param maxIndex 最大下标
 	 * @return 线程index
 	 */
-	default int route(Session session, T packet, int maxIndex) {
-		return session.getSessionId() % maxIndex;
-	}
+	<T> int route(Session session, T packet, int maxIndex);
 }

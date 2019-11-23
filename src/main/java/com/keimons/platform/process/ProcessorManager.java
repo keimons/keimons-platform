@@ -128,8 +128,8 @@ public class ProcessorManager<I> {
 	 * @param packageName 消息号所在包
 	 */
 	public void addProcessor(String packageName) {
-		List<Class<BaseProcessor<?>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
-		for (Class<BaseProcessor<?>> clazz : classes) {
+		List<Class<IProcessor<?>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
+		for (Class<IProcessor<?>> clazz : classes) {
 			AProcessor info = clazz.getAnnotation(AProcessor.class);
 			if (info.ThreadLevel() == ThreadLevel.AUTO &&
 					!KeimonsServer.KeimonsConfig.isAutoThreadLevel()) {
@@ -150,11 +150,7 @@ public class ProcessorManager<I> {
 			}
 			try {
 				@SuppressWarnings("unchecked")
-				BaseProcessor<I> processor = (BaseProcessor<I>) clazz.getDeclaredConstructor().newInstance();
-
-				if (!processor.getMessageType().equals(messageType)) {
-					throw new ModuleException("数据载体格式错误：" + getClass().getName());
-				}
+				IProcessor<I> processor = (IProcessor<I>) clazz.getDeclaredConstructor().newInstance();
 
 				processors.put(info.MsgCode(), new ProcessorInfo<>(info, processor));
 				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());

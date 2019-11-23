@@ -1,6 +1,7 @@
 package com.keimons.platform.network;
 
 import com.keimons.platform.exception.ModuleException;
+import com.keimons.platform.process.IProcessor;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -38,7 +39,7 @@ public abstract class MessageConverter<I> {
 	/**
 	 * 获取数据由二进制数据转化为程序中数据底层传输载体的数据传输类型
 	 * <p>
-	 * {@link com.keimons.platform.process.BaseProcessor} 将二进制的数据转化为
+	 * {@link IProcessor} 将二进制的数据转化为
 	 * 程序可识别的载体，并交由消息处理器进行处理。
 	 *
 	 * @return 传输类型

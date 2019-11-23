@@ -6,7 +6,7 @@ import com.keimons.platform.session.Session;
  * 消息处理器
  * <p>
  * 在这个接口中，仅仅设计了核心的接口，并设计例如getMsgCode() getInterval() getDesc()等接口
- * 考虑到整个项目都会使用{注解-安装}的模式，所以，将描述信息存放在了
+ * 考虑到整个项目都会使用{注解-安装}的模式，所以，将协议的描述信息存放在了
  * {@link com.keimons.platform.annotation.AProcessor}而不
  * 是在这个接口中实现
  * <p>
@@ -16,14 +16,7 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  */
-public abstract class BaseProcessor<T> implements IRoute<T> {
-
-	/**
-	 * 获取入站出站消息类型
-	 *
-	 * @return 入站出站消息类型
-	 */
-	public abstract Class<T> getMessageType();
+public interface IProcessor<T> {
 
 	/**
 	 * 处理消息
@@ -33,5 +26,5 @@ public abstract class BaseProcessor<T> implements IRoute<T> {
 	 * @param session 客户端-服务器 会话
 	 * @param packet  客户端发送过来的数据
 	 */
-	public abstract void processor(Session session, T packet);
+	void processor(Session session, T packet);
 }
