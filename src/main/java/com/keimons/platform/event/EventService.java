@@ -67,6 +67,22 @@ public class EventService {
 	}
 
 	/**
+	 * 发布事件
+	 *
+	 * @param player    玩家
+	 * @param eventCode 事件号
+	 * @param params    参数列表
+	 * @param <T>       事件枚举
+	 */
+	public static <T extends Enum<T> & IEventCode> void syncPublicEvent(IPlayer player, T eventCode, Object... params) {
+		Event event = new Event();
+		event.setPlayer(player);
+		event.setEventCode(eventCode);
+		event.setParams(params);
+		onEvent(event, -1, false);
+	}
+
+	/**
 	 * 注册事件处理器
 	 *
 	 * @param handler 处理器

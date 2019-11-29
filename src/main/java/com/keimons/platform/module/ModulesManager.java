@@ -1,13 +1,10 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.annotation.APlayerData;
-import com.keimons.platform.datebase.RedissonManager;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.IPlayer;
-import com.keimons.platform.unit.CharsetUtil;
 import com.keimons.platform.unit.ClassUtil;
-import org.redisson.client.codec.ByteArrayCodec;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,16 +59,9 @@ public class ModulesManager {
 	public void persistence(Modules modules, boolean coercive) {
 		if (modules != null) {
 			try {
-				Map<byte[], byte[]> module = new HashMap<>();
 				for (IPlayerData data : modules.getModules()) {
 					data.encode();
-					byte[] bytes = data.persistence(coercive);
-					if (bytes != null) {
-						module.put(CharsetUtil.getUTF8(data.getModuleName()), bytes);
-					}
-				}
-				if (!module.isEmpty()) {
-					RedissonManager.setMapValues(ByteArrayCodec.INSTANCE, modules.getIdentifier(), module);
+                    data.save(modules.getIdentifier(), coercive);
 				}
 			} catch (Exception e) {
 				LogService.error(e, "存储玩家数据失败");

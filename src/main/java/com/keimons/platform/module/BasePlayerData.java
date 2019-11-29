@@ -14,7 +14,7 @@ import com.keimons.platform.unit.MD5Util;
  * @version 1.0
  * @since 1.0
  */
-public abstract class BasePlayerData implements IPlayerData {
+public abstract class BasePlayerData implements IPlayerData, IBytesPersistence {
 
 	/**
 	 * 计算上次的MD5
