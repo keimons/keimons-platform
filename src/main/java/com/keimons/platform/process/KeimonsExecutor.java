@@ -25,12 +25,12 @@ public class KeimonsExecutor<T> {
 	/**
 	 * 中耗时线程队列
 	 */
-	private static Executor[] midExecutor;
+	private Executor[] midExecutor;
 
 	/**
 	 * 长耗时线程队列
 	 */
-	private static Executor[] lowExecutor;
+	private Executor[] lowExecutor;
 
 	/**
 	 * 单线程队列
@@ -40,40 +40,17 @@ public class KeimonsExecutor<T> {
 	/**
 	 * 中耗时线程数量
 	 */
-	private static int MID_MAX;
+	private int MID_MAX;
 
 	/**
 	 * 长耗时线程数量
 	 */
-	private static int LOW_MAX;
-
-	/**
-	 * 单利
-	 */
-	private static KeimonsExecutor instance;
-
-	private KeimonsExecutor() {
-
-	}
-
-	/**
-	 * 单利模式 业务执行器
-	 *
-	 * @param <T> 类型
-	 * @return 执行器
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> KeimonsExecutor<T> getInstance() {
-		if (instance == null) {
-			instance = new KeimonsExecutor();
-		}
-		return instance;
-	}
+	private int LOW_MAX;
 
 	/**
 	 * 初始化消息处理线程模型
 	 */
-	public static void init() {
+	public KeimonsExecutor() {
 		if (KeimonsServer.KeimonsConfig.getNetThreadCount()[0] <= 0) {
 			throw new KeimonsConfigException(KeimonsConfig.NET_THREAD_COUNT);
 		}
@@ -151,12 +128,11 @@ public class KeimonsExecutor<T> {
 	 *
 	 * @param threadName 线程名
 	 * @param callable   执行消息体
-	 * @param <T>        返回值类型
 	 * @return 执行结果
 	 * @throws ExecutionException   异常
 	 * @throws InterruptedException 异常
 	 */
-	public static <T> T syncProcessor(String threadName, Callable<T> callable)
+	public static <R> R syncProcessor(String threadName, Callable<R> callable)
 			throws ExecutionException, InterruptedException {
 		return singleThreads.get(threadName).offer(callable);
 	}

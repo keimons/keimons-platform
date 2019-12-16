@@ -5,7 +5,7 @@ import com.keimons.platform.log.LogService;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -120,6 +120,82 @@ public class ClassUtil {
 		}
 
 		return classes;
+	}
+
+	/**
+	 * 查找一个对象的泛型类型
+	 *
+	 * @param object 对象
+	 * @param clazz  类型
+	 * @param param  泛型参数名
+	 * @return 类型
+	 */
+	public static Class<?> find(final Object object, Class<?> clazz, String param) {
+		final Class<?> thisClass = object.getClass();
+		Class<?> currentClass = thisClass;
+		for (; ; ) {
+			if (currentClass.getSuperclass() == clazz) {
+				int typeParamIndex = -1;
+				TypeVariable<?>[] typeParams = currentClass.getSuperclass().getTypeParameters();
+				for (int i = 0; i < typeParams.length; i++) {
+					if (param.equals(typeParams[i].getName())) {
+						typeParamIndex = i;
+						break;
+					}
+				}
+
+				if (typeParamIndex < 0) {
+					throw new IllegalStateException(
+							"unknown type parameter '" + param + "': " + clazz);
+				}
+
+				Type genericSuperType = currentClass.getGenericSuperclass();
+				if (!(genericSuperType instanceof ParameterizedType)) {
+					return Object.class;
+				}
+
+				Type[] actualTypeParams = ((ParameterizedType) genericSuperType).getActualTypeArguments();
+
+				Type actualTypeParam = actualTypeParams[typeParamIndex];
+				if (actualTypeParam instanceof ParameterizedType) {
+					actualTypeParam = ((ParameterizedType) actualTypeParam).getRawType();
+				}
+				if (actualTypeParam instanceof Class) {
+					return (Class<?>) actualTypeParam;
+				}
+				if (actualTypeParam instanceof GenericArrayType) {
+					Type componentType = ((GenericArrayType) actualTypeParam).getGenericComponentType();
+					if (componentType instanceof ParameterizedType) {
+						componentType = ((ParameterizedType) componentType).getRawType();
+					}
+					if (componentType instanceof Class) {
+						return Array.newInstance((Class<?>) componentType, 0).getClass();
+					}
+				}
+				if (actualTypeParam instanceof TypeVariable) {
+					// Resolved type parameter points to another type parameter.
+					TypeVariable<?> v = (TypeVariable<?>) actualTypeParam;
+					currentClass = thisClass;
+					if (!(v.getGenericDeclaration() instanceof Class)) {
+						return Object.class;
+					}
+
+					clazz = (Class<?>) v.getGenericDeclaration();
+					param = v.getName();
+					if (clazz.isAssignableFrom(thisClass)) {
+						continue;
+					} else {
+						return Object.class;
+					}
+				}
+
+				return fail(thisClass, param);
+			}
+			currentClass = currentClass.getSuperclass();
+			if (currentClass == null) {
+				return fail(thisClass, param);
+			}
+		}
 	}
 
 	/**
@@ -304,5 +380,17 @@ public class ClassUtil {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 查找失败
+	 *
+	 * @param type  类文件
+	 * @param param 参数名
+	 * @return 抛出异常，并且不会返回任何内容
+	 */
+	private static Class<?> fail(Class<?> type, String param) {
+		throw new IllegalStateException(
+				"泛型类型参数查找失败 '" + param + "': " + type);
 	}
 }

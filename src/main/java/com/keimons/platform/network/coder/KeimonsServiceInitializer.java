@@ -1,7 +1,6 @@
 package com.keimons.platform.network.coder;
 
 import com.keimons.platform.network.KeimonsHandler;
-import com.keimons.platform.network.MessageConverter;
 import com.keimons.platform.process.ProcessorManager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -16,12 +15,17 @@ import io.netty.handler.timeout.IdleStateHandler;
  */
 public class KeimonsServiceInitializer<I> extends ChannelInitializer<SocketChannel> {
 
-	private final MessageConverter<I> converter;
+	private final CodecAdapter<I> codecAdapter;
+
+	private final ByteAdapter byteAdapter;
 
 	private final ProcessorManager<I> executor;
 
-	public KeimonsServiceInitializer(MessageConverter<I> converter, ProcessorManager<I> processorManager) {
-		this.converter = converter;
+	public KeimonsServiceInitializer(CodecAdapter<I> converter,
+									 ByteAdapter byteAdapter,
+									 ProcessorManager<I> processorManager) {
+		this.codecAdapter = converter;
+		this.byteAdapter = byteAdapter;
 		this.executor = processorManager;
 	}
 
@@ -29,10 +33,8 @@ public class KeimonsServiceInitializer<I> extends ChannelInitializer<SocketChann
 	protected void initChannel(SocketChannel ch) {
 		ch.pipeline()
 				.addLast("IdleHandler", new IdleStateHandler(5 * 60, 5 * 60, 5 * 60))
-				.addLast("FramerDecoder", new ClientRequestFrameDecoder())
-				.addLast("RequestDecoder", new ClientRequestDecoder<>(converter.getInboundConverter()))
-				.addLast("FramerEncoder", new ServerResponseFrameEncoder())
-				.addLast("RequestEncoder", new ServerResponseEncoder<>(converter.getMessageType(), converter.getOutboundConverter()))
-				.addLast("KeimonsHandler", new KeimonsHandler<>(converter.getMessageType(), executor));
+				.addLast("byteAdapter", byteAdapter)
+				.addLast("codecAdapter", codecAdapter)
+				.addLast("KeimonsHandler", new KeimonsHandler<>(codecAdapter.getMessageType(), executor));
 	}
 }

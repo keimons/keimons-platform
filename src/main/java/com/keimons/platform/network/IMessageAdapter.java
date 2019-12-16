@@ -11,7 +11,7 @@ import io.netty.channel.ChannelHandlerContext;
  * @version 1.0
  * @since 1.8
  */
-public interface IMessageConverter<T, R> {
+public interface IMessageAdapter<T, R> {
 
 	/**
 	 * 消息转化

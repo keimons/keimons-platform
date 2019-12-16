@@ -5,7 +5,6 @@ import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AProcessor;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.MessageConverter;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -51,6 +50,8 @@ public class ProcessorManager<I> {
 	 */
 	private final Class<I> messageType;
 
+	private KeimonsExecutor<I> executor = new KeimonsExecutor<>();
+
 	/**
 	 * 构造器
 	 *
@@ -71,17 +72,16 @@ public class ProcessorManager<I> {
 	public void execute(Session session, I packet) {
 		int msgCode = message2Code.apply(packet);
 		ProcessorInfo<I> processorInfo = processors.get(msgCode);
-		KeimonsExecutor<I> instance = KeimonsExecutor.getInstance();
 		if (processorInfo != null) {
 			switch (processorInfo.selectThreadLevel()) {
 				case H_LEVEL:
-					instance.asyncTopProcessor(session, processorInfo, packet);
+					executor.asyncTopProcessor(session, processorInfo, packet);
 					break;
 				case M_LEVEL:
-					instance.asyncMidProcessor(session, processorInfo, packet);
+					executor.asyncMidProcessor(session, processorInfo, packet);
 					break;
 				case L_LEVEL:
-					instance.asyncLowProcessor(session, processorInfo, packet);
+					executor.asyncLowProcessor(session, processorInfo, packet);
 					break;
 				default:
 			}
@@ -95,10 +95,10 @@ public class ProcessorManager<I> {
 	 *
 	 * @param threadName 线程名
 	 * @param callable   执行内容
-	 * @param <T>        返回值类型
+	 * @param <R>        返回值类型
 	 * @return 执行结果
 	 */
-	public static <T> T execute(String threadName, Callable<T> callable) {
+	public static <R> R execute(String threadName, Callable<R> callable) {
 		try {
 			return KeimonsExecutor.syncProcessor(threadName, callable);
 		} catch (ExecutionException | InterruptedException e) {
@@ -122,14 +122,13 @@ public class ProcessorManager<I> {
 	 * <p>
 	 * 扫描指定位置下的所有Class文件，如果该类标注了{@link AProcessor}根据消息号进行
 	 * 消息号的添加，整个功能都是按照消息号来求情的，消息号所有操作的标识。当消息号被加载
-	 * 到系统时，需要校验消息号是否能处理底层系统
-	 * {@link MessageConverter#getInboundConverter()}并对消息号进行校验。
+	 * 到系统时，需要校验消息号是否能处理底层系统并对消息号进行校验。
 	 *
 	 * @param packageName 消息号所在包
 	 */
 	public void addProcessor(String packageName) {
-		List<Class<IProcessor<?>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
-		for (Class<IProcessor<?>> clazz : classes) {
+		List<Class<Processor<?>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
+		for (Class<Processor<?>> clazz : classes) {
 			AProcessor info = clazz.getAnnotation(AProcessor.class);
 			if (info.ThreadLevel() == ThreadLevel.AUTO &&
 					!KeimonsServer.KeimonsConfig.isAutoThreadLevel()) {
@@ -148,15 +147,25 @@ public class ProcessorManager<I> {
 					!clazz.getName().equals(processors.get(info.MsgCode()).getClass().getName())) {
 				throw new ModuleException("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
+			Processor<?> instance = null;
 			try {
-				@SuppressWarnings("unchecked")
-				IProcessor<I> processor = (IProcessor<I>) clazz.getDeclaredConstructor().newInstance();
-
-				processors.put(info.MsgCode(), new ProcessorInfo<>(info, processor));
-				System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
+				instance = clazz.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
 				LogService.error(e, clazz.getSimpleName() + "，安装消息处理器失败");
+				System.exit(1);
 			}
+
+			Class<?> type = ClassUtil.find(instance, Processor.class, "T");
+
+			if (!type.equals(messageType)) {
+				throw new ModuleException("载体信息错误" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
+			}
+
+			@SuppressWarnings("unchecked")
+			Processor<I> processor = (Processor<I>) instance;
+
+			processors.put(info.MsgCode(), new ProcessorInfo<>(info, processor));
+			System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
 			System.out.println("成功安装消息处理器：" + clazz.getSimpleName());
 		}
 	}

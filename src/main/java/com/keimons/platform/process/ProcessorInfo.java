@@ -56,7 +56,7 @@ public class ProcessorInfo<T> {
 	/**
 	 * 消息处理器
 	 */
-	private IProcessor<T> processor;
+	private Processor<T> processor;
 
 	/**
 	 * 总的执行时间
@@ -78,7 +78,7 @@ public class ProcessorInfo<T> {
 	 */
 	private int AND;
 
-	public ProcessorInfo(AProcessor info, IProcessor<T> processor) {
+	public ProcessorInfo(AProcessor info, Processor<T> processor) {
 		if (info.ThreadLevel() == ThreadLevel.AUTO &&
 				(info.Sampling() <= 0 || (info.Sampling() & (info.Sampling() - 1)) != 0)) {
 			throw new NumberFormatException("必须是2的整数次幂");

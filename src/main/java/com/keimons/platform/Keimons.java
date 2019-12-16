@@ -12,8 +12,7 @@ import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.ModulesManager;
 import com.keimons.platform.network.KeimonsTcpService;
-import com.keimons.platform.network.MessageConverter;
-import com.keimons.platform.process.KeimonsExecutor;
+import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.process.ProcessorManager;
 import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
@@ -22,11 +21,15 @@ import com.keimons.platform.unit.TimeUtil;
 import java.util.*;
 
 /**
+ * Keimons模块集合
+ *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  **/
-public class KeimonsPlatform<I> {
+public class Keimons<T> {
+
+	private Class<T> messageType;
 
 	/**
 	 * 所有的管理器
@@ -40,17 +43,15 @@ public class KeimonsPlatform<I> {
 
 	KeimonsConfig config;
 
-	MessageConverter<I> converter;
+	KeimonsTcpService<T> net;
 
-	KeimonsTcpService<I> net;
+	ProcessorManager<T> executor;
 
-	ProcessorManager<I> executor;
-
-	public KeimonsPlatform(KeimonsConfig config, MessageConverter<I> converter) {
+	public Keimons(KeimonsConfig config, CodecAdapter<T> adapter) {
+		this.messageType = adapter.getMessageType();
 		this.config = config;
-		this.converter = converter;
-		executor = new ProcessorManager<>(converter.getMsg2CodeConverter(), converter.getMessageType());
-		net = new KeimonsTcpService<>(converter, executor);
+		executor = new ProcessorManager<>(adapter::getMsgCode, messageType);
+		net = new KeimonsTcpService<>(adapter, executor);
 	}
 
 	public void start() {
@@ -88,7 +89,6 @@ public class KeimonsPlatform<I> {
 
 			System.out.println("************************* 完成安装模块 *************************");
 		}
-		KeimonsExecutor.init();
 
 		net.init();
 	}

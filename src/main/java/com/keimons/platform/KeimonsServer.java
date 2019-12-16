@@ -2,7 +2,7 @@ package com.keimons.platform;
 
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
-import com.keimons.platform.network.MessageConverter;
+import com.keimons.platform.network.coder.CodecAdapter;
 
 import java.util.Collection;
 
@@ -23,7 +23,7 @@ public class KeimonsServer {
 	/**
 	 * 系统平台
 	 */
-	private static KeimonsPlatform<?> platform;
+	private static Keimons<?> platform;
 
 	public static KeimonsConfig KeimonsConfig;
 
@@ -32,11 +32,10 @@ public class KeimonsServer {
 	 * <p>
 	 * 采用默认的配置
 	 *
-	 * @param converter 消息转化器
-	 * @param <T>       输入/输出类型
+	 * @param codecAdapter 消息转化器
 	 */
-	public static <T> void start(MessageConverter<T> converter) {
-		start(com.keimons.platform.KeimonsConfig.defaultConfig(), converter);
+	public static void start(CodecAdapter codecAdapter) {
+		start(com.keimons.platform.KeimonsConfig.defaultConfig(), codecAdapter);
 	}
 
 	/**
@@ -45,12 +44,12 @@ public class KeimonsServer {
 	 * 采用默认的配置文件
 	 *
 	 * @param path      文件路径
-	 * @param converter 消息转化器
+	 * @param codecAdapter 消息转化器
 	 * @param <T>       输入/输出类型
 	 * @deprecated 暂未完成
 	 */
 	@Deprecated
-	public static <T> void start(String path, MessageConverter<T> converter) {
+	public static <T> void start(String path, CodecAdapter<T> codecAdapter) {
 
 	}
 
@@ -58,12 +57,13 @@ public class KeimonsServer {
 	 * 启动入口
 	 *
 	 * @param keimonsConfig 启动入口
-	 * @param converter     消息转化器
+	 * @param codecAdapter     消息转化器
 	 * @param <T>           输入/输出类型
 	 */
-	public static <T> void start(KeimonsConfig keimonsConfig, MessageConverter<T> converter) {
+	public static <T> void start(KeimonsConfig keimonsConfig, CodecAdapter<T> codecAdapter) {
 		KeimonsConfig = keimonsConfig;
-		platform = new KeimonsPlatform<>(keimonsConfig, converter);
+		Keimons<T> platform = new Keimons<>(keimonsConfig, codecAdapter);
+		KeimonsServer.platform = platform;
 		platform.start();
 	}
 
@@ -81,7 +81,7 @@ public class KeimonsServer {
 		platform.shutdown();
 	}
 
-	public static KeimonsPlatform<?> getPlatform() {
+	public static Keimons<?> getPlatform() {
 		return platform;
 	}
 

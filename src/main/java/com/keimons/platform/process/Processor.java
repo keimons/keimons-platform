@@ -16,7 +16,7 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  */
-public interface IProcessor<T> {
+public abstract class Processor<T> {
 
 	/**
 	 * 处理消息
@@ -26,5 +26,5 @@ public interface IProcessor<T> {
 	 * @param session 客户端-服务器 会话
 	 * @param packet  客户端发送过来的数据
 	 */
-	void processor(Session session, T packet);
+	public abstract void processor(Session session, T packet);
 }

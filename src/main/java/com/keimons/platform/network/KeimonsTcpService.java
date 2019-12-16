@@ -2,6 +2,8 @@ package com.keimons.platform.network;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.network.coder.CodecAdapter;
+import com.keimons.platform.network.coder.DefaultByteAdapter;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
 import com.keimons.platform.process.ProcessorManager;
 import io.netty.bootstrap.ServerBootstrap;
@@ -32,12 +34,12 @@ public class KeimonsTcpService<T> {
 	 */
 	private EventLoopGroup workerGroup;
 
-	private final MessageConverter<T> converter;
+	private final CodecAdapter<T> codecAdapter;
 
 	private final ProcessorManager<T> executor;
 
-	public KeimonsTcpService(MessageConverter<T> converter, ProcessorManager<T> executor) {
-		this.converter = converter;
+	public KeimonsTcpService(CodecAdapter<T> codecAdapter, ProcessorManager<T> executor) {
+		this.codecAdapter = codecAdapter;
 		this.executor = executor;
 	}
 
@@ -61,7 +63,7 @@ public class KeimonsTcpService<T> {
 				b.channel(NioServerSocketChannel.class);
 			}
 			b.group(bossGroup, workerGroup);
-			b.childHandler(new KeimonsServiceInitializer<>(converter, executor));
+			b.childHandler(new KeimonsServiceInitializer<>(codecAdapter, new DefaultByteAdapter(), executor));
 			b.option(ChannelOption.SO_BACKLOG, 1024);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.childOption(ChannelOption.TCP_NODELAY, true); // 关闭Nagle的算法
