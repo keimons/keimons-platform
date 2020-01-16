@@ -2,11 +2,9 @@ package com.keimons.platform.module;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.datebase.RedissonManager;
-import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.iface.IModule;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.IPlayer;
-import com.keimons.platform.unit.CharsetUtil;
-import com.keimons.platform.unit.CodeUtil;
 import org.redisson.client.codec.ByteArrayCodec;
 
 import java.util.Map;
@@ -98,26 +96,21 @@ public class Loader implements Runnable {
 				int size = 0;
 				Map<byte[], byte[]> bytes = RedissonManager.getMapValues(ByteArrayCodec.INSTANCE, identifier);
 				if (bytes != null) {
-					for (Map.Entry<byte[], byte[]> entry : bytes.entrySet()) {
-						size += entry.getKey().length;
-						size += entry.getValue().length;
-						String moduleName = CharsetUtil.getUTF8(entry.getKey());
-						// 反序列化
-						IPlayerData data = CodeUtil.decode(ModulesManager.classes.get(moduleName), entry.getValue());
-						if (data != null) {
-							modules.addPlayerData(data);
-						}
-					}
+					modules.load(bytes);
 				}
 				if (KeimonsServer.KeimonsConfig.isDebug()) {
 					LogService.debug("玩家ID：" + identifier + "，数据模块共计：" + size + "字节！");
 				}
-				modules.checkPlayerData();
-				for (IPlayerData module : modules.getModules()) {
-					module.decode();
+				modules.check();
+				for (Map<Object, IModule> value : modules.getModules().values()) {
+					for (IModule module : value.values()) {
+						module.decode();
+					}
 				}
-				for (IPlayerData data : modules.getModules()) {
-					data.loaded(player);
+				for (Map<Object, IModule> value : modules.getModules().values()) {
+					for (IModule module : value.values()) {
+						module.loaded(player);
+					}
 				}
 			}
 			ModulesManager.cacheModules(identifier, modules);

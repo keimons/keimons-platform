@@ -1,10 +1,10 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.iface.IModule;
 import com.keimons.platform.module.Modules;
 import com.keimons.platform.session.Session;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * 玩家基类
@@ -59,12 +59,17 @@ public abstract class BasePlayer implements IPlayer {
 	}
 
 	@Override
-	public <T extends IPlayerData> T getModule(String moduleName) {
-		return modules.getModule(moduleName);
+	public <T extends IModule> T getModule(Class<T> module) {
+		return getModule(module, Modules.DEFAULT_MODULE_KEY);
 	}
 
 	@Override
-	public Collection<IPlayerData> getModules() {
+	public <T extends IModule> T getModule(Class<T> module, Object object) {
+		return modules.getModule(module, object);
+	}
+
+	@Override
+	public Map<String, Map<Object, IModule>> getModules() {
 		return modules.getModules();
 	}
 

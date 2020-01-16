@@ -1,8 +1,7 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.annotation.APlayerData;
-import com.keimons.platform.iface.IPlayerData;
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.iface.IModule;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -25,7 +24,7 @@ public class ModulesManager {
 	/**
 	 * 玩家数据模块
 	 */
-	public static Map<String, Class<? extends IPlayerData>> classes = new HashMap<>();
+	public static Map<String, Class<? extends IModule>> classes = new HashMap<>();
 
 	/**
 	 * 玩家数据
@@ -57,16 +56,7 @@ public class ModulesManager {
 	 * @param coercive 是否强制存储
 	 */
 	public void persistence(Modules modules, boolean coercive) {
-		if (modules != null) {
-			try {
-				for (IPlayerData data : modules.getModules()) {
-					data.encode();
-                    data.save(modules.getIdentifier(), coercive);
-				}
-			} catch (Exception e) {
-				LogService.error(e, "存储玩家数据失败");
-			}
-		}
+		modules.save(coercive);
 	}
 
 	/**
@@ -77,7 +67,7 @@ public class ModulesManager {
 	 */
 	public static Modules createModules(IPlayer player) {
 		Modules modules = new Modules(player.uuid());
-		modules.checkPlayerData();
+		modules.check();
 		player.setModules(modules);
 		cacheModules(player.uuid(), modules);
 		return modules;
@@ -143,17 +133,11 @@ public class ModulesManager {
 	 * @param packageName 包名
 	 */
 	public static void addPlayerData(String packageName) {
-		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
-		for (Class<IPlayerData> clazz : classes) {
+		List<Class<IModule>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
+		for (Class<IModule> clazz : classes) {
 			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
-			try {
-				IPlayerData data = clazz.newInstance();
-				String moduleName = data.getModuleName();
-				ModulesManager.classes.put(moduleName, clazz);
-			} catch (InstantiationException | IllegalAccessException e) {
-				LogService.error(e, "由于模块添加是由系统底层完成，所以需要提供默认构造方法，如有初始化操作，请重载init和loaded方法中");
-				System.exit(0);
-			}
+			String moduleName = clazz.getDeclaredAnnotation(APlayerData.class).name();
+			ModulesManager.classes.put(moduleName, clazz);
 			System.out.println("成功安装独有数据模块：" + clazz.getSimpleName());
 		}
 	}

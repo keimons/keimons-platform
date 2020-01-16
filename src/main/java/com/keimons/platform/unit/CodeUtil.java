@@ -77,6 +77,6 @@ public class CodeUtil {
 	 * @return Java对象
 	 */
 	public static <T extends IData> T decode(Class<T> clazz, String data) {
-		return decode(clazz, data.getBytes(Charset.forName("ISO-8859-1")));
+		return decode(clazz, data.getBytes(Charset.forName("UTF-8")));
 	}
 }

@@ -1,10 +1,10 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.iface.IModule;
 import com.keimons.platform.module.Modules;
 import com.keimons.platform.session.Session;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * 玩家的接口
@@ -57,18 +57,28 @@ public interface IPlayer {
 	/**
 	 * 获取玩家的一个模块
 	 *
-	 * @param moduleName 模块名称
-	 * @param <T>        模块类型
+	 * @param module 模块
+	 * @param <T>    模块类型
 	 * @return 数据模块
 	 */
-	<T extends IPlayerData> T getModule(String moduleName);
+	<T extends IModule> T getModule(Class<T> module);
+
+	/**
+	 * 获取玩家的一个模块
+	 *
+	 * @param module 模块
+	 * @param object 唯一ID
+	 * @param <T>    模块类型
+	 * @return 模块
+	 */
+	<T extends IModule> T getModule(Class<T> module, Object object);
 
 	/**
 	 * 获取玩家所有的模块数据
 	 *
 	 * @return 玩家所有模块数据
 	 */
-	Collection<IPlayerData> getModules();
+	Map<String, Map<Object, IModule>> getModules();
 
 	/**
 	 * 设置活跃时间

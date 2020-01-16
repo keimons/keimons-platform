@@ -17,4 +17,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface APlayerData {
 
+	/**
+	 * 模块名称
+	 * <p>
+	 * 系统中用来标识模块的名称的
+	 *
+	 * @return 模块名称
+	 */
+	String name();
 }
