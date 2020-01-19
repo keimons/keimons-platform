@@ -142,7 +142,7 @@ public class DefaultModules extends BaseModules<String> {
 						}
 					}
 				}
-				ModulesManager.cacheModules(identifier, modules);
+				ModulesManager.cacheModules(modules);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

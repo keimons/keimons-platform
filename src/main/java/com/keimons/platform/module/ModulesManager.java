@@ -72,7 +72,7 @@ public class ModulesManager {
 		BaseModules<T> baseModules = mappingFunction.get();
 		baseModules.checkModule();
 		player.setModules(baseModules);
-		cacheModules(player.uuid(), baseModules);
+		cacheModules(baseModules);
 		return baseModules;
 	}
 
@@ -113,11 +113,10 @@ public class ModulesManager {
 	/**
 	 * 缓存玩家模块数据
 	 *
-	 * @param identifier  唯一标识符
-	 * @param baseModules 所有模块数据
+	 * @param modules 所有模块数据
 	 */
-	public static void cacheModules(Object identifier, BaseModules baseModules) {
-		ModulesManager.modules.put(identifier, baseModules);
+	public static void cacheModules(BaseModules modules) {
+		ModulesManager.modules.put(modules.getIdentifier(), modules);
 	}
 
 	/**
