@@ -1,7 +1,7 @@
 package com.keimons.platform.module;
 
+import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.annotation.APlayerData;
-import com.keimons.platform.iface.IModule;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * 玩家数据管理器
@@ -24,12 +25,12 @@ public class ModulesManager {
 	/**
 	 * 玩家数据模块
 	 */
-	public static Map<String, Class<? extends IModule>> classes = new HashMap<>();
+	public static Map<String, Class<? extends IPlayerData>> classes = new HashMap<>();
 
 	/**
 	 * 玩家数据
 	 */
-	private static Map<String, Modules> modules = new HashMap<>();
+	private static Map<Object, BaseModules<?>> modules = new HashMap<>();
 
 	/**
 	 * 存储所有模块的当前版本号，这个版本号依赖于class文件的变动
@@ -44,33 +45,35 @@ public class ModulesManager {
 	 * @param coercive 是否强制存储
 	 */
 	public void persistence(boolean coercive) {
-		for (Modules modules : modules.values()) {
-			persistence(modules, coercive);
+		for (BaseModules<?> baseModules : modules.values()) {
+			persistence(baseModules, coercive);
 		}
 	}
 
 	/**
 	 * 持久化一个玩家
 	 *
-	 * @param modules  玩家
-	 * @param coercive 是否强制存储
+	 * @param baseModules 玩家
+	 * @param coercive    是否强制存储
 	 */
-	public void persistence(Modules modules, boolean coercive) {
-		modules.save(coercive);
+	public void persistence(BaseModules<?> baseModules, boolean coercive) {
+		baseModules.save(coercive);
 	}
 
 	/**
 	 * 创建并缓存模块数据
 	 *
-	 * @param player 玩家
+	 * @param player          玩家
+	 * @param mappingFunction 构造函数
+	 * @param <T>             玩家数据的唯一标识符的类型
 	 * @return 模块数据
 	 */
-	public static Modules createModules(IPlayer player) {
-		Modules modules = new Modules(player.uuid());
-		modules.check();
-		player.setModules(modules);
-		cacheModules(player.uuid(), modules);
-		return modules;
+	public static <T> BaseModules createModules(IPlayer<T> player, Supplier<? extends BaseModules<T>> mappingFunction) {
+		BaseModules<T> baseModules = mappingFunction.get();
+		baseModules.checkModule();
+		player.setModules(baseModules);
+		cacheModules(player.uuid(), baseModules);
+		return baseModules;
 	}
 
 	/**
@@ -93,7 +96,7 @@ public class ModulesManager {
 	 * @param player 玩家
 	 * @return 玩家所有模块
 	 */
-	public static Modules load(IPlayer player) {
+	public static BaseModules load(IPlayer player) {
 		return Loader.fastLoad(player);
 	}
 
@@ -103,28 +106,30 @@ public class ModulesManager {
 	 * @param identifier 数据唯一标识符
 	 * @param consumer   消费函数，加载成功后执行逻辑
 	 */
-	public static void loadModules(String identifier, Consumer<Modules> consumer) {
+	public static void loadModules(String identifier, Consumer<BaseModules<?>> consumer) {
 
 	}
 
 	/**
 	 * 缓存玩家模块数据
 	 *
-	 * @param identifier 唯一标识符
-	 * @param modules    所有模块数据
+	 * @param identifier  唯一标识符
+	 * @param baseModules 所有模块数据
 	 */
-	public static void cacheModules(String identifier, Modules modules) {
-		ModulesManager.modules.put(identifier, modules);
+	public static void cacheModules(Object identifier, BaseModules baseModules) {
+		ModulesManager.modules.put(identifier, baseModules);
 	}
 
 	/**
 	 * 获取玩家的模块
 	 *
 	 * @param identifier 唯一标识符
+	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @return 模块集合
 	 */
-	public static Modules getModules(String identifier) {
-		return modules.get(identifier);
+	@SuppressWarnings("unchecked")
+	public static <T> BaseModules<T> getModules(T identifier) {
+		return (BaseModules<T>) modules.get(identifier);
 	}
 
 	/**
@@ -133,10 +138,10 @@ public class ModulesManager {
 	 * @param packageName 包名
 	 */
 	public static void addPlayerData(String packageName) {
-		List<Class<IModule>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
-		for (Class<IModule> clazz : classes) {
+		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
+		for (Class<IPlayerData> clazz : classes) {
 			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
-			String moduleName = clazz.getDeclaredAnnotation(APlayerData.class).name();
+			String moduleName = clazz.getDeclaredAnnotation(APlayerData.class).moduleName();
 			ModulesManager.classes.put(moduleName, clazz);
 			System.out.println("成功安装独有数据模块：" + clazz.getSimpleName());
 		}

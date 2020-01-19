@@ -1,19 +1,22 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IModule;
-import com.keimons.platform.module.Modules;
+import com.keimons.platform.iface.IRepeatedData;
+import com.keimons.platform.iface.ISingularData;
+import com.keimons.platform.module.BaseModules;
 import com.keimons.platform.session.Session;
 
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * 玩家的接口
  *
+ * @param <T> 唯一标识符类型
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  **/
-public interface IPlayer {
+public interface IPlayer<T> {
 
 	/**
 	 * 获取用于标识唯一玩家的数据唯一标识符
@@ -24,7 +27,7 @@ public interface IPlayer {
 	 *
 	 * @return 唯一标识符
 	 */
-	String uuid();
+	T uuid();
 
 	/**
 	 * 设置session
@@ -48,37 +51,46 @@ public interface IPlayer {
 	boolean isLoaded();
 
 	/**
-	 * 设置所有模块
-	 *
-	 * @param modules 模块
-	 */
-	void setModules(Modules modules);
-
-	/**
 	 * 获取玩家的一个模块
 	 *
 	 * @param module 模块
-	 * @param <T>    模块类型
+	 * @param <V>    模块类型
 	 * @return 数据模块
 	 */
-	<T extends IModule> T getModule(Class<T> module);
+	<V extends ISingularData> V getPlayerData(Class<V> module);
 
 	/**
 	 * 获取玩家的一个模块
 	 *
 	 * @param module 模块
 	 * @param object 唯一ID
-	 * @param <T>    模块类型
+	 * @param <V>    模块类型
 	 * @return 模块
 	 */
-	<T extends IModule> T getModule(Class<T> module, Object object);
+	<V extends IRepeatedData> V getPlayerData(Class<V> module, Object object);
 
 	/**
 	 * 获取玩家所有的模块数据
 	 *
 	 * @return 玩家所有模块数据
 	 */
-	Map<String, Map<Object, IModule>> getModules();
+	BaseModules<T> getModules();
+
+	/**
+	 * 设置所有模块
+	 *
+	 * @param baseModules 模块
+	 */
+	void setModules(BaseModules<T> baseModules);
+
+	/**
+	 * 获取加载器
+	 *
+	 * @param consumer  消耗函数
+	 * @param reference 引用
+	 * @return 加载器
+	 */
+	Runnable getLoader(Consumer<IPlayer<T>> consumer, AtomicReference<BaseModules<T>> reference);
 
 	/**
 	 * 设置活跃时间

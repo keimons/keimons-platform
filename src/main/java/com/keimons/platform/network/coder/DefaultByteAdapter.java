@@ -6,10 +6,10 @@ import io.netty.channel.ChannelHandlerContext;
 import java.util.List;
 
 /**
+ * 默认数据传输模式
+ *
  * @author monkey1993
  * @version 1.0
- * @date 2019-12-04
- * @since 1.8
  **/
 public class DefaultByteAdapter extends ByteAdapter {
 

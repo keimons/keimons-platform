@@ -1,13 +1,8 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.datebase.RedissonManager;
-import com.keimons.platform.iface.IModule;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.IPlayer;
-import org.redisson.client.codec.ByteArrayCodec;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -33,11 +28,12 @@ public class Loader implements Runnable {
 	 * 立即加载玩家数据（阻塞加载）
 	 *
 	 * @param player 玩家唯一标识
+	 * @param <T>    玩家数据的唯一标识符的类型
 	 * @return 玩家所有模块
 	 */
-	public static Modules fastLoad(IPlayer player) {
-		AtomicReference<Modules> reference = new AtomicReference<>();
-		FutureTask<Void> task = new FutureTask<>(getLoader(player, null, reference), null);
+	public static <T> BaseModules<T> fastLoad(IPlayer<T> player) {
+		AtomicReference<BaseModules<T>> reference = new AtomicReference<>();
+		FutureTask<Void> task = new FutureTask<>(player.getLoader(null, reference), null);
 		loading.offerFirst(task);
 		return reference.get();
 	}
@@ -47,9 +43,10 @@ public class Loader implements Runnable {
 	 *
 	 * @param player   玩家
 	 * @param consumer 消费函数
+	 * @param <T>      玩家唯一ID类型
 	 */
-	public static void slowLoad(IPlayer player, Consumer<IPlayer> consumer) {
-		loading.add(getLoader(player, consumer, null));
+	public static <T> void slowLoad(IPlayer<T> player, Consumer<IPlayer<T>> consumer) {
+		loading.add(player.getLoader(consumer, null));
 	}
 
 	/**
@@ -74,55 +71,6 @@ public class Loader implements Runnable {
 		FutureTask<R> task = new FutureTask<>(callable);
 		loading.offerFirst(task);
 		return task.get();
-	}
-
-	/**
-	 * 解码器
-	 *
-	 * @param player    玩家
-	 * @param consumer  加载成功后消费函数
-	 * @param reference 引用
-	 * @return 解码器
-	 */
-	public static Runnable getLoader(IPlayer player, Consumer<IPlayer> consumer, AtomicReference<Modules> reference) {
-		return () -> {
-			if (player.isLoaded()) {
-				LogService.warn("当前玩家已经加载过数据，正在重复加载：" + player.uuid());
-			}
-			String identifier = player.uuid();
-			Modules modules = ModulesManager.getModules(identifier);
-			if (modules == null) {
-				modules = new Modules(identifier);
-				int size = 0;
-				Map<byte[], byte[]> bytes = RedissonManager.getMapValues(ByteArrayCodec.INSTANCE, identifier);
-				if (bytes != null) {
-					modules.load(bytes);
-				}
-				if (KeimonsServer.KeimonsConfig.isDebug()) {
-					LogService.debug("玩家ID：" + identifier + "，数据模块共计：" + size + "字节！");
-				}
-				modules.check();
-				for (Map<Object, IModule> value : modules.getModules().values()) {
-					for (IModule module : value.values()) {
-						module.decode();
-					}
-				}
-				for (Map<Object, IModule> value : modules.getModules().values()) {
-					for (IModule module : value.values()) {
-						module.loaded(player);
-					}
-				}
-			}
-			ModulesManager.cacheModules(identifier, modules);
-			if (consumer != null) {
-				consumer.accept(player);
-			}
-			player.setLoaded(true);
-			player.setModules(modules);
-			if (reference != null) {
-				reference.set(modules);
-			}
-		};
 	}
 
 	@Override

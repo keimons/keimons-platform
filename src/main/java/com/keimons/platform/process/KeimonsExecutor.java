@@ -128,6 +128,7 @@ public class KeimonsExecutor<T> {
 	 *
 	 * @param threadName 线程名
 	 * @param callable   执行消息体
+	 * @param <R>        返回值类型
 	 * @return 执行结果
 	 * @throws ExecutionException   异常
 	 * @throws InterruptedException 异常

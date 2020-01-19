@@ -6,9 +6,8 @@ package com.keimons.platform.iface;
  * @param <T> 数据模块
  * @author monkey1993
  * @version 1.0
- * @date 2020-01-16
  **/
-public interface IRepeated<T> {
+public interface IRepeatedData<T> extends IPlayerData {
 
 	/**
 	 * 数据唯一标识

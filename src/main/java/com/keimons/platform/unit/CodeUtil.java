@@ -26,14 +26,10 @@ public class CodeUtil {
 	 *
 	 * @param data 数据
 	 * @return 序列化后的数据
+	 * @throws IOException 序列化错误
 	 */
-	public static byte[] encode(IData data) {
-		try {
-			return codecs.get(data.getClass()).encode(data);
-		} catch (IOException e) {
-			LogService.error(e, "序列化错误！");
-		}
-		return null;
+	public static byte[] encode(IData data) throws IOException {
+		return codecs.get(data.getClass()).encode(data);
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package com.keimons.platform.iface;
 
-import com.keimons.platform.module.Modules;
+import com.keimons.platform.module.BaseModules;
 
 /**
  * 玩家数据模块
@@ -9,7 +9,7 @@ import com.keimons.platform.module.Modules;
  * @version 1.0
  * @since 1.8
  */
-public interface IModule extends IData, ILoaded, IDataVersion {
+public interface IPlayerData extends IData, ILoaded, IDataVersion {
 
 	/**
 	 * 初始化(当且仅当对象被创建时调用)
@@ -21,5 +21,5 @@ public interface IModule extends IData, ILoaded, IDataVersion {
 	 *
 	 * @param player 玩家
 	 */
-	void init(Modules player);
+	void init(BaseModules player);
 }

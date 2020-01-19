@@ -1,5 +1,7 @@
 package com.keimons.platform.module;
 
+import java.io.IOException;
+
 /**
  * 二进制数据持久化
  * <p>
@@ -16,6 +18,7 @@ public interface IBytesPersistence {
 	 *
 	 * @param notnull 是否强制获取数据
 	 * @return 最新数据{@code null}则表示无最新数据
+	 * @throws IOException 序列化错误
 	 */
-	byte[] persistence(boolean notnull);
+	byte[] persistence(boolean notnull) throws IOException;
 }

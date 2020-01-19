@@ -1,9 +1,11 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.IModule;
+import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.MD5Util;
+
+import java.io.IOException;
 
 /**
  * 玩家数据
@@ -14,7 +16,7 @@ import com.keimons.platform.unit.MD5Util;
  * @version 1.0
  * @since 1.0
  */
-public abstract class BaseModule implements IModule, IBytesPersistence {
+public abstract class BasePlayerData implements IPlayerData, IBytesPersistence {
 
 	/**
 	 * 计算上次的MD5
@@ -32,7 +34,7 @@ public abstract class BaseModule implements IModule, IBytesPersistence {
 	private volatile int version = KeimonsServer.VERSION;
 
 	@Override
-	public byte[] persistence(boolean notnull) {
+	public byte[] persistence(boolean notnull) throws IOException {
 		byte[] bytes = CodeUtil.encode(this);
 		String thisMd5 = MD5Util.md5(bytes);
 		if (!notnull && lastMd5 != null && lastMd5.equals(thisMd5)) {

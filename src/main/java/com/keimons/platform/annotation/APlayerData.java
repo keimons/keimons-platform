@@ -24,5 +24,14 @@ public @interface APlayerData {
 	 *
 	 * @return 模块名称
 	 */
-	String name();
+	String moduleName();
+
+	/**
+	 * 是否压缩
+	 * <p>
+	 * 该模块是否要对数据进行压缩
+	 *
+	 * @return 是否压缩
+	 */
+	boolean isCompress() default false;
 }

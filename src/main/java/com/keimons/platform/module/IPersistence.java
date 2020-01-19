@@ -1,6 +1,6 @@
 package com.keimons.platform.module;
 
-import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 数据持久化标识
@@ -11,7 +11,7 @@ import java.util.Map;
  * @version 1.0
  * @since 1.8
  */
-public interface IPersistence {
+public interface IPersistence<T> {
 
 	/**
 	 * 存储
@@ -23,9 +23,9 @@ public interface IPersistence {
 	void save(boolean coercive);
 
 	/**
-	 * 加载
+	 * 加载器
 	 *
-	 * @param map 要加载的数据
+	 * @return 加载器
 	 */
-	void load(Map<byte[], byte[]> map);
+	Consumer<T> getLoader();
 }
