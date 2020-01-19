@@ -11,14 +11,15 @@ import java.io.IOException;
  * @version 1.0
  * @since 1.8
  **/
-public interface IBytesPersistence {
+public interface ISerializable {
 
 	/**
 	 * 获取持久化数据
 	 *
 	 * @param notnull 是否强制获取数据
+	 * @param <T>     序列化类型
 	 * @return 最新数据{@code null}则表示无最新数据
 	 * @throws IOException 序列化错误
 	 */
-	byte[] persistence(boolean notnull) throws IOException;
+	<T> T serialize(boolean notnull) throws IOException;
 }

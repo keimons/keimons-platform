@@ -5,7 +5,7 @@ import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IData;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.module.IBytesPersistence;
+import com.keimons.platform.module.ISerializable;
 import com.keimons.platform.module.IModulePersistence;
 import com.keimons.platform.unit.CodeUtil;
 import org.xerial.snappy.Snappy;
@@ -47,14 +47,17 @@ public class BytesModulePersistence implements IModulePersistence<byte[]> {
 			coercive = true;
 		}
 		for (IData data : module.getPlayerData()) {
-			APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
-			this.compress = annotation.isCompress();
-			byte[] persistence = ((IBytesPersistence) data).persistence(coercive);
-			if (annotation.isCompress()) {
-				persistence = Snappy.compress(persistence);
-			}
-			if (persistence != null) {
-				this.bytes.add(persistence);
+			if (data instanceof ISerializable) {
+				ISerializable serializable = (ISerializable) data;
+				APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
+				this.compress = annotation.isCompress();
+				byte[] persistence = serializable.serialize(coercive);
+				if (annotation.isCompress()) {
+					persistence = Snappy.compress(persistence);
+				}
+				if (persistence != null) {
+					this.bytes.add(persistence);
+				}
 			}
 		}
 	}

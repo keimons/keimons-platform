@@ -8,6 +8,7 @@ import com.keimons.platform.player.BaseRepeatedModule;
  *
  * @author monkey1993
  * @version 1.0
+ * @since 1.0
  **/
 public class DefaultRepeatedModule<T extends IRepeatedData> extends BaseRepeatedModule<T> {
 

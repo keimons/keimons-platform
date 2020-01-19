@@ -1,7 +1,8 @@
-package com.keimons.platform.module;
+package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.iface.ISingularData;
+import com.keimons.platform.module.ISerializable;
 import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.MD5Util;
 
@@ -16,14 +17,14 @@ import java.io.IOException;
  * @version 1.0
  * @since 1.0
  */
-public abstract class BasePlayerData implements IPlayerData, IBytesPersistence {
+public abstract class DefaultSingularData implements ISingularData, ISerializable {
 
 	/**
 	 * 计算上次的MD5
 	 * <p>
 	 * 比较两次的MD5值是否相等，如果相等，则不对这个数据进行存数，不相等则存储该模块
 	 */
-	private String lastMd5;
+	private transient String lastMd5;
 
 	/**
 	 * 当前数据版本
@@ -31,10 +32,10 @@ public abstract class BasePlayerData implements IPlayerData, IBytesPersistence {
 	 * 数据版本是数据迭代的依据，如果数据需要迭代，则先将数据序列化为二进制，再将二级
 	 * 制反序列化为新的版本数据。
 	 */
-	private volatile int version = KeimonsServer.VERSION;
+	private volatile transient int version = KeimonsServer.VERSION;
 
 	@Override
-	public byte[] persistence(boolean notnull) throws IOException {
+	public byte[] serialize(boolean notnull) throws IOException {
 		byte[] bytes = CodeUtil.encode(this);
 		String thisMd5 = MD5Util.md5(bytes);
 		if (!notnull && lastMd5 != null && lastMd5.equals(thisMd5)) {
