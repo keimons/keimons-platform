@@ -8,17 +8,16 @@ import com.keimons.platform.iface.IRepeatedData;
 import com.keimons.platform.iface.ISingularData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.BaseModules;
-import com.keimons.platform.module.IModulePersistence;
 import com.keimons.platform.module.ModulesManager;
-import com.keimons.platform.player.BytesModulePersistence;
+import com.keimons.platform.player.BytesModuleSerialize;
 import com.keimons.platform.player.IModule;
-import com.keimons.platform.unit.CodeUtil;
+import com.keimons.platform.player.SerializeUtils;
 import org.redisson.client.codec.ByteArrayCodec;
-import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -80,10 +79,9 @@ public class DefaultModules extends BaseModules<String> {
 		for (Map.Entry<String, IModule<? extends IPlayerData>> entry : modules.entrySet()) {
 			byte[] moduleName = entry.getKey().getBytes(Charset.forName("UTF-8"));
 			try {
-				IModulePersistence<byte[]> dataModule = new BytesModulePersistence();
-				dataModule.setModule(entry.getValue(), coercive);
-				bytes.put(moduleName, dataModule.serialize());
-			} catch (IOException e) {
+				byte[] serialize = SerializeUtils.serialize(BytesModuleSerialize.class, entry.getValue(), coercive);
+				bytes.put(moduleName, serialize);
+			} catch (IOException | IllegalAccessException | InstantiationException e) {
 				e.printStackTrace();
 			}
 		}
@@ -101,28 +99,23 @@ public class DefaultModules extends BaseModules<String> {
 				if (modules == null) {
 					modules = new DefaultModules(identifier);
 					int size = 0;
-					Map<byte[], byte[]> document = RedissonManager.getMapValues(ByteArrayCodec.INSTANCE, identifier);
-					if (document != null) {
-						for (Map.Entry<byte[], byte[]> entry : document.entrySet()) {
-							BytesModulePersistence persistence = CodeUtil.decode(BytesModulePersistence.class, entry.getValue());
-							if (persistence == null) {
-								continue;
-							}
+					Map<byte[], byte[]> moduleBytes = RedissonManager.getMapValues(ByteArrayCodec.INSTANCE, identifier);
+					if (moduleBytes != null) {
+						for (Map.Entry<byte[], byte[]> entry : moduleBytes.entrySet()) {
 							String moduleName = new String(entry.getKey(), Charset.forName("UTF-8"));
 							Class<? extends IPlayerData> clazz = ModulesManager.classes.get(moduleName);
-							for (byte[] bytes : persistence.getBytes()) {
-								if (persistence.isCompress()) {
-									bytes = Snappy.uncompress(bytes);
-								}
-								IPlayerData data = CodeUtil.decode(clazz, bytes);
-								if (data == null) {
+							List<? extends IPlayerData> deserialize = SerializeUtils.deserialize(
+									BytesModuleSerialize.class, clazz, entry.getValue()
+							);
+							for (IPlayerData playerData : deserialize) {
+								if (playerData == null) {
 									continue;
 								}
 								if (IRepeatedData.class.isAssignableFrom(clazz)) {
-									addRepeatedData((IRepeatedData) data);
+									addRepeatedData((IRepeatedData) playerData);
 								}
 								if (ISingularData.class.isAssignableFrom(clazz)) {
-									addSingularData((ISingularData) data);
+									addSingularData((ISingularData) playerData);
 								}
 							}
 						}

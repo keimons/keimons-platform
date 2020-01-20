@@ -11,7 +11,7 @@ import java.io.IOException;
  * @version 1.0
  * @since 1.8
  **/
-public interface ISerializable {
+public interface IDataSerializable {
 
 	/**
 	 * 获取持久化数据

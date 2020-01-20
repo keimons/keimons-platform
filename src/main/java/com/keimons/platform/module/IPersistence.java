@@ -3,9 +3,10 @@ package com.keimons.platform.module;
 import java.util.function.Consumer;
 
 /**
- * 数据持久化标识
+ * 数据持久化方案
  * <p>
- * 数据序列化为二进制后的数据，如果要对某一个模块数据进行存储
+ * 数据序列化为二进制后的数据，如果要对某一个模块数据进行存储，则需要实现这个接口，并重新这两个方法。
+ * 该接口定义了如何存储和加载数据。
  *
  * @author monkey1993
  * @version 1.0

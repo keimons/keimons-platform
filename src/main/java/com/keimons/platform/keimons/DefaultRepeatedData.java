@@ -2,7 +2,7 @@ package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.module.ISerializable;
+import com.keimons.platform.module.IDataSerializable;
 import com.keimons.platform.unit.CodeUtil;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.io.IOException;
  * @version 1.0
  * @since 1.0
  */
-public abstract class DefaultRepeatedData<T> implements IRepeatedData<T>, ISerializable {
+public abstract class DefaultRepeatedData<T> implements IRepeatedData<T>, IDataSerializable {
 
 	/**
 	 * 当前数据版本
