@@ -1,11 +1,10 @@
-package com.keimons.platform.player;
+package com.keimons.platform.module;
 
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.module.IDataSerializable;
-import com.keimons.platform.module.IModuleSerializable;
+import com.keimons.platform.player.IModule;
 import com.keimons.platform.unit.CodeUtil;
 import org.xerial.snappy.Snappy;
 
@@ -89,8 +88,8 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 				coercive = true;
 			}
 			for (IPlayerData data : module.getPlayerData()) {
-				if (data instanceof IDataSerializable) {
-					IDataSerializable serializable = (IDataSerializable) data;
+				if (data instanceof IBytesPlayerDataSerializable) {
+					IBytesPlayerDataSerializable serializable = (IBytesPlayerDataSerializable) data;
 					APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
 					compress = annotation.isCompress();
 					byte[] persistence = serializable.serialize(coercive);

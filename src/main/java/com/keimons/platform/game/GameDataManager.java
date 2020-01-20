@@ -7,6 +7,7 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.CodeUtil;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class GameDataManager {
 	 * @return 玩家数据
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IPlayerData> T loadGameData(String moduleName) {
+	public static <T extends IPlayerData> T loadGameData(String moduleName) throws IOException {
 		byte[] data = null; //RedissonManager.getMapValue(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(playerId), CharsetUtil.getUTF8(moduleType.toString()));
 		// 反序列化
 		Class<? extends IGameData> clazz = modules.get(moduleName);

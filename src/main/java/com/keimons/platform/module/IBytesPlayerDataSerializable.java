@@ -11,15 +11,14 @@ import java.io.IOException;
  * @version 1.0
  * @since 1.8
  **/
-public interface IDataSerializable {
+public interface IBytesPlayerDataSerializable extends IPlayerDataSerializable<byte[]> {
 
 	/**
 	 * 获取持久化数据
 	 *
 	 * @param notnull 是否强制获取数据
-	 * @param <T>     序列化类型
 	 * @return 最新数据{@code null}则表示无最新数据
 	 * @throws IOException 序列化错误
 	 */
-	<T> T serialize(boolean notnull) throws IOException;
+	byte[] serialize(boolean notnull) throws IOException;
 }

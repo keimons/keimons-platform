@@ -1,6 +1,6 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IData;
+import com.keimons.platform.iface.ISerializable;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.player.IModule;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * @version 1.0
  * @since 1.8
  **/
-public interface IModuleSerializable<T> extends IData {
+public interface IModuleSerializable<T> extends ISerializable {
 
 	/**
 	 * 序列化为存库数据
@@ -47,7 +47,7 @@ public interface IModuleSerializable<T> extends IData {
 	 * @version 1.0
 	 * @since 1.8
 	 **/
-	interface ISerializeModule<T> extends IData {
+	interface ISerializeModule<T> extends ISerializable {
 
 		/**
 		 * 获取模块中所有的数据

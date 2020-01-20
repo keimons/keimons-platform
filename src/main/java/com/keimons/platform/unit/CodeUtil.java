@@ -2,7 +2,7 @@ package com.keimons.platform.unit;
 
 import com.baidu.bjf.remoting.protobuf.Codec;
 import com.baidu.bjf.remoting.protobuf.ProtobufProxy;
-import com.keimons.platform.iface.IData;
+import com.keimons.platform.iface.ISerializable;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public class CodeUtil {
 	/**
 	 * 整个jar包中所有的ProtoBuf对象
 	 */
-	private static Map<Class<? extends IData>, Codec<IData>> codecs = new HashMap<>();
+	private static Map<Class<? extends ISerializable>, Codec<ISerializable>> codecs = new HashMap<>();
 
 	/**
 	 * 序列化
@@ -26,7 +26,7 @@ public class CodeUtil {
 	 * @return 序列化后的数据
 	 * @throws IOException 序列化错误
 	 */
-	public static byte[] encode(IData data) throws IOException {
+	public static byte[] encode(ISerializable data) throws IOException {
 		return codecs.get(data.getClass()).encode(data);
 	}
 
@@ -40,7 +40,7 @@ public class CodeUtil {
 	 * @return Java对象
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IData> T decode(Class<T> clazz, byte[] data) throws IOException {
+	public static <T extends ISerializable> T decode(Class<T> clazz, byte[] data) throws IOException {
 		Codec<T> codec = (Codec<T>) codecs.get(clazz);
 		if (codec == null) {
 			synchronized (CodeUtil.class) {
@@ -49,7 +49,7 @@ public class CodeUtil {
 					// 由程序自行缓存，关闭工具的自带缓存
 					ProtobufProxy.enableCache(false);
 					codec = ProtobufProxy.create(clazz, true);
-					codecs.put(clazz, (Codec<IData>) codec);
+					codecs.put(clazz, (Codec<ISerializable>) codec);
 				}
 			}
 		}

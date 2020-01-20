@@ -9,7 +9,7 @@ import com.keimons.platform.module.BaseModules;
  * @version 1.0
  * @since 1.8
  */
-public interface IPlayerData extends IData, ILoaded, IDataVersion {
+public interface IPlayerData extends ISerializable, ILoaded, IDataVersion {
 
 	/**
 	 * 初始化(当且仅当对象被创建时调用)

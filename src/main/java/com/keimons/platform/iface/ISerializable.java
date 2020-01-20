@@ -1,13 +1,13 @@
 package com.keimons.platform.iface;
 
 /**
- * 玩家数据
+ * 可以进行序列化的数据
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  */
-public interface IData {
+public interface ISerializable {
 
 	/**
 	 * 解码 数据最原始的解码操作

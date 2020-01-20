@@ -1,6 +1,6 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IData;
+import com.keimons.platform.iface.ISerializable;
 import com.keimons.platform.iface.IPlayerData;
 
 import java.util.Collection;
@@ -14,7 +14,7 @@ import java.util.Collection;
  * @author monkey1993
  * @version 1.0
  **/
-public interface IModule<T extends IPlayerData> extends IData {
+public interface IModule<T extends IPlayerData> extends ISerializable {
 
 	/**
 	 * 增加数据
