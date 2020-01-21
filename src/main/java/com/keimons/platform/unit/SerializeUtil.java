@@ -2,7 +2,7 @@ package com.keimons.platform.unit;
 
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.module.IModuleSerializable;
-import com.keimons.platform.player.IModule;
+import com.keimons.platform.module.IModule;
 
 import java.io.IOException;
 import java.util.List;

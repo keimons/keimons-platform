@@ -1,6 +1,7 @@
 package com.keimons.platform.player;
 
 import com.keimons.platform.iface.IRepeatedData;
+import com.keimons.platform.module.IRepeatedModule;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,22 +12,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author monkey1993
  * @version 1.0
  **/
-public abstract class BaseRepeatedModule<T extends IRepeatedData> implements IModule<T> {
+public abstract class BaseRepeatedModule<T extends IRepeatedData> implements IRepeatedModule<T> {
 
 	protected ConcurrentHashMap<Object, T> repeated = new ConcurrentHashMap<>();
 
 	@Override
-	public void addPlayerData(T repeatedData) {
-		repeated.put(repeatedData.getDataId(), repeatedData);
+	public void add(T data) {
+		repeated.put(data.getDataId(), data);
 	}
 
 	@Override
-	public T getPlayerData(Object dataId) {
+	public T get(Object dataId) {
 		return repeated.get(dataId);
 	}
 
 	@Override
-	public Collection<T> getPlayerData() {
+	public T remove(Object dataId) {
+		return repeated.remove(dataId);
+	}
+
+	@Override
+	public Collection<T> toCollection() {
 		return repeated.values();
 	}
 }

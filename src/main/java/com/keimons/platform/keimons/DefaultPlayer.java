@@ -69,13 +69,18 @@ public class DefaultPlayer implements IPlayer<String> {
 	}
 
 	@Override
-	public <V extends IRepeatedData> V getPlayerData(Class<V> clazz, Object dataId) {
-		return modules.getPlayerData(clazz, dataId);
+	public <V extends ISingularData> V get(Class<V> clazz) {
+		return modules.get(clazz);
 	}
 
 	@Override
-	public <V extends ISingularData> V getPlayerData(Class<V> module) {
-		return modules.getPlayerData(module);
+	public <V extends IRepeatedData> V get(Class<V> clazz, Object dataId) {
+		return modules.get(clazz, dataId);
+	}
+
+	@Override
+	public <V extends IRepeatedData> V remove(Class<V> clazz, Object dataId) {
+		return modules.remove(clazz, dataId);
 	}
 
 	@Override

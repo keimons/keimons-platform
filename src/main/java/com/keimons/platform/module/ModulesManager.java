@@ -1,7 +1,7 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.iface.IPlayerData;
-import com.keimons.platform.annotation.APlayerData;
+import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -137,10 +137,10 @@ public class ModulesManager {
 	 * @param packageName 包名
 	 */
 	public static void addPlayerData(String packageName) {
-		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
+		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
 		for (Class<IPlayerData> clazz : classes) {
 			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
-			String moduleName = clazz.getDeclaredAnnotation(APlayerData.class).moduleName();
+			String moduleName = clazz.getDeclaredAnnotation(AGameData.class).moduleName();
 			ModulesManager.classes.put(moduleName, clazz);
 			System.out.println("成功安装独有数据模块：" + clazz.getSimpleName());
 		}

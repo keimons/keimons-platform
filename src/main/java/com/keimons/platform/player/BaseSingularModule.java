@@ -1,9 +1,7 @@
 package com.keimons.platform.player;
 
 import com.keimons.platform.iface.ISingularData;
-
-import java.util.Collection;
-import java.util.Collections;
+import com.keimons.platform.module.ISingularModule;
 
 /**
  * 单数据实现
@@ -11,25 +9,24 @@ import java.util.Collections;
  * @author monkey1993
  * @version 1.0
  **/
-public abstract class BaseSingularModule<T extends ISingularData> implements IModule<T> {
+public abstract class BaseSingularModule<T extends ISingularData> implements ISingularModule<T> {
 
 	/**
 	 * 玩家数据
 	 */
-	protected T singular;
+	protected final T singular;
 
-	@Override
-	public void addPlayerData(T singularData) {
-		this.singular = singularData;
+	/**
+	 * 构造方法
+	 *
+	 * @param singular 数据
+	 */
+	public BaseSingularModule(T singular) {
+		this.singular = singular;
 	}
 
 	@Override
-	public T getPlayerData(Object dataId) {
+	public T get() {
 		return singular;
-	}
-
-	@Override
-	public Collection<T> getPlayerData() {
-		return Collections.singletonList(singular);
 	}
 }

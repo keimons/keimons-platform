@@ -1,17 +1,18 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.annotation.APlayerData;
+import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.iface.IRepeatedData;
 import com.keimons.platform.iface.ISingularData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.player.IModule;
 import com.keimons.platform.unit.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * 玩家所有模块数据
@@ -69,32 +70,48 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	/**
 	 * 获取玩家的一个模块
 	 *
+	 * @param clazz 模块名称
+	 * @param <V>   玩家数据类型
+	 * @return 数据模块
+	 */
+	@SuppressWarnings("unchecked")
+	public <V extends ISingularData> V get(Class<V> clazz) {
+		AGameData annotation = clazz.getAnnotation(AGameData.class);
+		String moduleName = annotation.moduleName();
+		ISingularModule<?> module = (ISingularModule<?>) modules.get(moduleName);
+		return (V) module.get();
+	}
+
+	/**
+	 * 获取玩家的一个模块
+	 *
 	 * @param clazz  模块名称
 	 * @param dataId 数据唯一IDs
 	 * @param <V>    模块类型
 	 * @return 数据模块
 	 */
 	@SuppressWarnings("unchecked")
-	public <V extends IRepeatedData> V getPlayerData(Class<V> clazz, Object dataId) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+	public <V extends IRepeatedData> V get(Class<V> clazz, Object dataId) {
+		AGameData annotation = clazz.getAnnotation(AGameData.class);
 		String moduleName = annotation.moduleName();
-		IModule<?> module = modules.get(moduleName);
-		return (V) module.getPlayerData(dataId);
+		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
+		return (V) module.get(dataId);
 	}
 
 	/**
 	 * 获取玩家的一个模块
 	 *
-	 * @param clazz 模块名称
-	 * @param <V>   玩家数据类型
+	 * @param clazz  模块名称
+	 * @param dataId 数据唯一IDs
+	 * @param <V>    模块类型
 	 * @return 数据模块
 	 */
 	@SuppressWarnings("unchecked")
-	public <V extends ISingularData> V getPlayerData(Class<V> clazz) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+	public <V extends IRepeatedData> V remove(Class<V> clazz, Object dataId) {
+		AGameData annotation = clazz.getAnnotation(AGameData.class);
 		String moduleName = annotation.moduleName();
-		IModule<?> module = modules.get(moduleName);
-		return (V) module.getPlayerData(null);
+		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
+		return (V) module.remove(dataId);
 	}
 
 	/**
@@ -112,13 +129,18 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	public abstract void addSingularData(ISingularData data);
 
 	/**
-	 * 增加一个模块
+	 * 获取数据模块
 	 *
-	 * @param moduleName 模块名称
-	 * @param module     模块
+	 * @param moduleName 模块名字
+	 * @param function   新建模块
+	 * @param <V>        模块类型
+	 * @return 模块
 	 */
-	protected void addModule(String moduleName, IModule<?> module) {
-		modules.put(moduleName, module);
+	@SuppressWarnings("unchecked")
+	protected  <V extends IModule<? extends IPlayerData>> V computeIfAbsent(
+			String moduleName, Function<String, V> function) {
+		Objects.requireNonNull(function);
+		return (V) modules.computeIfAbsent(moduleName, function);
 	}
 
 	/**
@@ -126,7 +148,7 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	 *
 	 * @return 玩家所有模块数据
 	 */
-	public Map<String, IModule<? extends IPlayerData>> getModules() {
+	public Map<String, ? extends IModule<? extends IPlayerData>> getModules() {
 		return modules;
 	}
 
@@ -145,22 +167,17 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	 */
 	public void checkModule() {
 		try {
-			List<IPlayerData> init = new ArrayList<>();
+			List<ISingularData> init = new ArrayList<>();
 			for (Map.Entry<String, Class<? extends IPlayerData>> entry : ModulesManager.classes.entrySet()) {
 				// 判断模块是否需要被添加
 				Class<? extends IPlayerData> clazz = entry.getValue();
-				if (!hasModule(entry.getKey()) && !IRepeatedData.class.isAssignableFrom(clazz)) {
-					IPlayerData data = clazz.newInstance();
-					if (data instanceof IRepeatedData) {
-						addRepeatedData((IRepeatedData) data);
-					}
-					if (data instanceof ISingularData) {
-						addSingularData((ISingularData) data);
-					}
+				if (!hasModule(entry.getKey()) && ISingularData.class.isAssignableFrom(clazz)) {
+					ISingularData data = (ISingularData) clazz.newInstance();
+					addSingularData(data);
 					init.add(data);
 				}
 			}
-			for (IPlayerData data : init) {
+			for (ISingularData data : init) {
 				data.init(this);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {

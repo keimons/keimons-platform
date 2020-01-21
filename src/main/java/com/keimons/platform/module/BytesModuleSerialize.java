@@ -1,10 +1,9 @@
 package com.keimons.platform.module;
 
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
-import com.keimons.platform.annotation.APlayerData;
+import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.player.IModule;
 import com.keimons.platform.unit.CodeUtil;
 import org.xerial.snappy.Snappy;
 
@@ -30,6 +29,9 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 
 	/**
 	 * 是否压缩
+	 * <p>
+	 * 为了标识数据是否被压缩过，所以，此数据时和存库数据平级关系，根据这个字段，{@link #bytes}
+	 * 从数据库中读出的数据是否解压。
 	 */
 	@Protobuf(order = 1, description = "是否压缩")
 	private boolean compress;
@@ -79,18 +81,21 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 
 		/**
 		 * 数据是否压缩
+		 * <p>
+		 * 这个字段仅仅表明该模块是否需要进行压缩。这个字段和 {@link #elements} 平级，所以，这个字段如果写入数据库中，
+		 * 是无法在解压之前读出该字段的。
 		 */
-		private boolean compress;
+		private transient boolean compress;
 
 		@Override
 		public void serialize(IModule<? extends IPlayerData> module, boolean coercive) throws IOException {
 			if (module instanceof IRepeatedData) {
 				coercive = true;
 			}
-			for (IPlayerData data : module.getPlayerData()) {
-				if (data instanceof IBytesPlayerDataSerializable) {
-					IBytesPlayerDataSerializable serializable = (IBytesPlayerDataSerializable) data;
-					APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
+			for (IPlayerData data : module.toCollection()) {
+				if (data instanceof IPlayerDataSerializable) {
+					IPlayerDataSerializable serializable = (IPlayerDataSerializable) data;
+					AGameData annotation = data.getClass().getAnnotation(AGameData.class);
 					compress = annotation.isCompress();
 					byte[] persistence = serializable.serialize(coercive);
 					if (persistence != null) {

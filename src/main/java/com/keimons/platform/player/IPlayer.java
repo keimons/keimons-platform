@@ -53,21 +53,31 @@ public interface IPlayer<T> {
 	/**
 	 * 获取玩家的一个模块
 	 *
-	 * @param module 模块
-	 * @param <V>    模块类型
+	 * @param clazz 模块
+	 * @param <V>   模块类型
 	 * @return 数据模块
 	 */
-	<V extends ISingularData> V getPlayerData(Class<V> module);
+	<V extends ISingularData> V get(Class<V> clazz);
 
 	/**
 	 * 获取玩家的一个模块
 	 *
-	 * @param module 模块
-	 * @param object 唯一ID
+	 * @param clazz  模块
+	 * @param dataId 唯一ID
 	 * @param <V>    模块类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedData> V getPlayerData(Class<V> module, Object object);
+	<V extends IRepeatedData> V get(Class<V> clazz, Object dataId);
+
+	/**
+	 * 移除玩家的一个数据
+	 *
+	 * @param clazz  模块
+	 * @param dataId 唯一ID
+	 * @param <V>    模块类型
+	 * @return 模块
+	 */
+	<V extends IRepeatedData> V remove(Class<V> clazz, Object dataId);
 
 	/**
 	 * 获取玩家所有的模块数据

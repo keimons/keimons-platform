@@ -27,6 +27,7 @@ public class CodeUtil {
 	 * @throws IOException 序列化错误
 	 */
 	public static byte[] encode(ISerializable data) throws IOException {
+		data.encode();
 		return codecs.get(data.getClass()).encode(data);
 	}
 
@@ -53,6 +54,10 @@ public class CodeUtil {
 				}
 			}
 		}
-		return codec.decode(data);
+		T decode = codec.decode(data);
+		if (decode != null) {
+			decode.decode();
+		}
+		return decode;
 	}
 }

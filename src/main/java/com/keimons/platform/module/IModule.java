@@ -1,4 +1,4 @@
-package com.keimons.platform.player;
+package com.keimons.platform.module;
 
 import com.keimons.platform.iface.ISerializable;
 import com.keimons.platform.iface.IPlayerData;
@@ -17,27 +17,9 @@ import java.util.Collection;
 public interface IModule<T extends IPlayerData> extends ISerializable {
 
 	/**
-	 * 增加数据
-	 * <p>
-	 * 讲一个模块的所有数据合并起来，最终转化为一个整体，存入数据库。需要注意的是，一旦一个模块
-	 * 中有一个数据需要存储，那么，整个模块都应该是被存储的。
-	 *
-	 * @param playerData 玩家数据
-	 */
-	void addPlayerData(T playerData);
-
-	/**
-	 * 获取玩家数据
-	 *
-	 * @param dataId 数据ID，数据ID可以为空
-	 * @return 玩家数据
-	 */
-	T getPlayerData(Object dataId);
-
-	/**
 	 * 获取模块中所有数据
 	 *
 	 * @return 模块所有数据
 	 */
-	Collection<T> getPlayerData();
+	Collection<T> toCollection();
 }

@@ -3,7 +3,6 @@ package com.keimons.platform.game;
 import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.iface.IPlayerData;
-import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.CodeUtil;
 
@@ -36,6 +35,15 @@ public class GameDataManager {
 	/**
 	 * 加载一个玩家的数据
 	 *
+	 * @param gameData 模块
+	 */
+	public static void addGameData(IGameData gameData) {
+		GameData.INSTANCE.addGameData(gameData);
+	}
+
+	/**
+	 * 加载一个玩家的数据
+	 *
 	 * @param moduleName 模块
 	 * @param <T>        模块类型
 	 * @return 玩家数据
@@ -46,9 +54,6 @@ public class GameDataManager {
 		// 反序列化
 		Class<? extends IGameData> clazz = modules.get(moduleName);
 		IGameData module = CodeUtil.decode(clazz, data);
-		if (module != null) {
-			module.decode();
-		}
 		return (T) module;
 	}
 
@@ -61,34 +66,9 @@ public class GameDataManager {
 		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
 		for (Class<IGameData> clazz : classes) {
 			System.out.println("正在安装共有数据模块：" + clazz.getSimpleName());
-			try {
-				IGameData data = clazz.newInstance();
-				String moduleName = data.getModuleName();
-				modules.put(moduleName, clazz);
-			} catch (InstantiationException | IllegalAccessException e) {
-				LogService.error(e, "由于模块添加是由系统底层完成，所以需要提供默认构造方法，如有初始化操作，请重载init和loaded方法中");
-				System.exit(0);
-			}
+			AGameData annotation = clazz.getAnnotation(AGameData.class);
+			modules.put(annotation.moduleName(), clazz);
 			System.out.println("成功安装共有数据模块：" + clazz.getSimpleName());
 		}
-	}
-
-	public static void main(String[] args) {
-		BaseGameData gameData = new BaseGameData() {
-			@Override
-			public void init() {
-
-			}
-
-			@Override
-			public String getModuleName() {
-				return null;
-			}
-		};
-		gameData.lock.lock();
-		gameData.lock.lock();
-		System.out.println(111);
-		gameData.lock.unlock();
-		gameData.lock.unlock();
 	}
 }

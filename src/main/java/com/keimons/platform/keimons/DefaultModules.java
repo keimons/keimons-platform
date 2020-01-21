@@ -1,18 +1,15 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.annotation.APlayerData;
+import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.datebase.RedissonManager;
 import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.iface.IRepeatedData;
 import com.keimons.platform.iface.ISingularData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.module.BaseModules;
-import com.keimons.platform.module.BytesModuleSerialize;
-import com.keimons.platform.module.ModulesManager;
-import com.keimons.platform.player.IModule;
-import com.keimons.platform.unit.SerializeUtil;
+import com.keimons.platform.module.*;
 import com.keimons.platform.unit.CodeUtil;
+import com.keimons.platform.unit.SerializeUtil;
 import org.redisson.client.codec.ByteArrayCodec;
 
 import java.io.IOException;
@@ -42,36 +39,17 @@ public class DefaultModules extends BaseModules<String> {
 
 	@Override
 	public void addRepeatedData(IRepeatedData data) {
-		APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
+		AGameData annotation = data.getClass().getAnnotation(AGameData.class);
 		String moduleName = annotation.moduleName();
-		DefaultRepeatedModule<IRepeatedData> module = this.getModule(annotation.moduleName());
-		if (module == null) {
-			synchronized (this) {
-				module = this.getModule(annotation.moduleName());
-				if (module == null) {
-					module = new DefaultRepeatedModule<>();
-					this.addModule(moduleName, module);
-				}
-			}
-		}
-		module.addPlayerData(data);
+		DefaultRepeatedModule<IRepeatedData> module = computeIfAbsent(moduleName, v -> new DefaultRepeatedModule<>());
+		module.add(data);
 	}
 
 	@Override
 	public void addSingularData(ISingularData data) {
-		APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
+		AGameData annotation = data.getClass().getAnnotation(AGameData.class);
 		String moduleName = annotation.moduleName();
-		DefaultSingularModule<ISingularData> module = this.getModule(annotation.moduleName());
-		if (module == null) {
-			synchronized (this) {
-				module = this.getModule(annotation.moduleName());
-				if (module == null) {
-					module = new DefaultSingularModule<>();
-					this.addModule(moduleName, module);
-				}
-			}
-		}
-		module.addPlayerData(data);
+		computeIfAbsent(moduleName, v -> new DefaultSingularModule<>(data));
 	}
 
 	@Override
@@ -114,10 +92,10 @@ public class DefaultModules extends BaseModules<String> {
 							if (playerData == null) {
 								continue;
 							}
-							if (IRepeatedData.class.isAssignableFrom(clazz)) {
+							if (playerData instanceof IRepeatedData) {
 								addRepeatedData((IRepeatedData) playerData);
 							}
-							if (ISingularData.class.isAssignableFrom(clazz)) {
+							if (playerData instanceof ISingularData) {
 								addSingularData((ISingularData) playerData);
 							}
 						}
@@ -128,12 +106,7 @@ public class DefaultModules extends BaseModules<String> {
 				}
 				modules.checkModule();
 				for (IModule<? extends IPlayerData> value : modules.getModules().values()) {
-					for (IPlayerData module : value.getPlayerData()) {
-						module.decode();
-					}
-				}
-				for (IModule<? extends IPlayerData> value : modules.getModules().values()) {
-					for (IPlayerData module : value.getPlayerData()) {
+					for (IPlayerData module : value.toCollection()) {
 						module.loaded(this);
 					}
 				}
