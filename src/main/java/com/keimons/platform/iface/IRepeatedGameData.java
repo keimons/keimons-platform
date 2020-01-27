@@ -1,13 +1,14 @@
 package com.keimons.platform.iface;
 
 /**
- * 可重复的标识
+ * 可重复的数据结构
  *
- * @param <T> 数据模块
+ * @param <T> 数据唯一标识符类型
  * @author monkey1993
  * @version 1.0
+ * @since 1.8
  **/
-public interface IRepeatedData<T> extends IPlayerData {
+public interface IRepeatedGameData<T> extends IGameData {
 
 	/**
 	 * 数据唯一标识

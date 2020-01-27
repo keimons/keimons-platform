@@ -1,7 +1,7 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IPlayerData;
 import com.keimons.platform.annotation.AGameData;
+import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -25,7 +25,7 @@ public class ModulesManager {
 	/**
 	 * 玩家数据模块
 	 */
-	public static Map<String, Class<? extends IPlayerData>> classes = new HashMap<>();
+	public static Map<String, Class<? extends IGameData>> classes = new HashMap<>();
 
 	/**
 	 * 玩家数据
@@ -137,8 +137,8 @@ public class ModulesManager {
 	 * @param packageName 包名
 	 */
 	public static void addPlayerData(String packageName) {
-		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
-		for (Class<IPlayerData> clazz : classes) {
+		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
+		for (Class<IGameData> clazz : classes) {
 			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
 			String moduleName = clazz.getDeclaredAnnotation(AGameData.class).moduleName();
 			ModulesManager.classes.put(moduleName, clazz);

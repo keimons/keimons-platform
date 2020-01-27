@@ -1,9 +1,8 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.IPlayerData;
-import com.keimons.platform.iface.ISingularData;
-import com.keimons.platform.module.IPlayerDataSerializable;
+import com.keimons.platform.iface.ISingularPlayerData;
+import com.keimons.platform.module.IGameDataSerialize;
 import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.MD5Util;
 
@@ -18,7 +17,7 @@ import java.io.IOException;
  * @version 1.0
  * @since 1.0
  */
-public abstract class DefaultSingularData implements ISingularData, IPlayerData, IPlayerDataSerializable {
+public abstract class DefaultSingularPlayerData implements ISingularPlayerData, IGameDataSerialize {
 
 	/**
 	 * 计算上次的MD5

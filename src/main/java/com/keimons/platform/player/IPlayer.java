@@ -1,7 +1,7 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.iface.ISingularData;
+import com.keimons.platform.iface.IRepeatedPlayerData;
+import com.keimons.platform.iface.ISingularPlayerData;
 import com.keimons.platform.module.BaseModules;
 import com.keimons.platform.session.Session;
 
@@ -57,7 +57,7 @@ public interface IPlayer<T> {
 	 * @param <V>   模块类型
 	 * @return 数据模块
 	 */
-	<V extends ISingularData> V get(Class<V> clazz);
+	<V extends ISingularPlayerData> V get(Class<V> clazz);
 
 	/**
 	 * 获取玩家的一个模块
@@ -67,7 +67,7 @@ public interface IPlayer<T> {
 	 * @param <V>    模块类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedData> V get(Class<V> clazz, Object dataId);
+	<V extends IRepeatedPlayerData> V get(Class<V> clazz, Object dataId);
 
 	/**
 	 * 移除玩家的一个数据
@@ -77,7 +77,7 @@ public interface IPlayer<T> {
 	 * @param <V>    模块类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedData> V remove(Class<V> clazz, Object dataId);
+	<V extends IRepeatedPlayerData> V remove(Class<V> clazz, Object dataId);
 
 	/**
 	 * 获取玩家所有的模块数据

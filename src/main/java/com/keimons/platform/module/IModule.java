@@ -1,7 +1,7 @@
 package com.keimons.platform.module;
 
+import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.iface.ISerializable;
-import com.keimons.platform.iface.IPlayerData;
 
 import java.util.Collection;
 
@@ -14,7 +14,7 @@ import java.util.Collection;
  * @author monkey1993
  * @version 1.0
  **/
-public interface IModule<T extends IPlayerData> extends ISerializable {
+public interface IModule<T extends IGameData> extends ISerializable {
 
 	/**
 	 * 获取模块中所有数据

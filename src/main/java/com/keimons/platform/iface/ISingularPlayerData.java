@@ -8,7 +8,7 @@ import com.keimons.platform.module.BaseModules;
  * @author monkey1993
  * @version 1.0
  **/
-public interface ISingularData extends IPlayerData {
+public interface ISingularPlayerData extends ISingularGameData, ILoaded {
 
 	/**
 	 * 初始化（当且仅当对象被创建时调用）

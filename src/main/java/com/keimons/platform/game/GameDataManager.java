@@ -2,7 +2,7 @@ package com.keimons.platform.game;
 
 import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.IPlayerData;
+import com.keimons.platform.iface.ILoaded;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.CodeUtil;
 
@@ -47,9 +47,10 @@ public class GameDataManager {
 	 * @param moduleName 模块
 	 * @param <T>        模块类型
 	 * @return 玩家数据
+	 * @throws IOException 反序列化异常
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IPlayerData> T loadGameData(String moduleName) throws IOException {
+	public static <T extends IGameData & ILoaded> T loadGameData(String moduleName) throws IOException {
 		byte[] data = null; //RedissonManager.getMapValue(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(playerId), CharsetUtil.getUTF8(moduleType.toString()));
 		// 反序列化
 		Class<? extends IGameData> clazz = modules.get(moduleName);

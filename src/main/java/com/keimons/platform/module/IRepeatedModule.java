@@ -1,6 +1,6 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IRepeatedData;
+import com.keimons.platform.iface.IRepeatedPlayerData;
 
 /**
  * 组持久化方案，这一步是将可重叠的数据进行合并，合并之后才能存入数据库
@@ -11,7 +11,7 @@ import com.keimons.platform.iface.IRepeatedData;
  * @author monkey1993
  * @version 1.0
  **/
-public interface IRepeatedModule<T extends IRepeatedData> extends IModule<T> {
+public interface IRepeatedModule<T extends IRepeatedPlayerData> extends IModule<T> {
 
 	/**
 	 * 增加数据

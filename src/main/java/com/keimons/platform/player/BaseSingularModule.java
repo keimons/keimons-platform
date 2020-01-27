@@ -1,6 +1,6 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.ISingularData;
+import com.keimons.platform.iface.ISingularPlayerData;
 import com.keimons.platform.module.ISingularModule;
 
 /**
@@ -9,7 +9,7 @@ import com.keimons.platform.module.ISingularModule;
  * @author monkey1993
  * @version 1.0
  **/
-public abstract class BaseSingularModule<T extends ISingularData> implements ISingularModule<T> {
+public abstract class BaseSingularModule<T extends ISingularPlayerData> implements ISingularModule<T> {
 
 	/**
 	 * 玩家数据

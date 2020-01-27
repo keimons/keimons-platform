@@ -2,8 +2,8 @@ package com.keimons.platform.module;
 
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
 import com.keimons.platform.annotation.AGameData;
-import com.keimons.platform.iface.IPlayerData;
-import com.keimons.platform.iface.IRepeatedData;
+import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.iface.IRepeatedPlayerData;
 import com.keimons.platform.unit.CodeUtil;
 import org.xerial.snappy.Snappy;
 
@@ -37,7 +37,7 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 	private boolean compress;
 
 	@Override
-	public byte[] serialize(IModule<? extends IPlayerData> module, boolean coercive) throws IOException {
+	public byte[] serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException {
 		BytesSerializeModule serializable = new BytesSerializeModule();
 		serializable.serialize(module, coercive);
 		bytes = CodeUtil.encode(serializable);
@@ -49,14 +49,14 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 	}
 
 	@Override
-	public List<? extends IPlayerData> deserialize(Class<? extends IPlayerData> clazz) throws IOException {
+	public List<? extends IGameData> deserialize(Class<? extends IGameData> clazz) throws IOException {
 		if (compress) {
 			bytes = Snappy.uncompress(bytes);
 		}
 		BytesSerializeModule serializable = CodeUtil.decode(BytesSerializeModule.class, bytes);
-		List<IPlayerData> elements = new ArrayList<>(serializable.getElements().size());
+		List<IGameData> elements = new ArrayList<>(serializable.getElements().size());
 		for (byte[] bytes : serializable.getElements()) {
-			IPlayerData data = CodeUtil.decode(clazz, bytes);
+			IGameData data = CodeUtil.decode(clazz, bytes);
 			if (data == null) {
 				continue;
 			}
@@ -88,13 +88,13 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 		private transient boolean compress;
 
 		@Override
-		public void serialize(IModule<? extends IPlayerData> module, boolean coercive) throws IOException {
-			if (module instanceof IRepeatedData) {
+		public void serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException {
+			if (module instanceof IRepeatedPlayerData) {
 				coercive = true;
 			}
-			for (IPlayerData data : module.toCollection()) {
-				if (data instanceof IPlayerDataSerializable) {
-					IPlayerDataSerializable serializable = (IPlayerDataSerializable) data;
+			for (IGameData data : module.toCollection()) {
+				if (data instanceof IGameDataSerialize) {
+					IGameDataSerialize serializable = (IGameDataSerialize) data;
 					AGameData annotation = data.getClass().getAnnotation(AGameData.class);
 					compress = annotation.isCompress();
 					byte[] persistence = serializable.serialize(coercive);

@@ -1,7 +1,7 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.iface.ISingularData;
+import com.keimons.platform.iface.IRepeatedPlayerData;
+import com.keimons.platform.iface.ISingularPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.BaseModules;
 import com.keimons.platform.module.ModulesManager;
@@ -69,17 +69,17 @@ public class DefaultPlayer implements IPlayer<String> {
 	}
 
 	@Override
-	public <V extends ISingularData> V get(Class<V> clazz) {
+	public <V extends ISingularPlayerData> V get(Class<V> clazz) {
 		return modules.get(clazz);
 	}
 
 	@Override
-	public <V extends IRepeatedData> V get(Class<V> clazz, Object dataId) {
+	public <V extends IRepeatedPlayerData> V get(Class<V> clazz, Object dataId) {
 		return modules.get(clazz, dataId);
 	}
 
 	@Override
-	public <V extends IRepeatedData> V remove(Class<V> clazz, Object dataId) {
+	public <V extends IRepeatedPlayerData> V remove(Class<V> clazz, Object dataId) {
 		return modules.remove(clazz, dataId);
 	}
 

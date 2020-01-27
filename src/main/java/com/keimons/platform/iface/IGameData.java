@@ -3,7 +3,7 @@ package com.keimons.platform.iface;
 import com.keimons.platform.unit.CodeUtil;
 
 /**
- * 公共数据模块
+ * 游戏数据结构接口
  *
  * @author monkey1993
  * @version 1.0

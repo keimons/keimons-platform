@@ -24,7 +24,7 @@ public class CodeUtil {
 	 *
 	 * @param data 数据
 	 * @return 序列化后的数据
-	 * @throws IOException 序列化错误
+	 * @throws IOException 序列化异常
 	 */
 	public static byte[] encode(ISerializable data) throws IOException {
 		data.encode();
@@ -39,6 +39,7 @@ public class CodeUtil {
 	 * @param data  要被解析的数据
 	 * @param <T>   泛型类型
 	 * @return Java对象
+	 * @throws IOException 反序列化异常
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends ISerializable> T decode(Class<T> clazz, byte[] data) throws IOException {

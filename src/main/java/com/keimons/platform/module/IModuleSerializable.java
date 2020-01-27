@@ -1,7 +1,7 @@
 package com.keimons.platform.module;
 
+import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.iface.ISerializable;
-import com.keimons.platform.iface.IPlayerData;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,17 +25,19 @@ public interface IModuleSerializable<T> extends ISerializable {
 	 *
 	 * @param module   模块
 	 * @param coercive 强制存储
+	 * @return 序列化后的数据
 	 * @throws IOException 序列化错误
 	 */
-	T serialize(IModule<? extends IPlayerData> module, boolean coercive) throws IOException;
+	T serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException;
 
 	/**
 	 * 反序列化为玩家数据
 	 *
 	 * @param clazz 数据类型
 	 * @return 玩家数据
+	 * @throws IOException 反序列化异常
 	 */
-	List<? extends IPlayerData> deserialize(Class<? extends IPlayerData> clazz) throws IOException;
+	List<? extends IGameData> deserialize(Class<? extends IGameData> clazz) throws IOException;
 
 	/**
 	 * 针对于模块的序列化方案
@@ -71,6 +73,6 @@ public interface IModuleSerializable<T> extends ISerializable {
 		 * @param coercive 强制存储
 		 * @throws IOException 序列化错误
 		 */
-		void serialize(IModule<? extends IPlayerData> module, boolean coercive) throws IOException;
+		void serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException;
 	}
 }

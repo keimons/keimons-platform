@@ -3,11 +3,15 @@ package com.keimons.platform.keimons;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.datebase.RedissonManager;
-import com.keimons.platform.iface.IPlayerData;
-import com.keimons.platform.iface.IRepeatedData;
-import com.keimons.platform.iface.ISingularData;
+import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.iface.ILoaded;
+import com.keimons.platform.iface.IRepeatedPlayerData;
+import com.keimons.platform.iface.ISingularPlayerData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.module.*;
+import com.keimons.platform.module.BaseModules;
+import com.keimons.platform.module.BytesModuleSerialize;
+import com.keimons.platform.module.IModule;
+import com.keimons.platform.module.ModulesManager;
 import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.SerializeUtil;
 import org.redisson.client.codec.ByteArrayCodec;
@@ -38,15 +42,15 @@ public class DefaultModules extends BaseModules<String> {
 	}
 
 	@Override
-	public void addRepeatedData(IRepeatedData data) {
+	public void addRepeatedData(IRepeatedPlayerData data) {
 		AGameData annotation = data.getClass().getAnnotation(AGameData.class);
 		String moduleName = annotation.moduleName();
-		DefaultRepeatedModule<IRepeatedData> module = computeIfAbsent(moduleName, v -> new DefaultRepeatedModule<>());
+		DefaultRepeatedModule<IRepeatedPlayerData> module = computeIfAbsent(moduleName, v -> new DefaultRepeatedModule<>());
 		module.add(data);
 	}
 
 	@Override
-	public void addSingularData(ISingularData data) {
+	public void addSingularData(ISingularPlayerData data) {
 		AGameData annotation = data.getClass().getAnnotation(AGameData.class);
 		String moduleName = annotation.moduleName();
 		computeIfAbsent(moduleName, v -> new DefaultSingularModule<>(data));
@@ -55,7 +59,7 @@ public class DefaultModules extends BaseModules<String> {
 	@Override
 	public void save(boolean coercive) {
 		Map<byte[], byte[]> bytes = new HashMap<>(modules.size());
-		for (Map.Entry<String, IModule<? extends IPlayerData>> entry : modules.entrySet()) {
+		for (Map.Entry<String, IModule<? extends IGameData>> entry : modules.entrySet()) {
 			byte[] moduleName = entry.getKey().getBytes(Charset.forName("UTF-8"));
 			try {
 				byte[] serialize = SerializeUtil.serialize(BytesModuleSerialize.class, entry.getValue(), coercive);
@@ -84,19 +88,19 @@ public class DefaultModules extends BaseModules<String> {
 				if (moduleBytes != null) {
 					for (Map.Entry<byte[], byte[]> entry : moduleBytes.entrySet()) {
 						String moduleName = new String(entry.getKey(), Charset.forName("UTF-8"));
-						Class<? extends IPlayerData> clazz = ModulesManager.classes.get(moduleName);
+						Class<? extends IGameData> clazz = ModulesManager.classes.get(moduleName);
 						BytesModuleSerialize serialize = CodeUtil.decode(BytesModuleSerialize.class, entry.getValue());
 
-						List<? extends IPlayerData> deserialize = SerializeUtil.deserialize(serialize, clazz);
-						for (IPlayerData playerData : deserialize) {
+						List<? extends IGameData> deserialize = SerializeUtil.deserialize(serialize, clazz);
+						for (IGameData playerData : deserialize) {
 							if (playerData == null) {
 								continue;
 							}
-							if (playerData instanceof IRepeatedData) {
-								addRepeatedData((IRepeatedData) playerData);
+							if (playerData instanceof IRepeatedPlayerData) {
+								addRepeatedData((IRepeatedPlayerData) playerData);
 							}
-							if (playerData instanceof ISingularData) {
-								addSingularData((ISingularData) playerData);
+							if (playerData instanceof ISingularPlayerData) {
+								addSingularData((ISingularPlayerData) playerData);
 							}
 						}
 					}
@@ -105,9 +109,11 @@ public class DefaultModules extends BaseModules<String> {
 					LogService.debug("玩家ID：" + identifier + "，数据模块共计：" + size + "字节！");
 				}
 				modules.checkModule();
-				for (IModule<? extends IPlayerData> value : modules.getModules().values()) {
-					for (IPlayerData module : value.toCollection()) {
-						module.loaded(this);
+				for (IModule<? extends IGameData> value : modules.getModules().values()) {
+					for (IGameData module : value.toCollection()) {
+						if (module instanceof ILoaded) {
+							((ILoaded) module).loaded(this);
+						}
 					}
 				}
 			} catch (Exception e) {

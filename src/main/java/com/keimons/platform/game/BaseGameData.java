@@ -2,6 +2,7 @@ package com.keimons.platform.game;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.module.IGameDataSerialize;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -15,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 1.0
  * @since 1.0
  */
-public abstract class BaseGameData implements IGameData, IGameDataSerializable {
+public abstract class BaseGameData implements IGameData, IGameDataSerialize {
 
 	protected Lock lock = new ReentrantLock();
 
