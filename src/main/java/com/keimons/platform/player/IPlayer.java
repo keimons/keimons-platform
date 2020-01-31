@@ -2,10 +2,8 @@ package com.keimons.platform.player;
 
 import com.keimons.platform.iface.IRepeatedPlayerData;
 import com.keimons.platform.iface.ISingularPlayerData;
-import com.keimons.platform.module.BaseModules;
 import com.keimons.platform.session.Session;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -16,7 +14,7 @@ import java.util.function.Consumer;
  * @version 1.0
  * @since 1.8
  **/
-public interface IPlayer<T> {
+public interface IPlayer<T> extends IPersistence<T> {
 
 	/**
 	 * 获取用于标识唯一玩家的数据唯一标识符
@@ -27,7 +25,7 @@ public interface IPlayer<T> {
 	 *
 	 * @return 唯一标识符
 	 */
-	T uuid();
+	T getIdentifier();
 
 	/**
 	 * 设置session
@@ -80,27 +78,12 @@ public interface IPlayer<T> {
 	<V extends IRepeatedPlayerData> V remove(Class<V> clazz, Object dataId);
 
 	/**
-	 * 获取玩家所有的模块数据
-	 *
-	 * @return 玩家所有模块数据
-	 */
-	BaseModules<T> getModules();
-
-	/**
-	 * 设置所有模块
-	 *
-	 * @param baseModules 模块
-	 */
-	void setModules(BaseModules<T> baseModules);
-
-	/**
 	 * 获取加载器
 	 *
 	 * @param consumer  消耗函数
-	 * @param reference 引用
 	 * @return 加载器
 	 */
-	Runnable getLoader(Consumer<IPlayer<T>> consumer, AtomicReference<BaseModules<T>> reference);
+	Runnable getLoader(Consumer<IPlayer<T>> consumer);
 
 	/**
 	 * 设置活跃时间
@@ -115,4 +98,6 @@ public interface IPlayer<T> {
 	 * @return 活跃时间
 	 */
 	long getActiveTime();
+
+	void checkModule();
 }

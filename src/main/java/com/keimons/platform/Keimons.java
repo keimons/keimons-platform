@@ -10,7 +10,7 @@ import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.module.ModulesManager;
+import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.process.ProcessorManager;
@@ -64,7 +64,7 @@ public class Keimons<T> {
 		LogService.init();
 		SchedulerService.init();
 		EventService.init();
-		ModulesManager.init();
+		PlayerManager.init();
 		List<Package> packages = new ArrayList<>();
 		for (Package pkg : ClassUtil.getPackages("")) {
 			AModular modular = pkg.getAnnotation(AModular.class);
@@ -84,7 +84,7 @@ public class Keimons<T> {
 			addService(packageName);
 			executor.addProcessor(packageName);
 			SchedulerService.addJobs(packageName);
-			ModulesManager.addPlayerData(packageName);
+			PlayerManager.addGameData(packageName);
 			GameDataManager.addGameData(packageName);
 
 			System.out.println("************************* 完成安装模块 *************************");

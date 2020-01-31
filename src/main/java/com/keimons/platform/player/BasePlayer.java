@@ -1,10 +1,13 @@
-package com.keimons.platform.module;
+package com.keimons.platform.player;
 
 import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.iface.IRepeatedPlayerData;
 import com.keimons.platform.iface.ISingularPlayerData;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.module.IModule;
+import com.keimons.platform.module.IRepeatedModule;
+import com.keimons.platform.module.ISingularModule;
 import com.keimons.platform.unit.TimeUtil;
 
 import java.util.ArrayList;
@@ -15,12 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * 玩家所有模块数据
+ * 玩家基类
  *
+ * @param <T> 玩家标识类型
  * @author monkey1993
  * @version 1.0
+ * @since 1.8
  **/
-public abstract class BaseModules<T> implements IPersistence<T> {
+public abstract class BasePlayer<T> implements IPlayer<T> {
 
 	/**
 	 * 数据唯一标识
@@ -43,7 +48,7 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	/**
 	 * 默认构造函数
 	 */
-	public BaseModules() {
+	public BasePlayer() {
 	}
 
 	/**
@@ -51,20 +56,8 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	 *
 	 * @param identifier 数据唯一表示
 	 */
-	public BaseModules(T identifier) {
+	public BasePlayer(T identifier) {
 		this.identifier = identifier;
-	}
-
-	/**
-	 * 模块数据
-	 *
-	 * @param moduleName 模块名称
-	 * @param <V>        模块类型
-	 * @return 模块数据
-	 */
-	@SuppressWarnings("unchecked")
-	public <V extends IModule> V getModule(String moduleName) {
-		return (V) modules.get(moduleName);
 	}
 
 	/**
@@ -97,6 +90,11 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 		return (V) module.get(dataId);
 	}
 
+	@Override
+	public T getIdentifier() {
+		return this.identifier;
+	}
+
 	/**
 	 * 获取玩家的一个模块
 	 *
@@ -111,6 +109,16 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 		String moduleName = annotation.moduleName();
 		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
 		return (V) module.remove(dataId);
+	}
+
+	@Override
+	public void setActiveTime(long activeTime) {
+		this.activeTime = activeTime;
+	}
+
+	@Override
+	public long getActiveTime() {
+		return activeTime;
 	}
 
 	/**
@@ -143,15 +151,6 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	}
 
 	/**
-	 * 获取玩家所有的模块数据
-	 *
-	 * @return 玩家所有模块数据
-	 */
-	public Map<String, ? extends IModule<? extends IGameData>> getModules() {
-		return modules;
-	}
-
-	/**
 	 * 检查玩家是否有该模块
 	 *
 	 * @param clazz 模块
@@ -167,7 +166,7 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 	public void checkModule() {
 		try {
 			List<ISingularPlayerData> init = new ArrayList<>();
-			for (Map.Entry<String, Class<? extends IGameData>> entry : ModulesManager.classes.entrySet()) {
+			for (Map.Entry<String, Class<? extends IGameData>> entry : PlayerManager.classes.entrySet()) {
 				// 判断模块是否需要被添加
 				Class<? extends IGameData> clazz = entry.getValue();
 				if (!hasModule(entry.getKey()) && ISingularPlayerData.class.isAssignableFrom(clazz)) {
@@ -182,17 +181,5 @@ public abstract class BaseModules<T> implements IPersistence<T> {
 		} catch (InstantiationException | IllegalAccessException e) {
 			LogService.error(e);
 		}
-	}
-
-	public T getIdentifier() {
-		return identifier;
-	}
-
-	public long getActiveTime() {
-		return activeTime;
-	}
-
-	public void setActiveTime(long activeTime) {
-		this.activeTime = activeTime;
 	}
 }

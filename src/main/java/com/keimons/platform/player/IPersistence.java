@@ -1,4 +1,4 @@
-package com.keimons.platform.module;
+package com.keimons.platform.player;
 
 import java.util.function.Consumer;
 

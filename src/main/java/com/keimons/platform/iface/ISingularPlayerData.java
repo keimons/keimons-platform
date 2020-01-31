@@ -1,6 +1,6 @@
 package com.keimons.platform.iface;
 
-import com.keimons.platform.module.BaseModules;
+import com.keimons.platform.player.IPlayer;
 
 /**
  * 单数形式的数据结构
@@ -19,5 +19,5 @@ public interface ISingularPlayerData extends ISingularGameData, ILoaded {
 	 *
 	 * @param player 玩家
 	 */
-	void init(BaseModules player);
+	void init(IPlayer player);
 }

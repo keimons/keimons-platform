@@ -1,13 +1,11 @@
-package com.keimons.platform.module;
+package com.keimons.platform.player;
 
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.player.IPlayer;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -17,7 +15,7 @@ import java.util.function.Consumer;
  * @version 1.0
  * @since 1.8
  **/
-public class Loader implements Runnable {
+public class PlayerLoader implements Runnable {
 
 	/**
 	 * 正在加载中的队列
@@ -31,11 +29,10 @@ public class Loader implements Runnable {
 	 * @param <T>    玩家数据的唯一标识符的类型
 	 * @return 玩家所有模块
 	 */
-	public static <T> BaseModules<T> fastLoad(IPlayer<T> player) {
-		AtomicReference<BaseModules<T>> reference = new AtomicReference<>();
-		FutureTask<Void> task = new FutureTask<>(player.getLoader(null, reference), null);
+	public static <T> IPlayer<T> fastLoad(IPlayer<T> player) {
+		FutureTask<Void> task = new FutureTask<>(player.getLoader(null), null);
 		loading.offerFirst(task);
-		return reference.get();
+		return null;
 	}
 
 	/**
@@ -46,7 +43,7 @@ public class Loader implements Runnable {
 	 * @param <T>      玩家唯一ID类型
 	 */
 	public static <T> void slowLoad(IPlayer<T> player, Consumer<IPlayer<T>> consumer) {
-		loading.add(player.getLoader(consumer, null));
+		loading.add(player.getLoader(consumer));
 	}
 
 	/**

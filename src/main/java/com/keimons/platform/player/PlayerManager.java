@@ -1,8 +1,7 @@
-package com.keimons.platform.module;
+package com.keimons.platform.player;
 
 import com.keimons.platform.annotation.AGameData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.ClassUtil;
 
 import java.util.HashMap;
@@ -11,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * 玩家数据管理器
@@ -20,7 +19,7 @@ import java.util.function.Supplier;
  * @version 1.0
  * @since 1.8
  */
-public class ModulesManager {
+public class PlayerManager {
 
 	/**
 	 * 玩家数据模块
@@ -30,7 +29,7 @@ public class ModulesManager {
 	/**
 	 * 玩家数据
 	 */
-	private static Map<Object, BaseModules<?>> modules = new HashMap<>();
+	private static Map<Object, IPlayer<?>> players = new HashMap<>();
 
 	/**
 	 * 存储所有模块的当前版本号，这个版本号依赖于class文件的变动
@@ -45,7 +44,7 @@ public class ModulesManager {
 	 * @param coercive 是否强制存储
 	 */
 	public void persistence(boolean coercive) {
-		for (BaseModules<?> baseModules : modules.values()) {
+		for (IPlayer<?> baseModules : players.values()) {
 			persistence(baseModules, coercive);
 		}
 	}
@@ -53,27 +52,29 @@ public class ModulesManager {
 	/**
 	 * 持久化一个玩家
 	 *
-	 * @param baseModules 玩家
-	 * @param coercive    是否强制存储
+	 * @param player   玩家
+	 * @param coercive 是否强制存储
 	 */
-	public void persistence(BaseModules<?> baseModules, boolean coercive) {
-		baseModules.save(coercive);
+	public void persistence(IPlayer<?> player, boolean coercive) {
+		player.save(coercive);
 	}
 
 	/**
 	 * 创建并缓存模块数据
 	 *
-	 * @param player          玩家
-	 * @param mappingFunction 构造函数
-	 * @param <T>             玩家数据的唯一标识符的类型
+	 * @param identifier 玩家唯一标识符
+	 * @param create     构造函数，如果没有找到这个对象，则构造这个对象
+	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @return 模块数据
 	 */
-	public static <T> BaseModules createModules(IPlayer<T> player, Supplier<? extends BaseModules<T>> mappingFunction) {
-		BaseModules<T> baseModules = mappingFunction.get();
-		baseModules.checkModule();
-		player.setModules(baseModules);
-		cacheModules(baseModules);
-		return baseModules;
+	public static <T> IPlayer findPlayer(T identifier, Function<T, IPlayer<T>> create) {
+		@SuppressWarnings("unchecked")
+		Function<Object, ? extends IPlayer<?>> _create =
+				(Function<Object, IPlayer<T>>) create;
+		IPlayer<?> player = players.computeIfAbsent(identifier, _create);
+		player.checkModule();
+		cacheModules(player);
+		return player;
 	}
 
 	/**
@@ -83,7 +84,7 @@ public class ModulesManager {
 	 * @param consumer 消费函数
 	 */
 	public static void loadAndExecute(IPlayer player, Consumer<IPlayer> consumer) {
-		Loader.slowLoad(player, (p) -> {
+		PlayerLoader.slowLoad(player, (p) -> {
 			if (consumer != null) {
 				consumer.accept(p);
 			}
@@ -96,8 +97,8 @@ public class ModulesManager {
 	 * @param player 玩家
 	 * @return 玩家所有模块
 	 */
-	public static BaseModules load(IPlayer player) {
-		return Loader.fastLoad(player);
+	public static IPlayer load(IPlayer player) {
+		return PlayerLoader.fastLoad(player);
 	}
 
 	/**
@@ -106,7 +107,7 @@ public class ModulesManager {
 	 * @param identifier 数据唯一标识符
 	 * @param consumer   消费函数，加载成功后执行逻辑
 	 */
-	public static void loadModules(String identifier, Consumer<BaseModules<?>> consumer) {
+	public static void loadModules(String identifier, Consumer<IPlayer<?>> consumer) {
 
 	}
 
@@ -115,8 +116,8 @@ public class ModulesManager {
 	 *
 	 * @param modules 所有模块数据
 	 */
-	public static void cacheModules(BaseModules modules) {
-		ModulesManager.modules.put(modules.getIdentifier(), modules);
+	public static void cacheModules(IPlayer modules) {
+		PlayerManager.players.put(modules.getIdentifier(), modules);
 	}
 
 	/**
@@ -127,28 +128,28 @@ public class ModulesManager {
 	 * @return 模块集合
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> BaseModules<T> getModules(T identifier) {
-		return (BaseModules<T>) modules.get(identifier);
+	public static <T> IPlayer<T> getModules(T identifier) {
+		return (IPlayer<T>) players.get(identifier);
 	}
 
 	/**
-	 * 增加一个玩家数据模块
+	 * 查找该包下的所有游戏数据结构
 	 *
 	 * @param packageName 包名
 	 */
-	public static void addPlayerData(String packageName) {
+	public static void addGameData(String packageName) {
 		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
 		for (Class<IGameData> clazz : classes) {
-			System.out.println("正在安装独有数据模块：" + clazz.getSimpleName());
-			String moduleName = clazz.getDeclaredAnnotation(AGameData.class).moduleName();
-			ModulesManager.classes.put(moduleName, clazz);
-			System.out.println("成功安装独有数据模块：" + clazz.getSimpleName());
+			AGameData annotation = clazz.getDeclaredAnnotation(AGameData.class);
+			PlayerManager.classes.put(annotation.moduleName(), clazz);
+			System.out.println("查找到数据结构：" + annotation.moduleName() +
+					"，是否压缩：" + annotation.isCompress());
 		}
 	}
 
 	public static void init() {
 		Executor single = Executors.newSingleThreadExecutor();
-		single.execute(new Loader());
+		single.execute(new PlayerLoader());
 	}
 
 	public boolean shutdown() {
