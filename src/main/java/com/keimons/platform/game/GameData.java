@@ -3,6 +3,7 @@ package com.keimons.platform.game;
 import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.log.LogService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,8 +33,8 @@ public enum GameData {
 			synchronized (this) {
 				data = modules.computeIfAbsent(clazz, value -> {
 					try {
-						return clazz.newInstance();
-					} catch (InstantiationException | IllegalAccessException e) {
+						return clazz.getDeclaredConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 						LogService.error(e, "模块加载失败，未找到默认的构造方法！");
 					}
 					return null;

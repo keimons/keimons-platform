@@ -1,7 +1,6 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.ILoaded;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,7 +14,7 @@ import java.util.Collections;
  * @author monkey1993
  * @version 1.0
  **/
-public interface ISingularModule<T extends IGameData & ILoaded> extends IModule<T> {
+public interface ISingularModule<T extends IGameData> extends IModule<T> {
 
 	/**
 	 * 获取数据

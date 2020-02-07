@@ -23,12 +23,12 @@ public class OtherServerManager {
 	public void doSome(String pluginName) {
 		try {
 			Class<?> forName = Class.forName(PackageName, true, getLoader(pluginName));
-			Class<?> interfaces[] = forName.getInterfaces();//获得Dog所实现的所有接口
-			for (Class<?> inte : interfaces) {//打印
-				System.out.println("实现接口："+inte);
+			Class<?>[] interfaces = forName.getInterfaces();//获得Dog所实现的所有接口
+			for (Class<?> clazz : interfaces) {//打印
+				System.out.println("实现接口：" + clazz);
 			}
 			System.out.println(OtherServer.class.equals(interfaces[0]));
-			OtherServer ins = (OtherServer) forName.newInstance();
+			OtherServer ins = (OtherServer) forName.getDeclaredConstructor().newInstance();
 			ins.start();
 		} catch (Exception e) {
 			LogService.error(e);

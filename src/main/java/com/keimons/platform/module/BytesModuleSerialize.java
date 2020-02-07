@@ -1,9 +1,9 @@
 package com.keimons.platform.module;
 
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
-import com.keimons.platform.annotation.AGameData;
+import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.IRepeatedPlayerData;
+import com.keimons.platform.player.IRepeatedPlayerData;
 import com.keimons.platform.unit.CodeUtil;
 import org.xerial.snappy.Snappy;
 
@@ -49,14 +49,14 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 	}
 
 	@Override
-	public List<? extends IGameData> deserialize(Class<? extends IGameData> clazz) throws IOException {
+	public <V extends IGameData> List<V> deserialize(Class<V> clazz) throws IOException {
 		if (compress) {
 			bytes = Snappy.uncompress(bytes);
 		}
 		BytesSerializeModule serializable = CodeUtil.decode(BytesSerializeModule.class, bytes);
-		List<IGameData> elements = new ArrayList<>(serializable.getElements().size());
+		List<V> elements = new ArrayList<>(serializable.getElements().size());
 		for (byte[] bytes : serializable.getElements()) {
-			IGameData data = CodeUtil.decode(clazz, bytes);
+			V data = CodeUtil.decode(clazz, bytes);
 			if (data == null) {
 				continue;
 			}
@@ -95,7 +95,7 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 			for (IGameData data : module.toCollection()) {
 				if (data instanceof IGameDataSerialize) {
 					IGameDataSerialize serializable = (IGameDataSerialize) data;
-					AGameData annotation = data.getClass().getAnnotation(AGameData.class);
+					APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
 					compress = annotation.isCompress();
 					byte[] persistence = serializable.serialize(coercive);
 					if (persistence != null) {

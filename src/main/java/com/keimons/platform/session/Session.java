@@ -52,12 +52,12 @@ public class Session {
 	 * 该值只有在未登录时为{@code false}
 	 * 登录成功后不会再重置为{@code false}
 	 */
-	private volatile boolean logined;
+	private volatile boolean landed;
 
 	/**
 	 * 玩家
 	 */
-	private IPlayer player;
+	private IPlayer<?> player;
 
 	/**
 	 * 消息号请求时间
@@ -150,36 +150,32 @@ public class Session {
 		return lastActiveTime;
 	}
 
-	public Session setLastActiveTime(long lastActiveTime) {
+	public void setLastActiveTime(long lastActiveTime) {
 		this.lastActiveTime = lastActiveTime;
-		return this;
 	}
 
 	public boolean isConnect() {
 		return connect;
 	}
 
-	public Session setConnect(boolean connect) {
+	public void setConnect(boolean connect) {
 		this.connect = connect;
-		return this;
 	}
 
-	public boolean isLogined() {
-		return logined;
+	public boolean isLanded() {
+		return landed;
 	}
 
-	public Session setLogined(boolean logined) {
-		this.logined = logined;
-		return this;
+	public void setLanded(boolean landed) {
+		this.landed = landed;
 	}
 
-	public IPlayer getPlayer() {
+	public IPlayer<?> getPlayer() {
 		return player;
 	}
 
-	public Session setPlayer(IPlayer player) {
+	public void setPlayer(IPlayer<?> player) {
 		this.player = player;
-		return this;
 	}
 
 	public int getSessionId() {

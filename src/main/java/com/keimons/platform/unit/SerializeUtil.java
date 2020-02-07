@@ -5,6 +5,7 @@ import com.keimons.platform.module.IModule;
 import com.keimons.platform.module.IModuleSerializable;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -31,8 +32,8 @@ public class SerializeUtil {
 	public static <T> T serialize(
 			Class<? extends IModuleSerializable<T>> clazz,
 			IModule<? extends IGameData> module,
-			boolean coercive) throws IOException, IllegalAccessException, InstantiationException {
-		IModuleSerializable<T> serializable = clazz.newInstance();
+			boolean coercive) throws IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+		IModuleSerializable<T> serializable = clazz.getDeclaredConstructor().newInstance();
 		return serializable.serialize(module, coercive);
 	}
 
@@ -42,12 +43,12 @@ public class SerializeUtil {
 	 * @param serializable 序列化方案
 	 * @param dataClass    数据类型
 	 * @param <T>          序列化类型
+	 * @param <V>          数据化类型
 	 * @return 序列化后的数据
 	 * @throws IOException 序列化异常
 	 */
-	public static <T> List<? extends IGameData> deserialize(
-			IModuleSerializable<T> serializable,
-			Class<? extends IGameData> dataClass) throws IOException {
+	public static <T, V extends IGameData> List<V> deserialize(IModuleSerializable<T> serializable,
+															   Class<V> dataClass) throws IOException {
 		return serializable.deserialize(dataClass);
 	}
 }

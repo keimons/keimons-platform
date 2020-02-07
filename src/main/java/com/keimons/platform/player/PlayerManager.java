@@ -1,16 +1,22 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.annotation.AGameData;
+import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.keimons.DefaultPlayer;
+import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
+import com.keimons.platform.unit.TimeUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * 玩家数据管理器
@@ -22,14 +28,20 @@ import java.util.function.Function;
 public class PlayerManager {
 
 	/**
+	 * 空模块
+	 */
+	@SuppressWarnings("unchecked")
+	public static final Class<? extends IGameData>[] EMPTY_MODULES = (Class<? extends IGameData>[]) new Class<?>[0];
+
+	/**
 	 * 玩家数据模块
 	 */
-	public static Map<String, Class<? extends IGameData>> classes = new HashMap<>();
+	public static Map<String, Class<? extends IPlayerData>> classes = new HashMap<>();
 
 	/**
 	 * 玩家数据
 	 */
-	private static Map<Object, IPlayer<?>> players = new HashMap<>();
+	private static ConcurrentHashMap<Object, IPlayer<?>> players = new ConcurrentHashMap<>();
 
 	/**
 	 * 存储所有模块的当前版本号，这个版本号依赖于class文件的变动
@@ -60,76 +72,138 @@ public class PlayerManager {
 	}
 
 	/**
+	 * 查找玩家
+	 *
+	 * @param <T>        主键类型
+	 * @param <R>        玩家类型
+	 * @param identifier 主键
+	 * @param modules    模块
+	 * @return 玩家
+	 */
+	@SafeVarargs
+	public static <T, R extends IPlayer<T>> R findPlayer(T identifier, Class<? extends IPlayerData>... modules) {
+		return load(identifier, null, modules, true, null);
+	}
+
+	/**
 	 * 创建并缓存模块数据
 	 *
+	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @param identifier 玩家唯一标识符
 	 * @param create     构造函数，如果没有找到这个对象，则构造这个对象
-	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @return 模块数据
 	 */
-	public static <T> IPlayer findPlayer(T identifier, Function<T, IPlayer<T>> create) {
-		@SuppressWarnings("unchecked")
-		Function<Object, ? extends IPlayer<?>> _create =
-				(Function<Object, IPlayer<T>>) create;
-		IPlayer<?> player = players.computeIfAbsent(identifier, _create);
-		player.checkModule();
-		cacheModules(player);
-		return player;
+	@SafeVarargs
+	public static <T, R extends IPlayer<T>> R findPlayer(T identifier, Function<T, IPlayer<T>> create, Class<? extends IPlayerData>... modules) {
+		return load(identifier, create, modules, true, null);
 	}
 
 	/**
-	 * 加载并执行（异步）
+	 * 创建并缓存模块数据
 	 *
-	 * @param player   玩家
-	 * @param consumer 消费函数
-	 */
-	public static void loadAndExecute(IPlayer player, Consumer<IPlayer> consumer) {
-		PlayerLoader.slowLoad(player, (p) -> {
-			if (consumer != null) {
-				consumer.accept(p);
-			}
-		});
-	}
-
-	/**
-	 * 加载所有模块
-	 *
-	 * @param player 玩家
-	 * @return 玩家所有模块
-	 */
-	public static IPlayer load(IPlayer player) {
-		return PlayerLoader.fastLoad(player);
-	}
-
-	/**
-	 * 加载一个玩家的数据，并且在加载完成之后对数据进行消费
-	 *
-	 * @param identifier 数据唯一标识符
-	 * @param consumer   消费函数，加载成功后执行逻辑
-	 */
-	public static void loadModules(String identifier, Consumer<IPlayer<?>> consumer) {
-
-	}
-
-	/**
-	 * 缓存玩家模块数据
-	 *
-	 * @param modules 所有模块数据
-	 */
-	public static void cacheModules(IPlayer modules) {
-		PlayerManager.players.put(modules.getIdentifier(), modules);
-	}
-
-	/**
-	 * 获取玩家的模块
-	 *
-	 * @param identifier 唯一标识符
 	 * @param <T>        玩家数据的唯一标识符的类型
-	 * @return 模块集合
+	 * @param identifier 玩家唯一标识符
+	 * @param create     构造函数，如果没有找到这个对象，则构造这个对象
+	 * @param consumer   消耗函数加载完成后对应的操作
+	 */
+	@SafeVarargs
+	public static <T, R extends IPlayer<T>> void findPlayer(T identifier, Function<T, IPlayer<T>> create, Consumer<R> consumer, Class<? extends IPlayerData>... modules) {
+		load(identifier, create, modules, false, consumer);
+	}
+
+	/**
+	 * 加载玩家到内存
+	 *
+	 * @param <T>        玩家主键class类型
+	 * @param <R>        玩家class类型
+	 * @param identifier 主键
+	 * @param fast       快速加载
+	 * @param create     创建函数
+	 * @param modules    模块
+	 * @param consumer   消耗函数
+	 * @return 玩家
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> IPlayer<T> getModules(T identifier) {
-		return (IPlayer<T>) players.get(identifier);
+	public static <T, R extends IPlayer<T>> R load(T identifier, Function<T, IPlayer<T>> create, Class<? extends IPlayerData>[] modules, boolean fast, Consumer<R> consumer) {
+		if (create == null) {
+			R player = (R) players.get(identifier);
+			if (player == null) {
+				return null;
+			}
+			if (modules.length == 0) {
+				return player.isLoaded() ? player : null;
+			}
+			if (player.hasModules(modules)) {
+				return player;
+			}
+			return null;
+		}
+		BiFunction<Object, IPlayer<?>, IPlayer<?>> create0 = (key, player) -> {
+			if (player == null) {
+				player = create.apply(identifier);
+			}
+			player.load(modules);
+			player.loaded();
+			player.setActiveTime(TimeUtil.currentTimeMillis());
+			if (modules.length == 0) {
+				player.setLoaded(true);
+			}
+			return player;
+		};
+		if (fast) {
+			return (R) players.compute(identifier, create0);
+		} else {
+			PlayerLoader.slowLoad(() -> {
+				try {
+					R player = (R) players.compute(identifier, create0);
+					if (consumer != null) {
+						consumer.accept(player);
+					}
+				} catch (Exception e) {
+					LogService.error(e);
+				}
+			});
+			return null;
+		}
+	}
+
+	/**
+	 * 移除玩家
+	 *
+	 * @param <T>        玩家数据唯一标识符类型
+	 * @param <R>        玩家类型
+	 * @param identifier 唯一标识符
+	 * @param predicate  移除规则
+	 * @return 被移除的玩家
+	 */
+	@SafeVarargs
+	public static <T, R extends IPlayer<T>> R removePlayer(T identifier, Predicate<IPlayer<?>> predicate, Class<? extends IPlayerData>... modules) {
+		return unload(identifier, predicate, modules);
+	}
+
+	/**
+	 * 卸载玩家
+	 *
+	 * @param <T>        玩家数据的唯一标识符的类型
+	 * @param identifier 玩家唯一标识符
+	 * @param modules    保留模块
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, R extends IPlayer<T>> R unload(T identifier, Predicate<IPlayer<?>> predicate, Class<? extends IPlayerData>[] modules) {
+		BiFunction<Object, IPlayer<?>, IPlayer<?>> create = (playerId, player) -> {
+			if (player == null) {
+				return null;
+			}
+			if (predicate.test(player)) {
+				if (modules.length == 0) {
+					return null;
+				} else {
+					player.clearIfNot(modules);
+				}
+			}
+			return player;
+		};
+		return (R) players.compute(identifier, create);
 	}
 
 	/**
@@ -138,9 +212,9 @@ public class PlayerManager {
 	 * @param packageName 包名
 	 */
 	public static void addGameData(String packageName) {
-		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
-		for (Class<IGameData> clazz : classes) {
-			AGameData annotation = clazz.getDeclaredAnnotation(AGameData.class);
+		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
+		for (Class<IPlayerData> clazz : classes) {
+			APlayerData annotation = clazz.getDeclaredAnnotation(APlayerData.class);
 			PlayerManager.classes.put(annotation.moduleName(), clazz);
 			System.out.println("查找到数据结构：" + annotation.moduleName() +
 					"，是否压缩：" + annotation.isCompress());
@@ -155,5 +229,12 @@ public class PlayerManager {
 	public boolean shutdown() {
 		persistence(true);
 		return false;
+	}
+
+	public static void main(String[] args) {
+		ConcurrentHashMap<String, IPlayer<?>> players = new ConcurrentHashMap<>();
+		players.put("我们的", new DefaultPlayer());
+		System.out.println("我们的");
+		System.out.println(players.get("test_01"));
 	}
 }

@@ -37,7 +37,7 @@ public interface IModuleSerializable<T> extends ISerializable {
 	 * @return 玩家数据
 	 * @throws IOException 反序列化异常
 	 */
-	List<? extends IGameData> deserialize(Class<? extends IGameData> clazz) throws IOException;
+	<V extends IGameData> List<V> deserialize(Class<V> clazz) throws IOException;
 
 	/**
 	 * 针对于模块的序列化方案

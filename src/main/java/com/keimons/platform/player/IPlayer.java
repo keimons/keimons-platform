@@ -1,10 +1,6 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IRepeatedPlayerData;
-import com.keimons.platform.iface.ISingularPlayerData;
 import com.keimons.platform.session.Session;
-
-import java.util.function.Consumer;
 
 /**
  * 玩家的接口
@@ -28,25 +24,38 @@ public interface IPlayer<T> extends IPersistence<T> {
 	T getIdentifier();
 
 	/**
-	 * 设置session
-	 *
-	 * @param session 客户端-服务器会话
+	 * 加载
 	 */
-	void setSession(Session session);
+	void loaded();
 
 	/**
-	 * 设置是否已加载
-	 *
-	 * @param loaded true.已加载 false.未加载
+	 * 登录
 	 */
-	void setLoaded(boolean loaded);
+	void online();
 
 	/**
-	 * 是否已经加载
+	 * 检查模块是否存在
 	 *
-	 * @return true.已加载 false.未加载
+	 * @param classes 模块
+	 * @return 是否存在
 	 */
-	boolean isLoaded();
+	@SuppressWarnings("unchecked")
+	boolean hasModules(Class<? extends IPlayerData>... classes);
+
+	/**
+	 * 移除不是这些的模块
+	 *
+	 * @param classes 模块
+	 */
+	@SuppressWarnings("unchecked")
+	void clearIfNot(Class<? extends IPlayerData>... classes);
+
+	/**
+	 * 增加一个模块数据
+	 *
+	 * @param data 数据
+	 */
+	void add(IPlayerData data);
 
 	/**
 	 * 获取玩家的一个模块
@@ -65,7 +74,7 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * @param <V>    模块类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedPlayerData> V get(Class<V> clazz, Object dataId);
+	<V extends IRepeatedPlayerData<?>> V get(Class<V> clazz, Object dataId);
 
 	/**
 	 * 移除玩家的一个数据
@@ -75,15 +84,35 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * @param <V>    模块类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedPlayerData> V remove(Class<V> clazz, Object dataId);
+	<V extends IRepeatedPlayerData<?>> V remove(Class<V> clazz, Object dataId);
 
 	/**
-	 * 获取加载器
+	 * 设置是否已加载
 	 *
-	 * @param consumer  消耗函数
-	 * @return 加载器
+	 * @param loaded true.已加载 false.未加载
 	 */
-	Runnable getLoader(Consumer<IPlayer<T>> consumer);
+	void setLoaded(boolean loaded);
+
+	/**
+	 * 是否已经加载
+	 *
+	 * @return true.已加载 false.未加载
+	 */
+	boolean isLoaded();
+
+	/**
+	 * 设置session
+	 *
+	 * @param session 客户端-服务器会话
+	 */
+	void setSession(Session session);
+
+	/**
+	 * 获取session
+	 *
+	 * @return 客户端-服务器会话
+	 */
+	Session getSession();
 
 	/**
 	 * 设置活跃时间
@@ -98,6 +127,4 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * @return 活跃时间
 	 */
 	long getActiveTime();
-
-	void checkModule();
 }

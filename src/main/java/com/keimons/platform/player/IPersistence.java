@@ -1,7 +1,5 @@
 package com.keimons.platform.player;
 
-import java.util.function.Consumer;
-
 /**
  * 数据持久化方案
  * <p>
@@ -24,9 +22,10 @@ public interface IPersistence<T> {
 	void save(boolean coercive);
 
 	/**
-	 * 加载器
+	 * 加载
 	 *
-	 * @return 加载器
+	 * @param classes 要加载的数据模块
 	 */
-	Consumer<T> getLoader();
+	@SuppressWarnings("unchecked")
+	void load(Class<? extends IPlayerData>... classes);
 }

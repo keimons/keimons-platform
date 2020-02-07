@@ -1,8 +1,7 @@
 package com.keimons.platform.game;
 
-import com.keimons.platform.annotation.AGameData;
+import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.ILoaded;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.CodeUtil;
 
@@ -50,7 +49,7 @@ public class GameDataManager {
 	 * @throws IOException 反序列化异常
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IGameData & ILoaded> T loadGameData(String moduleName) throws IOException {
+	public static <T extends IGameData> T loadGameData(String moduleName) throws IOException {
 		byte[] data = null; //RedissonManager.getMapValue(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(playerId), CharsetUtil.getUTF8(moduleType.toString()));
 		// 反序列化
 		Class<? extends IGameData> clazz = modules.get(moduleName);
@@ -64,10 +63,10 @@ public class GameDataManager {
 	 * @param packageName 包名
 	 */
 	public static void addGameData(String packageName) {
-		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, AGameData.class);
+		List<Class<IGameData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
 		for (Class<IGameData> clazz : classes) {
 			System.out.println("正在安装共有数据模块：" + clazz.getSimpleName());
-			AGameData annotation = clazz.getAnnotation(AGameData.class);
+			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 			modules.put(annotation.moduleName(), clazz);
 			System.out.println("成功安装共有数据模块：" + clazz.getSimpleName());
 		}

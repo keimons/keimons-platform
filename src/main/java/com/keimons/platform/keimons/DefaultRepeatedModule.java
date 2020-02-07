@@ -1,6 +1,6 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.iface.IRepeatedPlayerData;
+import com.keimons.platform.player.IRepeatedPlayerData;
 import com.keimons.platform.player.BaseRepeatedModule;
 
 /**
@@ -10,6 +10,6 @@ import com.keimons.platform.player.BaseRepeatedModule;
  * @version 1.0
  * @since 1.0
  **/
-public class DefaultRepeatedModule<T extends IRepeatedPlayerData> extends BaseRepeatedModule<T> {
+public class DefaultRepeatedModule<T extends IRepeatedPlayerData<?>> extends BaseRepeatedModule<T> {
 
 }

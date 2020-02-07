@@ -1,6 +1,6 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.iface.ISingularPlayerData;
+import com.keimons.platform.player.ISingularPlayerData;
 import com.keimons.platform.player.BaseSingularModule;
 
 /**

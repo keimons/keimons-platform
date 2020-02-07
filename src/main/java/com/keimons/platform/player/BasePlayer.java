@@ -1,20 +1,19 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.annotation.AGameData;
-import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.IRepeatedPlayerData;
-import com.keimons.platform.iface.ISingularPlayerData;
+import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.IModule;
 import com.keimons.platform.module.IRepeatedModule;
 import com.keimons.platform.module.ISingularModule;
+import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.TimeUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
 /**
@@ -36,14 +35,39 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	protected T identifier;
 
 	/**
+	 * 数据是否已经加载
+	 * <p>
+	 * 为了防止数据被重复加载，所以需要一个标识符，标识数据是否已经被加载了。如果数据已经被
+	 * 加载，则不会向这个{@code DefaultPlayer}中进行二次加载，以防止覆盖之前的对象。
+	 */
+	private boolean loaded;
+
+	/**
 	 * 玩家数据 Key:数据名称 Value:数据
 	 */
-	protected final ConcurrentHashMap<String, IModule<? extends IGameData>> modules = new ConcurrentHashMap<>();
+	protected final ConcurrentHashMap<String, IModule<? extends IPlayerData>> modules = new ConcurrentHashMap<>();
+
+	/**
+	 * 已经初始化过的模块名称
+	 * <p>
+	 * 系统允许只加载用户的一部分数据。{@link #load(Class[])}加载数据时，如果数据没有完全加载，{@link #get(Class)}获取数据时，应该获取到的是
+	 * {@code null}，如果该模块未曾初始化，那么则可以对该模块进行初始化。
+	 * <p>
+	 * 警告：如果模块已经初始化，再次初始化模块，会导致数据被覆盖。
+	 */
+	protected final CopyOnWriteArraySet<String> moduleNames = new CopyOnWriteArraySet<>();
 
 	/**
 	 * 最后活跃时间
 	 */
-	private volatile long activeTime = TimeUtil.currentTimeMillis();
+	protected volatile long activeTime = TimeUtil.currentTimeMillis();
+
+	/**
+	 * 客户端-服务器会话
+	 * <p>
+	 * 客户端和服务器相互绑定，向服务器发送数据通过客户端完成
+	 */
+	protected Session session;
 
 	/**
 	 * 默认构造函数
@@ -60,17 +84,49 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 		this.identifier = identifier;
 	}
 
+	@Override
+	public void add(IPlayerData data) {
+		if (data instanceof ISingularPlayerData) {
+			addSingularData((ISingularPlayerData) data);
+		}
+		if (data instanceof IRepeatedPlayerData) {
+			addRepeatedData((IRepeatedPlayerData<?>) data);
+		}
+	}
+
 	/**
 	 * 获取玩家的一个模块
+	 * <p>
+	 * 如果玩家已经被完全加载，如果缺少这个模块，则补充这个模块，如果玩家没有被完全加载，则不能
 	 *
 	 * @param clazz 模块名称
 	 * @param <V>   玩家数据类型
 	 * @return 数据模块
 	 */
+	@Override
+	@SuppressWarnings("unchecked")
 	public <V extends ISingularPlayerData> V get(Class<V> clazz) {
-		AGameData annotation = clazz.getAnnotation(AGameData.class);
+		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
 		ISingularModule<?> module = (ISingularModule<?>) modules.get(moduleName);
+		if (module == null && !modules.containsKey(moduleName)) {
+			synchronized (this) {
+				if (!modules.containsKey(moduleName)) {
+					try {
+						ISingularPlayerData data = clazz.getDeclaredConstructor().newInstance();
+						data.init(this);
+						addSingularData(data);
+						moduleNames.add(moduleName);
+					} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+						LogService.error(e);
+					}
+				}
+			}
+			module = (ISingularModule<?>) modules.get(moduleName);
+		}
+		if (module == null) {
+			return null;
+		}
 		return (V) module.get();
 	}
 
@@ -82,58 +138,34 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @param <V>    模块类型
 	 * @return 数据模块
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
-	public <V extends IRepeatedPlayerData> V get(Class<V> clazz, Object dataId) {
-		AGameData annotation = clazz.getAnnotation(AGameData.class);
+	public <V extends IRepeatedPlayerData<?>> V get(Class<V> clazz, Object dataId) {
+		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
 		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
+		if (module == null) {
+			return null;
+		}
 		return (V) module.get(dataId);
 	}
 
-	@Override
-	public T getIdentifier() {
-		return this.identifier;
-	}
-
 	/**
-	 * 获取玩家的一个模块
+	 * 移除玩家的一个模块
 	 *
 	 * @param clazz  模块名称
 	 * @param dataId 数据唯一IDs
 	 * @param <V>    模块类型
 	 * @return 数据模块
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
-	public <V extends IRepeatedPlayerData> V remove(Class<V> clazz, Object dataId) {
-		AGameData annotation = clazz.getAnnotation(AGameData.class);
+	public <V extends IRepeatedPlayerData<?>> V remove(Class<V> clazz, Object dataId) {
+		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
 		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
 		return (V) module.remove(dataId);
 	}
-
-	@Override
-	public void setActiveTime(long activeTime) {
-		this.activeTime = activeTime;
-	}
-
-	@Override
-	public long getActiveTime() {
-		return activeTime;
-	}
-
-	/**
-	 * 增加一个可重复的模块数据
-	 *
-	 * @param data 数据
-	 */
-	public abstract void addRepeatedData(IRepeatedPlayerData data);
-
-	/**
-	 * 增加一个非重复的模块数据
-	 *
-	 * @param data 数据
-	 */
-	public abstract void addSingularData(ISingularPlayerData data);
 
 	/**
 	 * 获取数据模块
@@ -144,42 +176,89 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @return 模块
 	 */
 	@SuppressWarnings("unchecked")
-	protected <V extends IModule<? extends IGameData>> V computeIfAbsent(
+	protected <V extends IModule<? extends IPlayerData>> V computeIfAbsent(
 			String moduleName, Function<String, V> function) {
 		Objects.requireNonNull(function);
 		return (V) modules.computeIfAbsent(moduleName, function);
 	}
 
 	/**
-	 * 检查玩家是否有该模块
+	 * 增加一个可重复的模块数据
 	 *
-	 * @param clazz 模块
-	 * @return 是否有该模块
+	 * @param data 数据
 	 */
-	public boolean hasModule(String clazz) {
-		return modules.containsKey(clazz);
-	}
+	public abstract void addRepeatedData(IRepeatedPlayerData<?> data);
 
 	/**
-	 * 检测玩家缺少的数据模块并添加该模块
+	 * 增加一个非重复的模块数据
+	 *
+	 * @param data 数据
 	 */
-	public void checkModule() {
-		try {
-			List<ISingularPlayerData> init = new ArrayList<>();
-			for (Map.Entry<String, Class<? extends IGameData>> entry : PlayerManager.classes.entrySet()) {
-				// 判断模块是否需要被添加
-				Class<? extends IGameData> clazz = entry.getValue();
-				if (!hasModule(entry.getKey()) && ISingularPlayerData.class.isAssignableFrom(clazz)) {
-					ISingularPlayerData data = (ISingularPlayerData) clazz.newInstance();
-					addSingularData(data);
-					init.add(data);
-				}
+	public abstract void addSingularData(ISingularPlayerData data);
+
+	@Override
+	public boolean hasModules(Class<? extends IPlayerData>[] classes) {
+		for (Class<? extends IPlayerData> clazz : classes) {
+			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+			if (annotation == null) {
+				return false;
 			}
-			for (ISingularPlayerData data : init) {
-				data.init(this);
+			if (!modules.containsKey(annotation.moduleName())) {
+				return false;
 			}
-		} catch (InstantiationException | IllegalAccessException e) {
-			LogService.error(e);
 		}
+		return true;
+	}
+
+	@Override
+	public void clearIfNot(Class<? extends IPlayerData>[] classes) {
+		Set<String> moduleNames = new HashSet<>(classes.length);
+		for (Class<? extends IPlayerData> clazz : classes) {
+			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+			if (annotation == null) {
+				continue;
+			}
+			moduleNames.add(annotation.moduleName());
+		}
+		for (String moduleName : modules.keySet()) {
+			if (!moduleNames.contains(moduleName)) {
+				modules.remove(moduleName);
+			}
+		}
+	}
+
+	@Override
+	public T getIdentifier() {
+		return this.identifier;
+	}
+
+	@Override
+	public void setSession(Session session) {
+		this.session = session;
+	}
+
+	@Override
+	public Session getSession() {
+		return session;
+	}
+
+	@Override
+	public void setLoaded(boolean loaded) {
+		this.loaded = loaded;
+	}
+
+	@Override
+	public boolean isLoaded() {
+		return loaded;
+	}
+
+	@Override
+	public void setActiveTime(long activeTime) {
+		this.activeTime = activeTime;
+	}
+
+	@Override
+	public long getActiveTime() {
+		return activeTime;
 	}
 }

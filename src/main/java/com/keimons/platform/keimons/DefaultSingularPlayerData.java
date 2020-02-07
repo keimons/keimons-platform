@@ -1,7 +1,7 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.ISingularPlayerData;
+import com.keimons.platform.player.ISingularPlayerData;
 import com.keimons.platform.module.IGameDataSerialize;
 import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.MD5Util;

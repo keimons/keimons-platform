@@ -15,7 +15,7 @@ import java.lang.annotation.*;
 @Inherited
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AGameData {
+public @interface APlayerData {
 
 	/**
 	 * 模块名称

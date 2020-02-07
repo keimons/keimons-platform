@@ -23,51 +23,12 @@ public class PlayerLoader implements Runnable {
 	private static LinkedBlockingDeque<Runnable> loading = new LinkedBlockingDeque<>();
 
 	/**
-	 * 立即加载玩家数据（阻塞加载）
-	 *
-	 * @param player 玩家唯一标识
-	 * @param <T>    玩家数据的唯一标识符的类型
-	 * @return 玩家所有模块
-	 */
-	public static <T> IPlayer<T> fastLoad(IPlayer<T> player) {
-		FutureTask<Void> task = new FutureTask<>(player.getLoader(null), null);
-		loading.offerFirst(task);
-		return null;
-	}
-
-	/**
 	 * 排队加载玩家数据
 	 *
-	 * @param player   玩家
-	 * @param consumer 消费函数
-	 * @param <T>      玩家唯一ID类型
+	 * @param runnable 队列
 	 */
-	public static <T> void slowLoad(IPlayer<T> player, Consumer<IPlayer<T>> consumer) {
-		loading.add(player.getLoader(consumer));
-	}
-
-	/**
-	 * 排队加载
-	 *
-	 * @param runnable 执行过程
-	 */
-	public static void addLoad(Runnable runnable) {
+	public static void slowLoad(Runnable runnable) {
 		loading.add(runnable);
-	}
-
-	/**
-	 * 阻塞加载
-	 *
-	 * @param callable 执行过程
-	 * @param <R>      返回结果
-	 * @return 返回值
-	 * @throws ExecutionException   异常
-	 * @throws InterruptedException 异常
-	 */
-	public static <R> R addLoad(Callable<R> callable) throws ExecutionException, InterruptedException {
-		FutureTask<R> task = new FutureTask<>(callable);
-		loading.offerFirst(task);
-		return task.get();
 	}
 
 	@Override

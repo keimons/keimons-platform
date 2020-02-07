@@ -18,6 +18,7 @@ import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -126,10 +127,10 @@ public class Keimons<T> {
 		for (Class<IManager> clazz : list) {
 			System.out.println("正在安装模块管理器：" + clazz.getSimpleName());
 			try {
-				IManager manager = clazz.newInstance();
+				IManager manager = clazz.getDeclaredConstructor().newInstance();
 				managers.put(manager.getClass(), manager);
 				manager.load();
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 				LogService.error(e, clazz.getSimpleName() + "安装模块管理器失败");
 			}
 			System.out.println("成功安装模块管理器：" + clazz.getSimpleName());
@@ -146,13 +147,13 @@ public class Keimons<T> {
 		for (Class<IService> clazz : list) {
 			System.out.println("正在安装模块服务器：" + clazz.getSimpleName());
 			try {
-				IService service = clazz.newInstance();
+				IService service = clazz.getDeclaredConstructor().newInstance();
 				services.put(service.getClass(), service);
 				if (service instanceof IEventHandler) {
 					EventService.registerEvent((IEventHandler) service);
 				}
 				service.start();
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 				LogService.error(e, clazz.getSimpleName() + "安装模块服务器失败");
 			}
 			System.out.println("成功安装模块服务器：" + clazz.getSimpleName());
