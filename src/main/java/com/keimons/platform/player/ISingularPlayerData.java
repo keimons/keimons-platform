@@ -18,6 +18,7 @@ public interface ISingularPlayerData extends IPlayerData, ISingularGameData {
 	 * 据已经被初始化后，不会对数据进行第二次初始化。
 	 *
 	 * @param player 玩家
+	 * @param <T>    玩家类型
 	 */
 	<T extends IPlayer<?>> void init(T player);
 }

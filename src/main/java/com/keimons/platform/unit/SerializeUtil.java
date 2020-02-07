@@ -25,9 +25,11 @@ public class SerializeUtil {
 	 * @param coercive 是否强制序列化
 	 * @param <T>      序列化类型
 	 * @return 序列化后的数据
-	 * @throws IOException            序列化异常
-	 * @throws IllegalAccessException 生成对象异常
-	 * @throws InstantiationException 生成对象异常
+	 * @throws IOException               序列化异常
+	 * @throws IllegalAccessException    反射创建对象异常
+	 * @throws InstantiationException    反射创建对象异常
+	 * @throws NoSuchMethodException     反射创建对象异常
+	 * @throws InvocationTargetException 反射创建对象异常
 	 */
 	public static <T> T serialize(
 			Class<? extends IModuleSerializable<T>> clazz,

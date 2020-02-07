@@ -1,6 +1,5 @@
 package com.keimons.platform.datebase;
 
-import com.google.common.collect.Sets;
 import org.redisson.Redisson;
 import org.redisson.api.*;
 import org.redisson.client.codec.Codec;
@@ -12,7 +11,6 @@ import org.redisson.config.SingleServerConfig;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 数据库管理
@@ -99,6 +97,7 @@ public class RedissonManager {
 	 * @param codec 解码方式
 	 * @param key   键
 	 * @param <F>   返回键类型
+	 * @param <V>   返回值类型
 	 * @return 所有field-value
 	 */
 	public static <F, V> Set<F> getMapKeys(Codec codec, String key) {
@@ -137,6 +136,7 @@ public class RedissonManager {
 	 *
 	 * @param codec 解码方式
 	 * @param key   键
+	 * @param field 字段
 	 * @param <F>   返回键类型
 	 * @param <V>   返回值类型
 	 * @return 所有field-value

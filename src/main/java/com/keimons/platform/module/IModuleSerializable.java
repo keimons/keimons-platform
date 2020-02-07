@@ -34,6 +34,7 @@ public interface IModuleSerializable<T> extends ISerializable {
 	 * 反序列化为玩家数据
 	 *
 	 * @param clazz 数据类型
+	 * @param <V>   数据类型
 	 * @return 玩家数据
 	 * @throws IOException 反序列化异常
 	 */

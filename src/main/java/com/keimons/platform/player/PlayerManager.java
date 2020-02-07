@@ -87,9 +87,11 @@ public class PlayerManager {
 	/**
 	 * 创建并缓存模块数据
 	 *
-	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @param identifier 玩家唯一标识符
 	 * @param create     构造函数，如果没有找到这个对象，则构造这个对象
+	 * @param modules    需要的模块
+	 * @param <T>        玩家主键类型
+	 * @param <R>        玩家类型
 	 * @return 模块数据
 	 */
 	@SafeVarargs
@@ -100,10 +102,12 @@ public class PlayerManager {
 	/**
 	 * 创建并缓存模块数据
 	 *
-	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @param identifier 玩家唯一标识符
 	 * @param create     构造函数，如果没有找到这个对象，则构造这个对象
 	 * @param consumer   消耗函数加载完成后对应的操作
+	 * @param modules    需要加载的模块
+	 * @param <T>        玩家主键类型
+	 * @param <R>        玩家类型
 	 */
 	@SafeVarargs
 	public static <T, R extends IPlayer<T>> void findPlayer(T identifier, Function<T, IPlayer<T>> create, Consumer<R> consumer, Class<? extends IPlayerData>... modules) {
@@ -113,13 +117,13 @@ public class PlayerManager {
 	/**
 	 * 加载玩家到内存
 	 *
-	 * @param <T>        玩家主键class类型
-	 * @param <R>        玩家class类型
 	 * @param identifier 主键
 	 * @param fast       快速加载
 	 * @param create     创建函数
 	 * @param modules    模块
 	 * @param consumer   消耗函数
+	 * @param <T>        玩家主键class类型
+	 * @param <R>        玩家class类型
 	 * @return 玩家
 	 */
 	@SuppressWarnings("unchecked")
@@ -169,10 +173,11 @@ public class PlayerManager {
 	/**
 	 * 移除玩家
 	 *
-	 * @param <T>        玩家数据唯一标识符类型
-	 * @param <R>        玩家类型
 	 * @param identifier 唯一标识符
 	 * @param predicate  移除规则
+	 * @param modules    要加载的模块
+	 * @param <T>        玩家数据唯一标识符类型
+	 * @param <R>        玩家类型
 	 * @return 被移除的玩家
 	 */
 	@SafeVarargs
@@ -183,9 +188,12 @@ public class PlayerManager {
 	/**
 	 * 卸载玩家
 	 *
-	 * @param <T>        玩家数据的唯一标识符的类型
 	 * @param identifier 玩家唯一标识符
-	 * @param modules    保留模块
+	 * @param predicate  移除规则 {@code true} 移除 {@code false} 不移除
+     * @param modules    保留模块
+     * @param <T>        玩家主键类型
+     * @param <R>        玩家类型
+     * @return 被卸载的玩家
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T, R extends IPlayer<T>> R unload(T identifier, Predicate<IPlayer<?>> predicate, Class<? extends IPlayerData>[] modules) {
