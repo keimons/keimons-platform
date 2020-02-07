@@ -2,7 +2,6 @@ package com.keimons.platform.player;
 
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.keimons.DefaultPlayer;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
@@ -229,12 +228,5 @@ public class PlayerManager {
 	public boolean shutdown() {
 		persistence(true);
 		return false;
-	}
-
-	public static void main(String[] args) {
-		ConcurrentHashMap<String, IPlayer<?>> players = new ConcurrentHashMap<>();
-		players.put("我们的", new DefaultPlayer());
-		System.out.println("我们的");
-		System.out.println(players.get("test_01"));
 	}
 }
