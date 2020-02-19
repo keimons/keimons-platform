@@ -1,4 +1,4 @@
-package com.keimons.platform.process;
+package com.keimons.platform.thread;
 
 import com.keimons.platform.session.Session;
 
@@ -12,7 +12,7 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  **/
-interface IThreadRoute {
+public interface IThreadRoute {
 
 	/**
 	 * 协议路由规则

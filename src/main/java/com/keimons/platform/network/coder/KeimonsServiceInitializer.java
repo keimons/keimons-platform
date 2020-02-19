@@ -1,7 +1,6 @@
 package com.keimons.platform.network.coder;
 
 import com.keimons.platform.network.KeimonsHandler;
-import com.keimons.platform.process.ProcessorManager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -19,14 +18,9 @@ public class KeimonsServiceInitializer<I> extends ChannelInitializer<SocketChann
 
 	private final ByteAdapter byteAdapter;
 
-	private final ProcessorManager<I> executor;
-
-	public KeimonsServiceInitializer(CodecAdapter<I> converter,
-									 ByteAdapter byteAdapter,
-									 ProcessorManager<I> processorManager) {
+	public KeimonsServiceInitializer(CodecAdapter<I> converter, ByteAdapter byteAdapter) {
 		this.codecAdapter = converter;
 		this.byteAdapter = byteAdapter;
-		this.executor = processorManager;
 	}
 
 	@Override
@@ -35,6 +29,6 @@ public class KeimonsServiceInitializer<I> extends ChannelInitializer<SocketChann
 				.addLast("IdleHandler", new IdleStateHandler(5 * 60, 5 * 60, 5 * 60))
 				.addLast("byteAdapter", byteAdapter)
 				.addLast("codecAdapter", codecAdapter)
-				.addLast("KeimonsHandler", new KeimonsHandler<>(codecAdapter.getMessageType(), executor));
+				.addLast("KeimonsHandler", new KeimonsHandler<>(codecAdapter.getMessageType()));
 	}
 }

@@ -1,7 +1,6 @@
 package com.keimons.platform.network;
 
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.process.ProcessorManager;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.session.SessionManager;
 import com.keimons.platform.unit.NetUtil;
@@ -26,11 +25,8 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 
 	public static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
 
-	private final ProcessorManager<I> executor;
-
-	public KeimonsHandler(Class<I> messageType, ProcessorManager<I> executor) {
+	public KeimonsHandler(Class<I> messageType) {
 		super(messageType);
-		this.executor = executor;
 	}
 
 	@Override
@@ -42,7 +38,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			executor.execute(session, packet);
+			session.commit(packet);
 		} catch (Exception e) {
 			String info = "会话ID：" + ctx.channel().attr(SESSION).get();
 			LogService.error(e, info);

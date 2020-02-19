@@ -39,5 +39,5 @@ public abstract class CodecAdapter<OUT_BOUND> extends MessageToMessageCodec<byte
 
 	public abstract OUT_BOUND decode(byte[] msg);
 
-	public abstract int getMsgCode(OUT_BOUND msg);
+	public abstract int getMsgCode(Object msg);
 }

@@ -1,7 +1,6 @@
-package com.keimons.platform.annotation;
+package com.keimons.platform.process;
 
-import com.keimons.platform.process.Processor;
-import com.keimons.platform.process.ThreadLevel;
+import com.keimons.platform.thread.DefaultExecutorConfig;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +12,7 @@ import java.lang.annotation.Target;
  * <p>
  * 标注了这个类是用来处理客户端请求的，在系统启动时，系统会扫描所有的系统模块，当模块
  * 中的某个类标注了这个注解，则会加载到消息处理器中，这里描述了消息处理器的相关信息，
- * 在{@link Processor}定义了业务如何处理，两
+ * 在{@link BaseProcessor}定义了业务如何处理，两
  * 个模块独立工作，不会合二为一
  *
  * @author monkey1993
@@ -63,7 +62,7 @@ public @interface AProcessor {
 	 *
 	 * @return 自动升级线程池
 	 */
-	ThreadLevel ThreadLevel() default ThreadLevel.AUTO;
+	DefaultExecutorConfig ExecutorConfig() default DefaultExecutorConfig.FAST;
 
 	/**
 	 * 采样频率
