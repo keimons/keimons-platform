@@ -7,14 +7,7 @@ package com.keimons.platform.thread;
  * @version 1.0
  * @since 1.8
  **/
-public interface IExecutorConfig {
-
-	/**
-	 * 是否启用
-	 *
-	 * @return 是否创建
-	 */
-	boolean isActive();
+public interface IExecutorEnum {
 
 	/**
 	 * 获取线程命名规则

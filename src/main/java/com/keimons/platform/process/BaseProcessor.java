@@ -1,10 +1,7 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.session.Session;
-import com.keimons.platform.thread.DefaultExecutorConfig;
-import com.keimons.platform.thread.IExecutorConfig;
-import com.keimons.platform.thread.IThreadRoute;
-import com.keimons.platform.thread.KeimonsExecutor;
+import com.keimons.platform.session.ISession;
+import com.keimons.platform.thread.IExecutorEnum;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,9 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  * @since 1.8
  */
-public abstract class BaseProcessor<T> implements IHandler<T> {
-
-	private static final KeimonsExecutor EXECUTOR = new KeimonsExecutor(DefaultExecutorConfig.class);
+public abstract class BaseProcessor<T extends ISession, O> implements IHandler<T, O> {
 
 	/**
 	 * 消息号
@@ -34,7 +29,7 @@ public abstract class BaseProcessor<T> implements IHandler<T> {
 	/**
 	 * 线程池类型
 	 */
-	protected final Enum<? extends IExecutorConfig> executorConfig;
+	protected final Enum<? extends IExecutorEnum> executor;
 
 	/**
 	 * 请求间隔
@@ -77,10 +72,15 @@ public abstract class BaseProcessor<T> implements IHandler<T> {
 		this.interval = annotation.Interval();
 		this.desc = annotation.Desc();
 		this.sampling = annotation.Sampling();
-		this.executorConfig = annotation.ExecutorConfig();
+		this.executor = annotation.Executor();
 
 		this.executorTimes = new int[this.sampling];
 		this.AND = this.sampling - 1;
+	}
+
+	@Override
+	public Enum<? extends IExecutorEnum> getExecutor() {
+		return executor;
 	}
 
 	/**
@@ -89,47 +89,8 @@ public abstract class BaseProcessor<T> implements IHandler<T> {
 	 * 如果线程是自适应等级，则根据历史本消息执行时长，计算出来它应该使用的线程。
 	 */
 	@Override
-	public boolean handler(Session session, T packet) {
-		DefaultExecutorConfig config = (DefaultExecutorConfig) this.executorConfig;
-		if (config == DefaultExecutorConfig.AUTO) {
-			int executeTime = executorTime / sampling;
-			if (executeTime < 20) {
-				config = DefaultExecutorConfig.FAST;
-			} else {
-				config = DefaultExecutorConfig.SLOW;
-			}
-		}
+	public void handler(T session, O packet) {
 
-		Runnable runnable = () -> {
-			try {
-				processor(session, packet);
-			} finally {
-				session.finish();
-			}
-		};
-		if (config.isRoute()) {
-			int route = route(session, packet, config.getThreadNumb());
-			EXECUTOR.execute(config, route, runnable);
-		} else {
-			EXECUTOR.execute(config, runnable);
-		}
-		return true;
-	}
-
-	/**
-	 * 获取旅游线程
-	 *
-	 * @param session  会话
-	 * @param packet   消息体
-	 * @param maxIndex 最大线程ID
-	 * @return 线程index
-	 */
-	public int route(Session session, Object packet, int maxIndex) {
-		if (this instanceof IThreadRoute) {
-			return ((IThreadRoute) this).route(session, packet, maxIndex);
-		} else {
-			return session.getSessionId() % maxIndex;
-		}
 	}
 
 	/**
@@ -138,13 +99,10 @@ public abstract class BaseProcessor<T> implements IHandler<T> {
 	 * @param executeTime 消息执行时长
 	 */
 	public void updateExecuteTime(int executeTime) {
-		DefaultExecutorConfig config = (DefaultExecutorConfig) this.executorConfig;
-		if (config == DefaultExecutorConfig.AUTO) {
-			int index = this.index.getAndIncrement() & AND;
-			executorTime -= this.executorTimes[index];
-			this.executorTimes[index] = executeTime;
-			executorTime += executeTime;
-		}
+		int index = this.index.getAndIncrement() & AND;
+		executorTime -= this.executorTimes[index];
+		this.executorTimes[index] = executeTime;
+		executorTime += executeTime;
 	}
 
 	/**
@@ -155,10 +113,5 @@ public abstract class BaseProcessor<T> implements IHandler<T> {
 	 * @param session 客户端-服务器 会话
 	 * @param packet  客户端发送过来的数据
 	 */
-	public abstract void processor(Session session, T packet);
-
-	@Override
-	public Enum<? extends IExecutorConfig> getExecutorConfig() {
-		return executorConfig;
-	}
+	public abstract void processor(T session, O packet);
 }

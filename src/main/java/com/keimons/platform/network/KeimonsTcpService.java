@@ -5,7 +5,7 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.network.coder.DefaultByteAdapter;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
-import com.keimons.platform.process.HandlerManager;
+import com.keimons.platform.process.BaseHandlerManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -36,9 +36,9 @@ public class KeimonsTcpService<T> {
 
 	private final CodecAdapter<T> codecAdapter;
 
-	private final HandlerManager executor;
+	private final BaseHandlerManager executor;
 
-	public KeimonsTcpService(CodecAdapter<T> codecAdapter, HandlerManager executor) {
+	public KeimonsTcpService(CodecAdapter<T> codecAdapter, BaseHandlerManager executor) {
 		this.codecAdapter = codecAdapter;
 		this.executor = executor;
 	}

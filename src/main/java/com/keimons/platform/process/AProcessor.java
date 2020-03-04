@@ -1,6 +1,6 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.thread.DefaultExecutorConfig;
+import com.keimons.platform.thread.DefaultExecutorEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -62,7 +62,7 @@ public @interface AProcessor {
 	 *
 	 * @return 自动升级线程池
 	 */
-	DefaultExecutorConfig ExecutorConfig() default DefaultExecutorConfig.FAST;
+	DefaultExecutorEnum Executor() default DefaultExecutorEnum.FAST;
 
 	/**
 	 * 采样频率

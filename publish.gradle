@@ -1,0 +1,128 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'groovy'
+apply plugin: 'java'
+
+apply from: rootDir.canonicalPath + '/publish/publish.gradle'
+
+group 'com.keimons.platform'
+version '1.0.0-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+repositories {
+    // 不要用 mavenCentral() 太慢了
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version: '28.1-jre', transitive: false
+
+    // 数据库
+    compile group: 'org.redisson', name: 'redisson', version: '3.7.5', transitive: false
+
+    // 序列化相关
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.54'
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.5.1'
+    compile group: 'com.baidu', name: 'jprotobuf', version: '2.2.14', transitive: false
+
+    // 数据压缩
+    compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.7.3'
+
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.11'
+
+    // 环形Buffer
+    compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.27.Final'
+
+    // 定时任务框架
+    compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0', transitive: false
+
+    // 启用LogBack日志模块 需要以下三个依赖
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3', transitive: false
+    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+
+publishing {
+    // 定义发布什么
+    publications {
+        mavenJava(MavenPublication) {
+            // groupId = project.group
+            // artifactId = project.name
+            // version = project.version
+            // groupId,artifactId,version，如果不定义，则会按照以上默认值执行
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                // 构件名称
+                // 区别于artifactId，可以理解为artifactName
+                name = 'Keimons Platform'
+                // 构件描述
+                description = 'Keimons Platform Library'
+                // 构件主页
+                url = 'https://keimons.com'
+                // 许可证名称和地址
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                // 开发者信息
+                developers {
+                    developer {
+                        name = 'monkey1993'
+                        email = 'monkey1993@keimons.com'
+                    }
+                }
+                // 版本控制仓库地址
+                scm {
+                    url = 'https://github.com/keimons/keimons-platform'
+                    connection = 'scm:git:git://github.com/keimons/keimons-platform.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:keimons/keimons-platform.git'
+                }
+            }
+        }
+    }
+    // 定义发布到哪里
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+            //url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                // 这里就是之前在issues.sonatype.org注册的账号
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    options.encoding = "UTF-8"
+    options.charSet = "UTF-8"
+}

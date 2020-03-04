@@ -5,7 +5,7 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.IModule;
 import com.keimons.platform.module.IRepeatedModule;
 import com.keimons.platform.module.ISingularModule;
-import com.keimons.platform.session.Session;
+import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -67,7 +67,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * <p>
 	 * 客户端和服务器相互绑定，向服务器发送数据通过客户端完成
 	 */
-	protected Session session;
+	protected ISession session;
 
 	/**
 	 * 默认构造函数
@@ -233,12 +233,12 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	}
 
 	@Override
-	public void setSession(Session session) {
+	public void setSession(ISession session) {
 		this.session = session;
 	}
 
 	@Override
-	public Session getSession() {
+	public ISession getSession() {
 		return session;
 	}
 

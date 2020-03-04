@@ -1,17 +1,9 @@
 package com.keimons.platform.thread;
 
-public enum DefaultExecutorConfig implements IExecutorConfig {
-	AUTO(false, "AUTO", 0, false),
-	FAST(true, "EXECUTOR-FAST-", 20, true),
-	SLOW(true, "EXECUTOR-SLOW-", 20, true),
-	RULE(true, "EXECUTOR-RULE-", 20, false),
-	LEAGUE(true, "LoginThread", 1, true),
-	;
-
-	/**
-	 * 是否活跃的
-	 */
-	private boolean active;
+public enum DefaultExecutorEnum implements IExecutorEnum {
+	FAST("EXECUTOR-FAST-", 20, false),
+	SLOW("EXECUTOR-SLOW-", 20, false),
+	RULE("EXECUTOR-RULE-", 20, true);
 
 	/**
 	 * 线程命名规则
@@ -35,16 +27,10 @@ public enum DefaultExecutorConfig implements IExecutorConfig {
 	 * @param threadNumb 执行器线程数量
 	 * @param route      执行器类型
 	 */
-	DefaultExecutorConfig(boolean active, String threadName, int threadNumb, boolean route) {
-		this.active = active;
+	DefaultExecutorEnum(String threadName, int threadNumb, boolean route) {
 		this.threadName = threadName;
 		this.threadNumb = threadNumb;
 		this.route = route;
-	}
-
-	@Override
-	public boolean isActive() {
-		return active;
 	}
 
 	@Override

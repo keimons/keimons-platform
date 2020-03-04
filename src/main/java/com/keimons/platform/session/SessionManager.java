@@ -46,14 +46,14 @@ public class SessionManager {
 	/**
 	 * 缓存整个游戏中所有的缓存
 	 */
-	private Set<Session> sessions = new ConcurrentSet<>();
+	private Set<ISession> sessions = new ConcurrentSet<>();
 
 	/**
 	 * 增加一个客户端-服务器会话
 	 *
 	 * @param session 会话
 	 */
-	public void addSession(Session session) {
+	public void addSession(ISession session) {
 		sessions.add(session);
 	}
 
@@ -62,7 +62,7 @@ public class SessionManager {
 	 *
 	 * @param session 会话
 	 */
-	public void removeSession(Session session) {
+	public void removeSession(ISession session) {
 		sessions.remove(session);
 	}
 
@@ -70,7 +70,7 @@ public class SessionManager {
 	 * 关闭服务器
 	 */
 	public void shutdown() {
-		for (Session session : sessions) {
+		for (ISession session : sessions) {
 			session.disconnect();
 		}
 	}

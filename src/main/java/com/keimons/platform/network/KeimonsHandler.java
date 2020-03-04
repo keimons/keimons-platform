@@ -1,6 +1,7 @@
 package com.keimons.platform.network;
 
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.session.ISession;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.session.SessionManager;
 import com.keimons.platform.unit.NetUtil;
@@ -23,7 +24,7 @@ import java.net.InetSocketAddress;
  */
 public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 
-	public static final AttributeKey<Session> SESSION = AttributeKey.valueOf("SESSION");
+	public static final AttributeKey<ISession> SESSION = AttributeKey.valueOf("SESSION");
 
 	public KeimonsHandler(Class<I> messageType) {
 		super(messageType);
@@ -32,7 +33,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, I packet) {
 		try {
-			Session session = ctx.channel().attr(SESSION).get();
+			ISession session = ctx.channel().attr(SESSION).get();
 			if (session == null) {
 				ctx.close();
 				LogService.error("当前ctx无法获取Session，Session已经被销毁");
@@ -47,7 +48,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 
 	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) {
-		Session session = new Session(ctx);
+		ISession session = new Session(ctx);
 		ctx.channel().attr(KeimonsHandler.SESSION).set(session);
 		SessionManager.getInstance().addSession(session);
 	}
@@ -55,7 +56,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 	@Override
 	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
 		super.channelUnregistered(ctx);
-		Session session = ctx.channel().attr(SESSION).get();
+		ISession session = ctx.channel().attr(SESSION).get();
 		if (session != null) {
 			session.disconnect();
 		}
@@ -64,7 +65,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 		// 已经是pipeline中最后一个handler了
-		Session session = ctx.channel().attr(SESSION).get();
+		ISession session = ctx.channel().attr(SESSION).get();
 		if (session != null) {
 			String errInfo = "Netty Exception! SessionId: " + NetUtil.getIpAddress(ctx);
 			LogService.error(errInfo);
@@ -77,7 +78,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) {
-		Session session = ctx.channel().attr(SESSION).get();
+		ISession session = ctx.channel().attr(SESSION).get();
 		if (session != null) {
 			session.disconnect();
 		}
@@ -97,7 +98,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 		// 读写超时时调用
 		if (evt instanceof IdleStateEvent) {
 			// 如果5分钟没有发生读/写的操作，则认定客户端已经掉线，直接关闭会话
-			Session session = ctx.channel().attr(SESSION).get();
+			ISession session = ctx.channel().attr(SESSION).get();
 			if (session != null && TimeUtil.currentTimeMillis() - session.getLastActiveTime() >= 5 * 60 * 1000) {
 				session.disconnect();
 			}

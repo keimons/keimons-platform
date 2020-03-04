@@ -2,8 +2,9 @@ package com.keimons.platform.process;
 
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.session.Session;
-import com.keimons.platform.thread.DefaultExecutorConfig;
+import com.keimons.platform.session.ISession;
+import com.keimons.platform.thread.DefaultExecutorEnum;
+import com.keimons.platform.thread.IRouteHandler;
 import com.keimons.platform.thread.KeimonsExecutor;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -26,19 +27,19 @@ import java.util.function.Function;
  * @version 1.0
  * @since 1.8
  */
-public class HandlerManager {
+public abstract class BaseHandlerManager<T extends ISession, O> {
 
-	private static KeimonsExecutor executor = new KeimonsExecutor(DefaultExecutorConfig.class);
+	private KeimonsExecutor executor = new KeimonsExecutor(DefaultExecutorEnum.class);
 
 	/**
 	 * 消息处理器
 	 */
-	public static Map<Integer, IHandler<?>> processors = new HashMap<>();
+	public Map<Integer, IHandler<T, O>> processors = new HashMap<>();
 
 	/**
 	 * 映射函数
 	 */
-	public static Function<Object, Integer> mapping;
+	public Function<Object, Integer> mapping;
 
 	/**
 	 * 入站出站消息类型
@@ -54,14 +55,34 @@ public class HandlerManager {
 	 *
 	 * @param messageType 入站出站消息类型
 	 */
-	public HandlerManager(Class<?> messageType, Function<Object, Integer> mapping) {
+	public BaseHandlerManager(Class<?> messageType, Function<Object, Integer> mapping) {
 		this.messageType = messageType;
-		HandlerManager.mapping = mapping;
+		this.mapping = mapping;
 	}
 
-	public static <I> boolean handler(Session session, I packet) throws Exception {
-		IHandler<I> info = (IHandler<I>) processors.get(mapping.apply(packet));
-		return info.handler(session, packet);
+	public void handler(T session, O packet) {
+		IHandler<T, O> info = processors.get(mapping.apply(packet));
+
+		DefaultExecutorEnum config = (DefaultExecutorEnum) info.getExecutor();
+		Runnable runnable = () -> {
+			try {
+				info.handler(session, packet);
+			} finally {
+				session.finish();
+			}
+		};
+		if (info instanceof IRouteHandler) {
+			IRouteHandler<T, O> route = (IRouteHandler<T, O>) info;
+			if (route.getExecuteTime() < 20) {
+				config = DefaultExecutorEnum.FAST;
+			} else {
+				config = DefaultExecutorEnum.SLOW;
+			}
+			int threadIndex = route.route(session, packet, config.getThreadNumb());
+			executor.execute(config, threadIndex, runnable);
+		} else {
+			executor.execute(config, runnable);
+		}
 	}
 
 	/**
@@ -73,15 +94,15 @@ public class HandlerManager {
 	 *
 	 * @param packageName 消息号所在包
 	 */
-	public <I> void addProcessor(String packageName) {
-		List<Class<BaseProcessor<?>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
-		for (Class<BaseProcessor<?>> clazz : classes) {
+	public void addProcessor(String packageName) {
+		List<Class<BaseProcessor<T, O>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
+		for (Class<BaseProcessor<T, O>> clazz : classes) {
 			AProcessor info = clazz.getAnnotation(AProcessor.class);
 			if (processors.containsKey(info.MsgCode()) &&
 					!clazz.getName().equals(processors.get(info.MsgCode()).getClass().getName())) {
 				throw new ModuleException("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
-			BaseProcessor<?> instance = null;
+			BaseProcessor<T, O> instance = null;
 			try {
 				instance = clazz.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
@@ -94,13 +115,13 @@ public class HandlerManager {
 			if (!type.equals(messageType)) {
 				throw new ModuleException("载体信息错误" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
 			}
-
-			@SuppressWarnings("unchecked")
-			BaseProcessor<I> processor = (BaseProcessor<I>) instance;
-
-			processors.put(info.MsgCode(), processor);
+			processors.put(info.MsgCode(), instance);
 			System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
 			System.out.println("成功安装消息处理器：" + clazz.getSimpleName());
 		}
+	}
+
+	public void init() {
+
 	}
 }

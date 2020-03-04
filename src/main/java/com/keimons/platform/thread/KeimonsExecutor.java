@@ -20,7 +20,7 @@ import java.util.concurrent.*;
  **/
 public class KeimonsExecutor {
 
-	private final Map<? extends Enum<? extends IExecutorConfig>, Object> executors;
+	private final Map<? extends Enum<? extends IExecutorEnum>, Object> executors;
 
 	@SuppressWarnings("unchecked")
 	public <T extends Enum<T>> KeimonsExecutor(Class<T> clazz) {
@@ -29,10 +29,7 @@ public class KeimonsExecutor {
 			Method values = clazz.getMethod("values");
 			T[] executorsInfo = (T[]) values.invoke(null);
 			for (T executorInfo : executorsInfo) {
-				IExecutorConfig info = (IExecutorConfig) executorInfo;
-				if (!info.isActive()) {
-					continue;
-				}
+				IExecutorEnum info = (IExecutorEnum) executorInfo;
 				if (info.isRoute()) {
 					ThreadPoolExecutor service = (ThreadPoolExecutor) Executors.newFixedThreadPool(info.getThreadNumb());
 					Executor[] routeExecutors = new Executor[info.getThreadNumb()];
@@ -54,7 +51,7 @@ public class KeimonsExecutor {
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
-		this.executors = (Map<? extends Enum<? extends IExecutorConfig>, Object>) new EnumMap<>(executors);
+		this.executors = (Map<? extends Enum<? extends IExecutorEnum>, Object>) new EnumMap<>(executors);
 	}
 
 	/**
@@ -63,12 +60,12 @@ public class KeimonsExecutor {
 	 * @param type     线程池类型
 	 * @param runnable 线程池昵称
 	 */
-	public void execute(Enum<? extends IExecutorConfig> type, Runnable runnable) {
+	public void execute(Enum<? extends IExecutorEnum> type, Runnable runnable) {
 		ExecutorService service = (ExecutorService) this.executors.get(type);
 		service.execute(runnable);
 	}
 
-	public void execute(Enum<? extends IExecutorConfig> type, int route, Runnable runnable) {
+	public void execute(Enum<? extends IExecutorEnum> type, int route, Runnable runnable) {
 		Executor[] executor = (Executor[]) this.executors.get(type);
 		executor[route].add(runnable);
 	}
@@ -81,8 +78,8 @@ public class KeimonsExecutor {
 	 * @param <R>      返回值类型
 	 * @return 执行结果
 	 */
-	public <R> R execute(Enum<? extends IExecutorConfig> type, Callable<R> callable) throws ExecutionException, InterruptedException {
-		if (((IExecutorConfig) type).isRoute()) {
+	public <R> R execute(Enum<? extends IExecutorEnum> type, Callable<R> callable) throws ExecutionException, InterruptedException {
+		if (((IExecutorEnum) type).isRoute()) {
 			ExecutorService service = (ExecutorService) this.executors.get(type);
 			return service.submit(callable).get();
 		} else {

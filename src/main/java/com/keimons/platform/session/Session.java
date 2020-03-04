@@ -3,7 +3,7 @@ package com.keimons.platform.session;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.player.IPlayer;
-import com.keimons.platform.process.HandlerManager;
+import com.keimons.platform.process.BaseHandlerManager;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  * @since 1.8
  */
-public class Session {
+public class Session implements ISession {
 
 	/**
 	 * 会话的自增ID
@@ -108,9 +108,7 @@ public class Session {
 					busy.set(false);
 				} else {
 					try {
-						if (!HandlerManager.handler(this, packet)) {
-							busy.set(false);
-						}
+						BaseHandlerManager.handler(this, packet);
 					} catch (Exception e) {
 						busy.set(false);
 						e.printStackTrace();

@@ -1,6 +1,6 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.session.Session;
+import com.keimons.platform.session.ISession;
 
 /**
  * 玩家的接口
@@ -105,14 +105,14 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 *
 	 * @param session 客户端-服务器会话
 	 */
-	void setSession(Session session);
+	void setSession(ISession session);
 
 	/**
 	 * 获取session
 	 *
 	 * @return 客户端-服务器会话
 	 */
-	Session getSession();
+	ISession getSession();
 
 	/**
 	 * 设置活跃时间

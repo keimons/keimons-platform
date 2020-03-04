@@ -13,7 +13,7 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
-import com.keimons.platform.process.HandlerManager;
+import com.keimons.platform.process.BaseHandlerManager;
 import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
@@ -46,12 +46,12 @@ public class Keimons<T> {
 
 	KeimonsTcpService<T> net;
 
-	HandlerManager executor;
+	BaseHandlerManager executor;
 
 	public Keimons(KeimonsConfig config, CodecAdapter<T> adapter) {
 		this.messageType = adapter.getMessageType();
 		this.config = config;
-		executor = new HandlerManager(messageType, adapter::getMsgCode);
+		executor = new BaseHandlerManager(messageType, adapter::getMsgCode);
 		net = new KeimonsTcpService<>(adapter, executor);
 	}
 

@@ -1,6 +1,7 @@
 package com.keimons.platform.thread;
 
-import com.keimons.platform.session.Session;
+import com.keimons.platform.process.IHandler;
+import com.keimons.platform.session.ISession;
 
 /**
  * 自定义的路有规则
@@ -12,7 +13,14 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  **/
-public interface IThreadRoute {
+public interface IRouteHandler<T extends ISession, O> extends IHandler<T, O> {
+
+	/**
+	 * 获取执行时间
+	 *
+	 * @return 执行时间
+	 */
+	int getExecuteTime();
 
 	/**
 	 * 协议路由规则
@@ -26,5 +34,7 @@ public interface IThreadRoute {
 	 * @param maxIndex 最大下标
 	 * @return 线程index
 	 */
-	<T> int route(Session session, T packet, int maxIndex);
+	default int route(T session, O packet, int maxIndex) {
+		return session.getSessionId() % maxIndex;
+	}
 }
