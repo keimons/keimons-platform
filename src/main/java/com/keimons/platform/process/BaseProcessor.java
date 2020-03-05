@@ -1,7 +1,7 @@
 package com.keimons.platform.process;
 
 import com.keimons.platform.session.ISession;
-import com.keimons.platform.thread.IExecutorEnum;
+import com.keimons.platform.executor.IExecutorEnum;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  * @since 1.8
  */
-public abstract class BaseProcessor<T extends ISession, O> implements IHandler<T, O> {
+public abstract class BaseProcessor<T extends ISession, O> implements IProcessor<T, O> {
 
 	/**
 	 * 消息号
@@ -78,7 +78,6 @@ public abstract class BaseProcessor<T extends ISession, O> implements IHandler<T
 		this.AND = this.sampling - 1;
 	}
 
-	@Override
 	public Enum<? extends IExecutorEnum> getExecutor() {
 		return executor;
 	}
@@ -89,7 +88,7 @@ public abstract class BaseProcessor<T extends ISession, O> implements IHandler<T
 	 * 如果线程是自适应等级，则根据历史本消息执行时长，计算出来它应该使用的线程。
 	 */
 	@Override
-	public void handler(T session, O packet) {
+	public void processor(T session, O packet) {
 
 	}
 
@@ -104,14 +103,4 @@ public abstract class BaseProcessor<T extends ISession, O> implements IHandler<T
 		this.executorTimes[index] = executeTime;
 		executorTime += executeTime;
 	}
-
-	/**
-	 * 处理消息
-	 * <p>
-	 * 当服务器接收并解码消息后，交由对应的消息处理器处理
-	 *
-	 * @param session 客户端-服务器 会话
-	 * @param packet  客户端发送过来的数据
-	 */
-	public abstract void processor(T session, O packet);
 }

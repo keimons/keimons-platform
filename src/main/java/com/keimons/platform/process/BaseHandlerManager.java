@@ -1,17 +1,16 @@
 package com.keimons.platform.process;
 
 import com.keimons.platform.exception.ModuleException;
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.executor.KeimonsExecutor;
+import com.keimons.platform.keimons.DefaultExecutorEnum;
 import com.keimons.platform.session.ISession;
-import com.keimons.platform.thread.DefaultExecutorEnum;
-import com.keimons.platform.thread.IRouteHandler;
-import com.keimons.platform.thread.KeimonsExecutor;
 import com.keimons.platform.unit.ClassUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
  * 消息处理管理器
@@ -39,7 +38,7 @@ public abstract class BaseHandlerManager<T extends ISession, O> {
 	/**
 	 * 映射函数
 	 */
-	public Function<Object, Integer> mapping;
+	public ToIntFunction<Object> mapping;
 
 	/**
 	 * 入站出站消息类型
@@ -55,33 +54,22 @@ public abstract class BaseHandlerManager<T extends ISession, O> {
 	 *
 	 * @param messageType 入站出站消息类型
 	 */
-	public BaseHandlerManager(Class<?> messageType, Function<Object, Integer> mapping) {
+	public BaseHandlerManager(Class<?> messageType, ToIntFunction<Object> mapping) {
 		this.messageType = messageType;
 		this.mapping = mapping;
 	}
 
-	public void handler(T session, O packet) {
-		IHandler<T, O> info = processors.get(mapping.apply(packet));
+	public void handler(T session, O message) {
+		int msgCode = mapping.applyAsInt(message);
+		IHandler<T, O> info = processors.get(msgCode);
 
-		DefaultExecutorEnum config = (DefaultExecutorEnum) info.getExecutor();
-		Runnable runnable = () -> {
-			try {
-				info.handler(session, packet);
-			} finally {
-				session.finish();
-			}
-		};
-		if (info instanceof IRouteHandler) {
-			IRouteHandler<T, O> route = (IRouteHandler<T, O>) info;
-			if (route.getExecuteTime() < 20) {
-				config = DefaultExecutorEnum.FAST;
-			} else {
-				config = DefaultExecutorEnum.SLOW;
-			}
-			int threadIndex = route.route(session, packet, config.getThreadNumb());
-			executor.execute(config, threadIndex, runnable);
+		DefaultExecutorEnum config = (DefaultExecutorEnum) info.getExecutorType();
+		if (info instanceof IRouteProcessor) {
+			IRouteProcessor<T, O> route = (IRouteProcessor<T, O>) info;
+			int threadIndex = route.route(session, message, config.getThreadNumb());
+			executor.execute(config, threadIndex, info.createTask(session, message));
 		} else {
-			executor.execute(config, runnable);
+			executor.execute(config, info.createTask(session, message));
 		}
 	}
 
@@ -94,29 +82,20 @@ public abstract class BaseHandlerManager<T extends ISession, O> {
 	 *
 	 * @param packageName 消息号所在包
 	 */
-	public void addProcessor(String packageName) {
-		List<Class<BaseProcessor<T, O>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
-		for (Class<BaseProcessor<T, O>> clazz : classes) {
-			AProcessor info = clazz.getAnnotation(AProcessor.class);
-			if (processors.containsKey(info.MsgCode()) &&
-					!clazz.getName().equals(processors.get(info.MsgCode()).getClass().getName())) {
-				throw new ModuleException("重复的消息号：" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
+	public void addProcessor(String packageName,  Function<? super Class<IProcessor<T, O>>, ? extends IHandler<T, O>> creator) {
+		List<Class<IProcessor<T, O>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
+		for (Class<IProcessor<T, O>> clazz : classes) {
+			IHandler<T, O> handler = creator.apply(clazz);
+			if (processors.containsKey(handler.getMsgCode())) {
+				throw new ModuleException("重复的消息号："
+						+ clazz.getName()
+						+ "，与："
+						+ processors.get(handler.getMsgCode()).getClass().getName()
+				);
 			}
-			BaseProcessor<T, O> instance = null;
-			try {
-				instance = clazz.getDeclaredConstructor().newInstance();
-			} catch (Exception e) {
-				LogService.error(e, clazz.getSimpleName() + "，安装消息处理器失败");
-				System.exit(1);
-			}
-
-			Class<?> type = ClassUtil.find(instance, BaseProcessor.class, "T");
-
-			if (!type.equals(messageType)) {
-				throw new ModuleException("载体信息错误" + clazz.getName() + "，与：" + processors.get(info.MsgCode()).getClass().getName());
-			}
-			processors.put(info.MsgCode(), instance);
-			System.out.println("消息处理器：" + "消息号：" + info.MsgCode() + "，描述：" + info.Desc());
+			processors.put(handler.getMsgCode(), handler);
+			System.out.println("消息处理器：" + "消息号：" + handler.getMsgCode()
+					+ "，描述：" + handler.getDesc());
 			System.out.println("成功安装消息处理器：" + clazz.getSimpleName());
 		}
 	}

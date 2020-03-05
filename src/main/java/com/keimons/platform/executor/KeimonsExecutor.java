@@ -1,4 +1,4 @@
-package com.keimons.platform.thread;
+package com.keimons.platform.executor;
 
 import com.keimons.platform.log.LogService;
 
@@ -23,7 +23,7 @@ public class KeimonsExecutor {
 	private final Map<? extends Enum<? extends IExecutorEnum>, Object> executors;
 
 	@SuppressWarnings("unchecked")
-	public <T extends Enum<T>> KeimonsExecutor(Class<T> clazz) {
+	public <T extends Enum<T>> KeimonsExecutor(Class<? extends IExecutorEnum> clazz) {
 		Map<T, Object> executors = new HashMap<>();
 		try {
 			Method values = clazz.getMethod("values");

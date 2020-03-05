@@ -1,4 +1,6 @@
-package com.keimons.platform.thread;
+package com.keimons.platform.keimons;
+
+import com.keimons.platform.executor.IExecutorEnum;
 
 public enum DefaultExecutorEnum implements IExecutorEnum {
 	FAST("EXECUTOR-FAST-", 20, false),

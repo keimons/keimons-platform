@@ -1,4 +1,4 @@
-package com.keimons.platform.thread;
+package com.keimons.platform.executor;
 
 /**
  * 业务处理线程模型

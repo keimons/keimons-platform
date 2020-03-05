@@ -1,6 +1,6 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.thread.DefaultExecutorEnum;
+import com.keimons.platform.keimons.DefaultExecutorEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
