@@ -1,59 +1,35 @@
 # keimons-platform
-## 系统底层架构
 
-&emsp;&emsp;一个模块分为8部分，分别是：Manager、Service、Event、Processor、PlayerData、GameData、Scheduler、Logger，将这8个模块接入到系统中即可完成模块安装。
+## 线程模型
 
-&emsp;&emsp;模块标识注解：@AModular。AModular是一个包注解，位于package-info.java中，标注一个包为一个模块，自动扫描该包下的所有归属于一个模块的子系统。按照模块指定的加载顺序进行加载。
+### 多级线程模型
 
-## 模块接入
+&emsp;&emsp;允许开发人员自定义多级线程，用于区分处理耗时差异较大的操作。例如：涉及IO等线程。或者有较强同步需要的操作。
 
-### 模块目录结构
+### 可以指定线程
 
-模块根目录  
-|&nbsp;&nbsp;–&nbsp;&nbsp;Manager    资源管理  
-|&nbsp;&nbsp;–&nbsp;&nbsp;Service    逻辑、事件  
-|&nbsp;&nbsp;–&nbsp;&nbsp;PlayerData 玩家私有数据  
-|&nbsp;&nbsp;–&nbsp;&nbsp;GameData   玩家共有数据  
-|&nbsp;&nbsp;–&nbsp;&nbsp;logger     日志  
-|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;ALogger            A日志  
-|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;BLogger            B日志  
-|&nbsp;&nbsp;–&nbsp;&nbsp;scheduler  调度任务  
-|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;AJob               A定时任务  
-|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;BJob               B定时任务  
-|&nbsp;&nbsp;–&nbsp;&nbsp;processor  消息处理器  
-|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;ThisAProcessor1001 A消息处理器  
-|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;–&nbsp;&nbsp;ThisAProcessor1002 B消息处理器
+&emsp;&emsp;允许开发人员指定执行业务线程，用于规避一些不必要的锁。例如：可以将同一个公会的线程，指定到同一个线程来执行，公会内部业务无需加锁。同理，同一小队的业务也可以由同一个线程来操作。
 
-### Manager
+### 单线程模型
 
-Manager负责管理静态数据，新建类实现IManager接口，并标注@AManager注解，即可完成Manager接入。
-其中，AManager中的Priority为启动优先级，系统会按照模块的启动顺序进行启动。
+&emsp;&emsp;允许开发人员自定义单线程，用于处理比较适合单线程的业务。例如：可以将申请公会，退出公会，一键申请等业务，交由一个单线程执行。
 
-### Service逻辑业务接入
+## 玩家数据
 
-Service负责业务逻辑相关处理，新建类实现IService接口，并标注@AService注解，即可完成Service接入。
-其中，AService中的Priority为启动优先级，系统会按照模块的启动顺序进行启动。
+&emsp;&emsp;将玩家数据交由系统底层进行统一管理。
 
-### Event事件系统接入
+### 单数据模块
 
-Event事件系统负责处理玩家抛出的事件，目前，异步系统是完全异步的，并且事件处理是依附于IService存在的。Event的接入方法：新建类实现IService接口和IEventHandler接口，重写注册事件和事件处理方法，即可完成Event系统接入。
+&emsp;&emsp;允许开发人员自定义单个的数据模块。例如：成就系统，任务系统等。
 
-### Processor消息处理接入
+### 多数据模块
 
-新建类继承BaseProcessor类，标注@AProcessor接口，即可完成Processor接入。
+&emsp;&emsp;允许开发人员自定义多个数据组成的模块。例如：装备、卡牌等。
 
-### PlayerData数据接入
+### 半加载模式
 
-新建类继承BasePlayerData类，重写getModuleName()方法，即可完成PlayerData接入。
+&emsp;&emsp;允许数据的半加载。例如：仅加载玩家的家园、好友、Mini数据等。
 
-### GameData数据接入
+### 只读加载模式
 
-新建类继承BaseGameData类，重写getModuleName()方法，即可完成GameData接入。
-
-### 定时任务接入
-
-新建类继承BaseJob类，即可完成CronJob接入。
-
-### Logger日志系统接入
-
-初始化时指定日志名称即可接入。
+&emsp;&emsp;将玩家的数据按照压缩的形式，只读加载到内存中，当使用数据时，对数据进行解压，使用完后，将数据存入软引用，如果内存不足则直接释放数据。例如：临时加载玩家战斗数据等。
