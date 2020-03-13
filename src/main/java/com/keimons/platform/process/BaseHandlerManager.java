@@ -1,77 +1,75 @@
 package com.keimons.platform.process;
 
 import com.keimons.platform.exception.ModuleException;
-import com.keimons.platform.executor.KeimonsExecutor;
-import com.keimons.platform.keimons.DefaultExecutorEnum;
+import com.keimons.platform.executor.IExecutor;
+import com.keimons.platform.executor.IExecutorEnum;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.ClassUtil;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.ToIntFunction;
 
 /**
  * 消息处理管理器
  * <p>
- * 消息处理器封装了3层消息执行器，系统共计定义了3个线程模型。分别命名为短耗时线程，中耗时线程，
- * 长耗时线程。系统消息默认由短耗时线程处理，短耗时线程中，所有的消息都是执行时间短，执行速度
- * 快，不涉及或消耗极小的IO/串行的操作。中耗时线程中，可以由用户自行将消息路由给中耗时线程来执
- * 行，例如，根据联盟ID将该联盟的所有操作，路由到某一个线程来执行，可以避免联盟内部的很多同步。
- * 长耗时线程用于处理设计IO/串行的操作，因为在IO/串行过程中，CPU并不会保持长时间的占用状态，
- * 所以，可以多设置一些线程。
+ * 消息处理器封装了3个消息执行器，系统共计定义了3个线程模型。分别命名为短耗时线程，长耗时线程，
+ * 可自定义分配线程。系统消息默认由短耗时线程处理，短耗时线程中，所有的消息都是执行时间短，执行速度
+ * 快，不涉及或消耗极小的IO/串行的操作。长耗时线程中是执行速度慢或执行时间不确定的线程。可自定义分
+ * 配线程是用来处理有特殊需要的功能，例如，公会操作等。另外，类似于一键申请的功能，建议放在一个单独
+ * 的单线程中执行，可以避免并发问题。
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  */
-public abstract class BaseHandlerManager<T extends ISession, O> {
+public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> implements IHandlerManager<SessionT, MessageT> {
 
-	private KeimonsExecutor executor = new KeimonsExecutor(DefaultExecutorEnum.class);
+	/**
+	 * 线程执行器
+	 */
+	private final IExecutor executor;
 
 	/**
 	 * 消息处理器
 	 */
-	public Map<Integer, IHandler<T, O>> processors = new HashMap<>();
+	private final Map<Integer, IHandler<SessionT, MessageT>> handlers = new HashMap<>();
 
-	/**
-	 * 映射函数
-	 */
-	public ToIntFunction<Object> mapping;
-
-	/**
-	 * 入站出站消息类型
-	 * <p>
-	 * 用户自定义消息的入站出站类型，消息在pipeline中流动时，经历byte->对象的转化
-	 * 这里提供的事入站出站消息使用的类型，校验每一个消息号使用的入站出站数据类型是否
-	 * 和框架中使用的相同。
-	 */
-	private final Class<?> messageType;
-
-	/**
-	 * 构造器
-	 *
-	 * @param messageType 入站出站消息类型
-	 */
-	public BaseHandlerManager(Class<?> messageType, ToIntFunction<Object> mapping) {
-		this.messageType = messageType;
-		this.mapping = mapping;
+	public BaseHandlerManager(IExecutor executor) {
+		this.executor = executor;
 	}
 
-	public void handler(T session, O message) {
-		int msgCode = mapping.applyAsInt(message);
-		IHandler<T, O> info = processors.get(msgCode);
+	/**
+	 * 消息处理
+	 *
+	 * @param session 客户端服务器会话
+	 * @param message 消息体
+	 */
+	@Override
+	public void handler(SessionT session, MessageT message) {
+		int msgCode = this.getMsgCode(message);
+		IHandler<SessionT, MessageT> info = handlers.get(msgCode);
 
-		DefaultExecutorEnum config = (DefaultExecutorEnum) info.getExecutorType();
-		if (info instanceof IRouteProcessor) {
-			IRouteProcessor<T, O> route = (IRouteProcessor<T, O>) info;
-			int threadIndex = route.route(session, message, config.getThreadNumb());
-			executor.execute(config, threadIndex, info.createTask(session, message));
-		} else {
+		Enum<? extends IExecutorEnum> config = info.getExecutorType();
+		SelectionThreadFunction<SessionT, MessageT> rule = info.getRule();
+		if (rule == null) {
 			executor.execute(config, info.createTask(session, message));
+		} else {
+			int maxIndex = ((IExecutorEnum) config).getThreadNumb();
+			int index = rule.selection(session, message, maxIndex);
+			executor.execute(config, index, info.createTask(session, message));
 		}
 	}
+
+	/**
+	 * 从消息体中获取消息号
+	 *
+	 * @param message 消息体
+	 * @return 消息号
+	 */
+	protected abstract int getMsgCode(MessageT message);
 
 	/**
 	 * 添加消息号
@@ -81,26 +79,32 @@ public abstract class BaseHandlerManager<T extends ISession, O> {
 	 * 到系统时，需要校验消息号是否能处理底层系统并对消息号进行校验。
 	 *
 	 * @param packageName 消息号所在包
+	 * @param annotation  扫描的注解
+	 * @param creator     转化函数
 	 */
-	public void addProcessor(String packageName,  Function<? super Class<IProcessor<T, O>>, ? extends IHandler<T, O>> creator) {
-		List<Class<IProcessor<T, O>>> classes = ClassUtil.loadClasses(packageName, AProcessor.class);
-		for (Class<IProcessor<T, O>> clazz : classes) {
-			IHandler<T, O> handler = creator.apply(clazz);
-			if (processors.containsKey(handler.getMsgCode())) {
-				throw new ModuleException("重复的消息号："
-						+ clazz.getName()
-						+ "，与："
-						+ processors.get(handler.getMsgCode()).getClass().getName()
-				);
-			}
-			processors.put(handler.getMsgCode(), handler);
-			System.out.println("消息处理器：" + "消息号：" + handler.getMsgCode()
-					+ "，描述：" + handler.getDesc());
-			System.out.println("成功安装消息处理器：" + clazz.getSimpleName());
+	protected void addJavaProcessor(
+			String packageName,
+			Class<? extends Annotation> annotation,
+			Function<? super Class<IProcessor<SessionT, MessageT>>, ? extends IHandler<SessionT, MessageT>> creator
+	) {
+		List<Class<IProcessor<SessionT, MessageT>>> classes = ClassUtil.loadClasses(packageName, annotation);
+		for (Class<IProcessor<SessionT, MessageT>> clazz : classes) {
+			IHandler<SessionT, MessageT> handler = creator.apply(clazz);
+			addProcessor(handler);
 		}
 	}
 
-	public void init() {
-
+	/**
+	 * 增加一个消息号
+	 *
+	 * @param handler 消息信息
+	 */
+	public void addProcessor(IHandler<SessionT, MessageT> handler) {
+		if (handlers.containsKey(handler.getMsgCode())) {
+			throw new ModuleException("重复的消息号：" + handler.getMsgCode());
+		}
+		handlers.put(handler.getMsgCode(), handler);
+		System.out.println("消息处理器：" + "消息号：" + handler.getMsgCode()
+				+ "，描述：" + handler.getDesc());
 	}
 }

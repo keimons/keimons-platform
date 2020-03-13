@@ -3,7 +3,6 @@ package com.keimons.platform.session;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.player.IPlayer;
-import com.keimons.platform.process.BaseHandlerManager;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -108,7 +107,7 @@ public class Session implements ISession {
 					busy.set(false);
 				} else {
 					try {
-						BaseHandlerManager.handler(this, packet);
+						// TODO 执行消息体
 					} catch (Exception e) {
 						busy.set(false);
 						e.printStackTrace();

@@ -51,7 +51,7 @@ public class Keimons<T> {
 	public Keimons(KeimonsConfig config, CodecAdapter<T> adapter) {
 		this.messageType = adapter.getMessageType();
 		this.config = config;
-		executor = new BaseHandlerManager(messageType, adapter::getMsgCode);
+		executor = null;
 		net = new KeimonsTcpService<>(adapter, executor);
 	}
 
@@ -83,7 +83,7 @@ public class Keimons<T> {
 			// Logger、Processor、Job、PlayerData、GameData
 			addManager(packageName);
 			addService(packageName);
-			executor.addProcessor(packageName);
+//			executor.addProcessor(packageName);
 			SchedulerService.addJobs(packageName);
 			PlayerManager.addGameData(packageName);
 			GameDataManager.addGameData(packageName);

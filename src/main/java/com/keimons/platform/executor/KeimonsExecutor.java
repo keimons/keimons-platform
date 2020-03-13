@@ -18,7 +18,7 @@ import java.util.concurrent.*;
  * @version 1.0
  * @since 1.8
  **/
-public class KeimonsExecutor {
+public class KeimonsExecutor implements IExecutor {
 
 	private final Map<? extends Enum<? extends IExecutorEnum>, Object> executors;
 
@@ -54,37 +54,33 @@ public class KeimonsExecutor {
 		this.executors = (Map<? extends Enum<? extends IExecutorEnum>, Object>) new EnumMap<>(executors);
 	}
 
-	/**
-	 * 执行消息
-	 *
-	 * @param type     线程池类型
-	 * @param runnable 线程池昵称
-	 */
+	@Override
 	public void execute(Enum<? extends IExecutorEnum> type, Runnable runnable) {
 		ExecutorService service = (ExecutorService) this.executors.get(type);
 		service.execute(runnable);
 	}
 
+	@Override
 	public void execute(Enum<? extends IExecutorEnum> type, int route, Runnable runnable) {
 		Executor[] executor = (Executor[]) this.executors.get(type);
 		executor[route].add(runnable);
 	}
 
-	/**
-	 * 选择执行器并执行消息体
-	 *
-	 * @param type     线程类型
-	 * @param callable 执行内容
-	 * @param <R>      返回值类型
-	 * @return 执行结果
-	 */
-	public <R> R execute(Enum<? extends IExecutorEnum> type, Callable<R> callable) throws ExecutionException, InterruptedException {
+	@Override
+	public <ResultT> ResultT execute(Enum<? extends IExecutorEnum> type, Callable<ResultT> callable) throws ExecutionException, InterruptedException {
 		if (((IExecutorEnum) type).isRoute()) {
 			ExecutorService service = (ExecutorService) this.executors.get(type);
 			return service.submit(callable).get();
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public <ResultT> ResultT execute(Enum<? extends IExecutorEnum> type, int index, Callable<ResultT> task) throws ExecutionException, InterruptedException {
+		ExecutorService service = (ExecutorService) this.executors.get(type);
+		Future<ResultT> future = service.submit(task);
+		return future.get();
 	}
 
 	/**

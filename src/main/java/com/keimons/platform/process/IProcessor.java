@@ -14,13 +14,13 @@ import com.keimons.platform.executor.KeimonsExecutor;
  * @see KeimonsExecutor 业务处理线程池
  * @since 1.8
  */
-public interface IProcessor<T extends ISession, O> {
+public interface IProcessor<SessionT extends ISession, MessageT> {
 
-    /**
-     * 消息处理逻辑
-     *
-     * @param session 客户端-服务器 会话
-     * @param packet  消息体
-     */
-    void processor(T session, O packet);
+	/**
+	 * 消息处理逻辑
+	 *
+	 * @param session 客户端-服务器 会话
+	 * @param packet  消息体
+	 */
+	void processor(SessionT session, MessageT packet);
 }
