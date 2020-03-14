@@ -37,6 +37,11 @@ public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> im
 	 */
 	private final Map<Integer, IHandler<SessionT, MessageT>> handlers = new HashMap<>();
 
+	/**
+	 * 构造方法
+	 *
+	 * @param executor 业务执行器
+	 */
 	public BaseHandlerManager(IExecutor executor) {
 		this.executor = executor;
 	}
