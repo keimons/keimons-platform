@@ -1,8 +1,8 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.player.ISingularPlayerData;
 import com.keimons.platform.module.IGameDataSerialize;
+import com.keimons.platform.player.ISingularPlayerData;
 import com.keimons.platform.unit.CodeUtil;
 import com.keimons.platform.unit.MD5Util;
 
@@ -44,10 +44,5 @@ public abstract class DefaultSingularPlayerData implements ISingularPlayerData, 
 		// 可能lastMd5所指向的对象已经进入老年代，所以仅在需要更新对象时才进行更新
 		lastMd5 = thisMd5;
 		return bytes;
-	}
-
-	@Override
-	public int getVersion() {
-		return version;
 	}
 }

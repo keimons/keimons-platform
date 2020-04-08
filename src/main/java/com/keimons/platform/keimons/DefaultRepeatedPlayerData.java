@@ -30,9 +30,4 @@ public abstract class DefaultRepeatedPlayerData<T> implements IRepeatedPlayerDat
 	public byte[] serialize(boolean notnull) throws IOException {
 		return CodeUtil.encode(this);
 	}
-
-	@Override
-	public int getVersion() {
-		return version;
-	}
 }

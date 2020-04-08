@@ -26,9 +26,4 @@ public abstract class BaseGameData implements IGameData, IGameDataSerialize {
 	 * 数据版本是数据迭代的依据，如果数据需要迭代，则先将数据序列化为二进制，再将二级制反序列化为新的版本数据
 	 */
 	private volatile int version = KeimonsServer.VERSION;
-
-	@Override
-	public int getVersion() {
-		return version;
-	}
 }

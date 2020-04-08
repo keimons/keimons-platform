@@ -9,7 +9,7 @@ import com.keimons.platform.unit.CodeUtil;
  * @version 1.0
  * @since 1.8
  */
-public interface IGameData extends ISerializable, IDataVersion {
+public interface IGameData extends ISerializable {
 
 	/**
 	 * 初始化（当且仅当对象被创建时调用）
