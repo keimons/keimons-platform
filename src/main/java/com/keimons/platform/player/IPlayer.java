@@ -43,12 +43,20 @@ public interface IPlayer<T> extends IPersistence<T> {
 	boolean hasModules(Class<? extends IPlayerData>... classes);
 
 	/**
-	 * 移除不是这些的模块
+	 * 从内存中卸载这些模块
 	 *
 	 * @param classes 模块
 	 */
 	@SuppressWarnings("unchecked")
-	void clearIfNot(Class<? extends IPlayerData>... classes);
+	void unload(Class<? extends IPlayerData>... classes);
+
+	/**
+	 * 从内存中卸载不是这些的模块
+	 *
+	 * @param classes 模块
+	 */
+	@SuppressWarnings("unchecked")
+	void unloadIfNot(Class<? extends IPlayerData>... classes);
 
 	/**
 	 * 增加一个模块数据

@@ -205,7 +205,7 @@ public class PlayerManager {
 				if (modules.length == 0) {
 					return null;
 				} else {
-					player.clearIfNot(modules);
+					player.unloadIfNot(modules);
 				}
 			}
 			return player;

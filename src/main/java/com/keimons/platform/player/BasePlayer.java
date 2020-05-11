@@ -7,13 +7,13 @@ import com.keimons.platform.module.IRepeatedModule;
 import com.keimons.platform.module.ISingularModule;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
+import io.netty.util.internal.ConcurrentSet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
 /**
@@ -55,7 +55,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * <p>
 	 * 警告：如果模块已经初始化，再次初始化模块，会导致数据被覆盖。
 	 */
-	protected final CopyOnWriteArraySet<String> moduleNames = new CopyOnWriteArraySet<>();
+	protected final ConcurrentSet<String> moduleNames = new ConcurrentSet<>();
 
 	/**
 	 * 最后活跃时间
@@ -211,7 +211,19 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	}
 
 	@Override
-	public void clearIfNot(Class<? extends IPlayerData>[] classes) {
+	public void unload(Class<? extends IPlayerData>[] classes) {
+		for (Class<? extends IPlayerData> clazz : classes) {
+			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+			if (annotation == null) {
+				continue;
+			}
+			this.modules.remove(annotation.moduleName());
+			this.moduleNames.remove(annotation.moduleName());
+		}
+	}
+
+	@Override
+	public void unloadIfNot(Class<? extends IPlayerData>[] classes) {
 		Set<String> moduleNames = new HashSet<>(classes.length);
 		for (Class<? extends IPlayerData> clazz : classes) {
 			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
@@ -220,9 +232,10 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 			}
 			moduleNames.add(annotation.moduleName());
 		}
-		for (String moduleName : modules.keySet()) {
+		for (String moduleName : this.modules.keySet()) {
 			if (!moduleNames.contains(moduleName)) {
-				modules.remove(moduleName);
+				this.modules.remove(moduleName);
+				this.moduleNames.remove(moduleName);
 			}
 		}
 	}
