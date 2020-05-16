@@ -22,4 +22,12 @@ public interface IModule<T extends IGameData> extends ISerializable {
 	 * @return 模块所有数据
 	 */
 	Collection<T> toCollection();
+
+	/**
+	 * 数据结构升级
+	 *
+	 * @param before  以前的版本
+	 * @param current 当前版本
+	 */
+	void upgrade(int before, int current);
 }

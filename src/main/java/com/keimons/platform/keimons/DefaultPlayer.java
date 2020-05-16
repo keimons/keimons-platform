@@ -3,9 +3,10 @@ package com.keimons.platform.keimons;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.datebase.RedissonManager;
+import com.keimons.platform.module.StringRepeatedModule;
 import com.keimons.platform.player.IPlayerData;
-import com.keimons.platform.player.IRepeatedPlayerData;
-import com.keimons.platform.player.ISingularPlayerData;
+import com.keimons.platform.module.IRepeatedPlayerData;
+import com.keimons.platform.module.ISingularPlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.BytesModuleSerialize;
 import com.keimons.platform.module.IModule;
@@ -44,10 +45,10 @@ public class DefaultPlayer extends BasePlayer<String> {
 	}
 
 	@Override
-	public void addRepeatedData(IRepeatedPlayerData<?> data) {
+	public <K> void addRepeatedData(IRepeatedPlayerData<K> data) {
 		APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
-		DefaultRepeatedModule<IRepeatedPlayerData<?>> module = computeIfAbsent(moduleName, v -> new DefaultRepeatedModule<>());
+		StringRepeatedModule<K, IRepeatedPlayerData<K>> module = computeIfAbsent(moduleName, v -> new StringRepeatedModule<>());
 		module.add(data);
 	}
 

@@ -1,6 +1,8 @@
-package com.keimons.platform.player;
+package com.keimons.platform.module;
 
 import com.keimons.platform.iface.ISingularGameData;
+import com.keimons.platform.player.IPlayer;
+import com.keimons.platform.player.IPlayerData;
 
 /**
  * 单数形式的数据结构

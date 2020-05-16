@@ -2,9 +2,7 @@ package com.keimons.platform.player;
 
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.module.IModule;
-import com.keimons.platform.module.IRepeatedModule;
-import com.keimons.platform.module.ISingularModule;
+import com.keimons.platform.module.*;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
 import io.netty.util.internal.ConcurrentSet;
@@ -140,10 +138,10 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public <V extends IRepeatedPlayerData<?>> V get(Class<V> clazz, Object dataId) {
+	public <K, V extends IRepeatedPlayerData<K>> V get(Class<V> clazz, K dataId) {
 		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
-		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
+		IRepeatedModule<K, V> module = (IRepeatedModule<K, V>) modules.get(moduleName);
 		if (module == null) {
 			return null;
 		}
@@ -160,10 +158,10 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public <V extends IRepeatedPlayerData<?>> V remove(Class<V> clazz, Object dataId) {
+	public <K, V extends IRepeatedPlayerData<K>> V remove(Class<V> clazz, K dataId) {
 		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
-		IRepeatedModule<?> module = (IRepeatedModule<?>) modules.get(moduleName);
+		IRepeatedModule<K, V> module = (IRepeatedModule<K, V>) modules.get(moduleName);
 		return (V) module.remove(dataId);
 	}
 
@@ -187,7 +185,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 *
 	 * @param data 数据
 	 */
-	public abstract void addRepeatedData(IRepeatedPlayerData<?> data);
+	public abstract <K> void addRepeatedData(IRepeatedPlayerData<K> data);
 
 	/**
 	 * 增加一个非重复的模块数据

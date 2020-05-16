@@ -1,7 +1,7 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.player.ISingularPlayerData;
-import com.keimons.platform.player.BaseSingularModule;
+import com.keimons.platform.module.ISingularPlayerData;
+import com.keimons.platform.module.BaseSingularModule;
 
 /**
  * 默认非重复数据实现

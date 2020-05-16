@@ -1,6 +1,4 @@
-package com.keimons.platform.player;
-
-import com.keimons.platform.module.ISingularModule;
+package com.keimons.platform.module;
 
 /**
  * 单数据实现
@@ -27,5 +25,10 @@ public abstract class BaseSingularModule<T extends ISingularPlayerData> implemen
 	@Override
 	public T get() {
 		return singular;
+	}
+
+	@Override
+	public void upgrade(int before, int current) {
+
 	}
 }

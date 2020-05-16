@@ -3,7 +3,6 @@ package com.keimons.platform.module;
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.player.IRepeatedPlayerData;
 import com.keimons.platform.unit.CodeUtil;
 import org.xerial.snappy.Snappy;
 

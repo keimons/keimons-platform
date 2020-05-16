@@ -1,6 +1,7 @@
-package com.keimons.platform.player;
+package com.keimons.platform.module;
 
 import com.keimons.platform.iface.IRepeatedGameData;
+import com.keimons.platform.player.IPlayerData;
 
 /**
  * 可重复的标识

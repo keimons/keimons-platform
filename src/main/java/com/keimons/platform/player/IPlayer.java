@@ -1,5 +1,7 @@
 package com.keimons.platform.player;
 
+import com.keimons.platform.module.IRepeatedPlayerData;
+import com.keimons.platform.module.ISingularPlayerData;
 import com.keimons.platform.session.ISession;
 
 /**
@@ -79,20 +81,22 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 *
 	 * @param clazz  模块
 	 * @param dataId 唯一ID
-	 * @param <V>    模块类型
+	 * @param <K>    键类型
+	 * @param <V>    值类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedPlayerData<?>> V get(Class<V> clazz, Object dataId);
+	<K, V extends IRepeatedPlayerData<K>> V get(Class<V> clazz, K dataId);
 
 	/**
 	 * 移除玩家的一个数据
 	 *
 	 * @param clazz  模块
 	 * @param dataId 唯一ID
-	 * @param <V>    模块类型
+	 * @param <K>    键类型
+	 * @param <V>    值类型
 	 * @return 模块
 	 */
-	<V extends IRepeatedPlayerData<?>> V remove(Class<V> clazz, Object dataId);
+	<K, V extends IRepeatedPlayerData<K>> V remove(Class<V> clazz, K dataId);
 
 	/**
 	 * 设置是否已加载
