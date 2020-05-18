@@ -9,6 +9,6 @@ package com.keimons.platform.module;
  * @version 1.0
  * @since 1.0
  **/
-public class StringRepeatedModule<T extends IRepeatedPlayerData<String>> extends BaseRepeatedModule<String, T> {
+public class DefaultRepeatedModule<K, T extends IRepeatedPlayerData<K>> extends BaseRepeatedModule<K, T> {
 
 }

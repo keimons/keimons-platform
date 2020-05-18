@@ -26,6 +26,11 @@ public interface IPlayer<T> extends IPersistence<T> {
 	T getIdentifier();
 
 	/**
+	 * 初始化
+	 */
+	void init();
+
+	/**
 	 * 加载
 	 */
 	void loaded();
@@ -45,7 +50,15 @@ public interface IPlayer<T> extends IPersistence<T> {
 	boolean hasModules(Class<? extends IPlayerData>... classes);
 
 	/**
-	 * 从内存中卸载这些模块
+	 * 删除这些模块，模块一旦被删除，将会删除这个模块以及数据库中的数据。
+	 *
+	 * @param classes 模块
+	 */
+	@SuppressWarnings("unchecked")
+	void remove(Class<? extends IPlayerData>... classes);
+
+	/**
+	 * 从内存中卸载这些模块，被卸载的模块依然存在于数据库中，随时可以加载到内存。
 	 *
 	 * @param classes 模块
 	 */
@@ -53,7 +66,7 @@ public interface IPlayer<T> extends IPersistence<T> {
 	void unload(Class<? extends IPlayerData>... classes);
 
 	/**
-	 * 从内存中卸载不是这些的模块
+	 * 从内存中卸载不是这些的模块，被卸载的模块依然存在于数据库中，随时可以加载到内存。
 	 *
 	 * @param classes 模块
 	 */

@@ -3,13 +3,9 @@ package com.keimons.platform.keimons;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.datebase.RedissonManager;
-import com.keimons.platform.module.StringRepeatedModule;
+import com.keimons.platform.module.*;
 import com.keimons.platform.player.IPlayerData;
-import com.keimons.platform.module.IRepeatedPlayerData;
-import com.keimons.platform.module.ISingularPlayerData;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.module.BytesModuleSerialize;
-import com.keimons.platform.module.IModule;
 import com.keimons.platform.player.BasePlayer;
 import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.unit.CodeUtil;
@@ -35,8 +31,13 @@ public class DefaultPlayer extends BasePlayer<String> {
 	}
 
 	@Override
-	public void loaded() {
+	public void init() {
+		
+	}
 
+	@Override
+	public void loaded() {
+		LogService.info("加载成功！id：" + this.identifier);
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class DefaultPlayer extends BasePlayer<String> {
 	public <K> void addRepeatedData(IRepeatedPlayerData<K> data) {
 		APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
-		StringRepeatedModule<K, IRepeatedPlayerData<K>> module = computeIfAbsent(moduleName, v -> new StringRepeatedModule<>());
+		IRepeatedModule<K, IRepeatedPlayerData<K>> module = computeIfAbsent(moduleName, v -> new DefaultRepeatedModule<>());
 		module.add(data);
 	}
 
@@ -118,6 +119,16 @@ public class DefaultPlayer extends BasePlayer<String> {
 			}
 		} catch (Exception e) {
 			LogService.error(e);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void remove(Class<? extends IPlayerData>... classes) {
+		for (Class<? extends IPlayerData> clazz : classes) {
+			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+			String moduleName = annotation.moduleName();
+			RedissonManager.delMapValue(identifier, moduleName.getBytes());
 		}
 	}
 }

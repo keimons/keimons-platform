@@ -5,13 +5,13 @@ import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.*;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
-import io.netty.util.internal.ConcurrentSet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 
 /**
@@ -53,7 +53,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * <p>
 	 * 警告：如果模块已经初始化，再次初始化模块，会导致数据被覆盖。
 	 */
-	protected final ConcurrentSet<String> moduleNames = new ConcurrentSet<>();
+	protected final ConcurrentSkipListSet<String> moduleNames = new ConcurrentSkipListSet<>();
 
 	/**
 	 * 最后活跃时间
@@ -145,7 +145,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 		if (module == null) {
 			return null;
 		}
-		return (V) module.get(dataId);
+		return module.get(dataId);
 	}
 
 	/**
@@ -162,7 +162,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
 		IRepeatedModule<K, V> module = (IRepeatedModule<K, V>) modules.get(moduleName);
-		return (V) module.remove(dataId);
+		return module.remove(dataId);
 	}
 
 	/**
