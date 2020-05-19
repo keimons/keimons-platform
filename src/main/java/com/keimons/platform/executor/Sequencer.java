@@ -1,10 +1,19 @@
 package com.keimons.platform.executor;
 
 import com.keimons.platform.unit.UnsafeUtil;
+import jdk.internal.vm.annotation.ForceInline;
 import sun.misc.Unsafe;
 
 /**
  * 环形Buffer计数器
+ *
+ * 数据的存取应该是原子的操作，但是，使用环形Buffer实际上不论是存入还是取出，都会经过两步。
+ * 存入过程：1.将数据存入环形Buffer中 2.修改存入位置标记
+ * 取出过程：1.将数据从环形Buffer取出 2.修改取出位置标记
+ * 为了保证整个过程是原子性的，所以我们将这个操作拆分为三步：
+ * 1.根据已经写入的位置，生成标记位，标记成功的线程进行后续操作，标记失败的线程重复此操作，直到成功为止。
+ * 2.将数据存入环形Buffer中
+ * 3.修改已写入位置为标记位置
  *
  * @author monkey1993
  * @version 1.0
@@ -17,42 +26,60 @@ class Sequencer {
 	/**
 	 * 读取的字段
 	 */
-	private static final long READER_VALUE;
+	private static final long READER_MARK_VALUE;
+
+	/**
+	 * 读取的字段
+	 */
+	private static final long READER_INDEX_VALUE;
 
 	/**
 	 * 写入的字段
 	 */
-	private static final long WRITER_VALUE;
+	private static final long WRITER_MARK_VALUE;
+
+	/**
+	 * 写入的字段
+	 */
+	private static final long WRITER_INDEX_VALUE;
 
 	static {
-		long reader;
+		long readerMark;
 		try {
-			reader = UNSAFE.objectFieldOffset(Sequencer.class.getDeclaredField("readerIndex"));
+			readerMark = UNSAFE.objectFieldOffset(Sequencer.class.getDeclaredField("readerMark"));
 		} catch (NoSuchFieldException e) {
 			e.printStackTrace();
-			reader = 0;
+			readerMark = 0;
 		}
-		READER_VALUE = reader;
+		READER_MARK_VALUE = readerMark;
 
-		long writer;
+		long readerIndex;
 		try {
-			writer = UNSAFE.objectFieldOffset(Sequencer.class.getDeclaredField("writerIndex"));
+			readerIndex = UNSAFE.objectFieldOffset(Sequencer.class.getDeclaredField("readerIndex"));
 		} catch (NoSuchFieldException e) {
 			e.printStackTrace();
-			writer = 0;
+			readerIndex = 0;
 		}
-		WRITER_VALUE = writer;
+		READER_INDEX_VALUE = readerIndex;
+
+		long writerMark;
+		try {
+			writerMark = UNSAFE.objectFieldOffset(Sequencer.class.getDeclaredField("writerMark"));
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+			writerMark = 0;
+		}
+		WRITER_MARK_VALUE = writerMark;
+
+		long writerIndex;
+		try {
+			writerIndex = UNSAFE.objectFieldOffset(Sequencer.class.getDeclaredField("writerIndex"));
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+			writerIndex = 0;
+		}
+		WRITER_INDEX_VALUE = writerIndex;
 	}
-
-	/**
-	 * boolean[]中首元素的地址
-	 */
-	private static final long BASE = UNSAFE.arrayBaseOffset(boolean[].class);
-
-	/**
-	 * boolean[]中每个元素占用字节数
-	 */
-	private static final long SCALE = UNSAFE.arrayIndexScale(boolean[].class);
 
 	/**
 	 * 环形Buffer的元素数量
@@ -67,53 +94,60 @@ class Sequencer {
 	/**
 	 * 写入的位置
 	 */
+	private volatile int writerMark;
+
+	/**
+	 * 对外展示的写入位置
+	 */
 	private volatile int writerIndex;
 
 	/**
 	 * 读取的位置
 	 */
-	private volatile int readerIndex;
+	private volatile int readerMark;
 
 	/**
-	 * 标记的位置
+	 * 对外展示的读取位置
 	 */
-	private final boolean[] maskerIndex;
+	private volatile int readerIndex;
 
 	public Sequencer(int bufferSize) {
 		this.bufferSize = bufferSize;
 		this.mask = bufferSize - 1;
-		this.maskerIndex = new boolean[bufferSize];
 	}
 
 	/**
 	 * 获取存入的位置
+	 * <p>
+	 * 需要保证标记存入位置-存入数据是一个原子性的操作
 	 *
 	 * @return 存入位置
 	 */
-	public int next() {
+	@ForceInline
+	public int beforeNext() {
 		for (; ; ) {
-			int newIndex = writerIndex + 1;
-			int index = (newIndex - 1) & mask;
-			// 使用volatile语义，可以保证获取到的始终是最新值 计算环形Buffer的下一个下标是否越界
-			if (UNSAFE.getBooleanVolatile(maskerIndex, (index * SCALE) + BASE)) {
+			int writerIndex = this.writerIndex;
+			int writerMark = writerIndex + 1;
+			// 计算环形Buffer的下一个下标是否越界
+			if (writerMark - readerIndex > bufferSize) {
 				// TODO 环形Buffer没有可写入的位置 需要补充策略
 				return -1;
 			} else {
-				if (UNSAFE.compareAndSwapInt(this, WRITER_VALUE, writerIndex, newIndex)) {
-					return index;
+				if (UNSAFE.compareAndSwapInt(this, WRITER_MARK_VALUE, writerIndex, writerMark)) {
+					return writerIndex & mask;
 				}
 			}
 		}
 	}
 
 	/**
-	 * 记录一个标记
-	 *
-	 * @param index     标记
-	 * @param available 是否活跃的
+	 * 获取存入的位置
+	 * <p>
+	 * 需要保证标记存入位置-存入数据是一个原子性的操作
 	 */
-	public void mark(int index, int available) {
-		UNSAFE.putOrderedInt(maskerIndex, (index * SCALE) + BASE, available);
+	@ForceInline
+	public void markNext() {
+		UNSAFE.putIntVolatile(this, WRITER_INDEX_VALUE, writerMark);
 	}
 
 	/**
@@ -121,18 +155,30 @@ class Sequencer {
 	 *
 	 * @return 取出位置
 	 */
-	public int take() {
+	@ForceInline
+	public int beforeTake() {
 		for (; ; ) {
-			int nextIndex = readerIndex + 1;
-			if (nextIndex - writerIndex > 0) {
+			int readerIndex = this.readerIndex;
+			int readMark = readerIndex + 1;
+			// 考虑到int的数值越界，所以，这里不能使用 nextIndex > writer
+			if (readMark - writerIndex > 0) {
 				// TODO 环形Buffer没有可读取的位置 需要补充策略
 				return -1;
 			} else {
-				if (UNSAFE.compareAndSwapInt(this, READER_VALUE, readerIndex, nextIndex)) {
-					return (nextIndex - 1) & mask;
+				if (UNSAFE.compareAndSwapInt(this, READER_MARK_VALUE, readerIndex, readMark)) {
+					return readerIndex & mask;
 				}
 			}
 		}
+	}
+
+	/**
+	 * 获取取出的位置
+	 */
+	@ForceInline
+	public void markTake() {
+//		readerIndex++;
+		UNSAFE.putIntVolatile(this, READER_INDEX_VALUE, readerMark);
 	}
 
 	/**
@@ -150,6 +196,6 @@ class Sequencer {
 	 * @return 元素数量
 	 */
 	public int size() {
-		return writerIndex - readerIndex;
+		return writerMark - readerMark;
 	}
 }

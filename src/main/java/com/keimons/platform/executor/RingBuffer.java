@@ -111,13 +111,13 @@ public class RingBuffer<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean offer(T object) {
-		int index = sequencer.next();
+		int index = sequencer.beforeNext();
 		if (index == -1) {
 			return false;
 		}
 		Node<T> node = (Node<T>) UNSAFE.getObject(entries, REF_ARRAY_BASE + (index << REF_ELEMENT_SHIFT));
 		node.setValue(object);
-		sequencer.mark(index, 1);
+		sequencer.markNext();
 		return true;
 	}
 
@@ -128,13 +128,13 @@ public class RingBuffer<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public T take() {
-		int index = sequencer.take();
+		int index = sequencer.beforeTake();
 		if (index == -1) {
 			return null;
 		}
 		Node<T> node = (Node<T>) UNSAFE.getObject(entries, REF_ARRAY_BASE + (index << REF_ELEMENT_SHIFT));
 		T result = node.setValue(null);
-		sequencer.mark(index, 0);
+		sequencer.markTake();
 		return result;
 	}
 
