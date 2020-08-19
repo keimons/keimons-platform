@@ -1,9 +1,9 @@
+apply from: 'build.gradle'
+apply from: rootDir.canonicalPath + '/publish/publish.gradle'
+
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-apply plugin: 'groovy'
-apply plugin: 'java'
 
-apply from: rootDir.canonicalPath + '/publish/publish.gradle'
 
 group 'com.keimons.platform'
 version '1.0.0-SNAPSHOT'

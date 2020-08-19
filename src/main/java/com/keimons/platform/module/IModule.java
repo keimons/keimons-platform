@@ -1,7 +1,6 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.ISerializable;
 
 import java.util.Collection;
 
@@ -14,14 +13,23 @@ import java.util.Collection;
  * @author monkey1993
  * @version 1.0
  **/
-public interface IModule<T extends IGameData> extends ISerializable {
+public interface IModule<T extends IGameData> extends Iterable<T> {
+
+	/**
+	 * 获取数据的版本
+	 *
+	 * @return 数据版本
+	 */
+	default int getVersion() {
+		return 0;
+	}
 
 	/**
 	 * 获取模块中所有数据
 	 *
 	 * @return 模块所有数据
 	 */
-	Collection<T> toCollection();
+	Collection<T> values();
 
 	/**
 	 * 数据结构升级

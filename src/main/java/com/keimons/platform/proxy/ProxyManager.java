@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * 代理类
+ *
  * @author monkey1993
  * @version 1.0
- * @date 2020-05-25
  * @since 1.8
  **/
 public class ProxyManager {
@@ -26,7 +27,6 @@ public class ProxyManager {
 				try {
 					Runnable runnable = task.take();
 					runnable.run();
-					Thread.currentThread().getName();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

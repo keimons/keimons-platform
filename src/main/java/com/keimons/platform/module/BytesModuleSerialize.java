@@ -70,7 +70,7 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 	 * @author monkey1993
 	 * @version 1.0
 	 */
-	class BytesSerializeModule implements ISerializeModule<byte[]> {
+	static class BytesSerializeModule implements ISerializeModule<byte[]> {
 
 		/**
 		 * 模块数据
@@ -91,7 +91,7 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 			if (module instanceof IRepeatedPlayerData) {
 				coercive = true;
 			}
-			for (IGameData data : module.toCollection()) {
+			for (IGameData data : module) {
 				if (data instanceof IGameDataSerialize) {
 					IGameDataSerialize serializable = (IGameDataSerialize) data;
 					APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);

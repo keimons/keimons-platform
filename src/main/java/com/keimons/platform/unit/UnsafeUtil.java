@@ -41,4 +41,21 @@ public class UnsafeUtil {
 	public static Unsafe getUnsafe() {
 		return UNSAFE;
 	}
+
+	/**
+	 * 获取一个数的最高比特位
+	 *
+	 * @param number 要获取最高位的数字
+	 * @return 最高位
+	 */
+	public static int log2(long number) {
+		if (number <= 0) {
+			throw new IllegalArgumentException("输入的数字必须大于0");
+		}
+		int index = 0;
+		while ((number >>= 1) != 0) {
+			index++;
+		}
+		return index;
+	}
 }

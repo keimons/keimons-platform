@@ -1,11 +1,11 @@
 package com.keimons.platform.event;
 
+import com.keimons.platform.thread.NameThreadFactory;
 import com.keimons.platform.iface.IEventCode;
 import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.IPlayer;
 import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -48,7 +47,7 @@ public class EventService {
 	/**
 	 * 事件处理
 	 */
-	private static Map<String, Set<IEventHandler>> eventHandlers = new HashMap<>();
+	private static final Map<String, Set<IEventHandler>> eventHandlers = new HashMap<>();
 
 	/**
 	 * 发布事件
@@ -58,7 +57,7 @@ public class EventService {
 	 * @param params    参数列表
 	 * @param <T>       事件枚举
 	 */
-	public static <T extends Enum<T> & IEventCode> void publicEvent(IPlayer player, T eventCode, Object... params) {
+	public static <T extends Enum<T> & IEventCode<?>> void publicEvent(IPlayer<?> player, T eventCode, Object... params) {
 		try {
 			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
@@ -74,7 +73,7 @@ public class EventService {
 	 * @param params    参数列表
 	 * @param <T>       事件枚举
 	 */
-	public static <T extends Enum<T> & IEventCode> void syncPublicEvent(IPlayer player, T eventCode, Object... params) {
+	public static <T extends Enum<T> & IEventCode<?>> void syncPublicEvent(IPlayer<?> player, T eventCode, Object... params) {
 		Event event = new Event();
 		event.setPlayer(player);
 		event.setEventCode(eventCode);
@@ -88,7 +87,7 @@ public class EventService {
 	 * @param handler 处理器
 	 */
 	public static void registerEvent(IEventHandler handler) {
-		for (IEventCode code : handler.register()) {
+		for (IEventCode<?> code : handler.register()) {
 			Set<IEventHandler> handlers = EventService.eventHandlers.computeIfAbsent(code.toString(), k -> new HashSet<>());
 			handlers.add(handler);
 		}
@@ -103,7 +102,7 @@ public class EventService {
 	 * @param eventCode 事件号
 	 * @param params    参数
 	 */
-	private static <T extends Enum<T> & IEventCode> void translate(Event event, long sequence, IPlayer player, T eventCode, Object... params) {
+	private static <T extends Enum<T> & IEventCode<?>> void translate(Event event, long sequence, IPlayer<?> player, T eventCode, Object... params) {
 		event.setPlayer(player);
 		event.setEventCode(eventCode);
 		event.setParams(params);
@@ -132,13 +131,11 @@ public class EventService {
 	/**
 	 * 初始化事件系统
 	 */
+	@SuppressWarnings("unchecked")
 	public static void init() {
-		ThreadFactory executor = Executors.defaultThreadFactory();
+		ThreadFactory executor = new NameThreadFactory("Event");
 		disruptor = new Disruptor<>(Event::new, RING_BUFFER_SIZE, executor, ProducerType.MULTI, new BlockingWaitStrategy());
-
-		EventHandler eventHandler = (EventHandler<Event>) EventService::onEvent;
-		disruptor.handleEventsWith(eventHandler);
-
+		disruptor.handleEventsWith(EventService::onEvent);
 		disruptor.start();
 	}
 

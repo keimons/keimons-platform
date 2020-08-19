@@ -1,7 +1,12 @@
 package com.keimons.platform.module;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Spliterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * 可重复的数据实现
@@ -32,11 +37,27 @@ public abstract class BaseRepeatedModule<K, T extends IRepeatedPlayerData<K>> im
 	}
 
 	@Override
-	public Collection<T> toCollection() {
+	public void upgrade(int before, int current) {
+	}
+
+	@Override
+	public Collection<T> values() {
 		return repeated.values();
 	}
 
 	@Override
-	public void upgrade(int before, int current) {
+	public void forEach(Consumer<? super T> action) {
+		repeated.values().forEach(action);
+	}
+
+	@Override
+	public Spliterator<T> spliterator() {
+		return repeated.values().spliterator();
+	}
+
+	@NotNull
+	@Override
+	public Iterator<T> iterator() {
+		return repeated.values().iterator();
 	}
 }

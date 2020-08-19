@@ -5,18 +5,19 @@ import com.keimons.platform.annotation.AModular;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
-import com.keimons.platform.game.GameDataManager;
+import com.keimons.platform.module.GameDataManager;
 import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
+import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.process.BaseHandlerManager;
 import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -44,7 +45,7 @@ public class Keimons<T> {
 
 	KeimonsConfig config;
 
-	KeimonsTcpService<T> net;
+	KeimonsTcpService net;
 
 	BaseHandlerManager executor;
 
@@ -52,7 +53,7 @@ public class Keimons<T> {
 		this.messageType = adapter.getMessageType();
 		this.config = config;
 		executor = null;
-		net = new KeimonsTcpService<>(adapter, executor);
+		net = new KeimonsTcpService();
 	}
 
 	public void start() {
@@ -189,16 +190,27 @@ public class Keimons<T> {
 	}
 
 	public static void main(String[] args) {
+		Keimons keimons = new Keimons(null, null);
+		LogService.init();
+		SchedulerService.init();
+		EventService.init();
+		PlayerManager.init();
 
-		System.out.println(f1());
+		keimons.add(KeimonsOption.NET, new KeimonsTcpService());
+		keimons.add(KeimonsOption.ADAPTER, null);
+		keimons.add(KeimonsOption.EVENT, null);
+
+		LogService.init();
+		EventService.init();
+
+		keimons.init();
+		keimons.start();
 	}
 
-	private static int f1() {
-		Integer integer = 3;
+	public <T> void add(KeimonsOption<T> option, @NotNull T value) {
 
+	}
 
-
-		return integer;
-
+	public void init() {
 	}
 }

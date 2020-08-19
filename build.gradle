@@ -1,9 +1,5 @@
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 apply plugin: 'groovy'
 apply plugin: 'java'
-
-apply from: rootDir.canonicalPath + '/publish/publish.gradle'
 
 group 'com.keimons.platform'
 version '1.0.0-SNAPSHOT'
@@ -35,6 +31,10 @@ dependencies {
     // 脚本语言groovy
     compile group: 'com.google.guava', name: 'guava', version: '29.0-jre', transitive: false
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.3'
+
+    // ASM
+    compile group: 'org.ow2.asm', name: 'asm', version: '8.0.1'
+    compile group: 'org.ow2.asm', name: 'asm-commons', version: '8.0.1'
 
     // 环形Buffer
     compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'

@@ -2,10 +2,8 @@ package com.keimons.platform.network;
 
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.log.LogService;
-import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.network.coder.DefaultByteAdapter;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
-import com.keimons.platform.process.BaseHandlerManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -22,7 +20,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @version 1.0
  * @since 1.8
  */
-public class KeimonsTcpService<T> {
+public class KeimonsTcpService implements NetService {
 
 	/**
 	 * BossGroup线程池
@@ -34,19 +32,8 @@ public class KeimonsTcpService<T> {
 	 */
 	private EventLoopGroup workerGroup;
 
-	private final CodecAdapter<T> codecAdapter;
-
-	private final BaseHandlerManager executor;
-
-	public KeimonsTcpService(CodecAdapter<T> codecAdapter, BaseHandlerManager executor) {
-		this.codecAdapter = codecAdapter;
-		this.executor = executor;
-	}
-
-	/**
-	 * 启动网络层
-	 */
-	private void start() {
+	@Override
+	public void start(int port) {
 		String osName = System.getProperty("os.name");
 		if (osName.contains("Linux")) {
 			bossGroup = new EpollEventLoopGroup();
@@ -63,14 +50,14 @@ public class KeimonsTcpService<T> {
 				b.channel(NioServerSocketChannel.class);
 			}
 			b.group(bossGroup, workerGroup);
-			b.childHandler(new KeimonsServiceInitializer<>(codecAdapter, new DefaultByteAdapter()));
+			b.childHandler(new KeimonsServiceInitializer<>(null, new DefaultByteAdapter()));
 			b.option(ChannelOption.SO_BACKLOG, 1024);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.childOption(ChannelOption.TCP_NODELAY, true); // 关闭Nagle的算法
 			b.childOption(ChannelOption.SO_RCVBUF, 64 * 1024);
 			b.childOption(ChannelOption.SO_SNDBUF, 1024 * 1024);
 			b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(64 * 1024, 10 * 1024 * 1024));
-			ChannelFuture channelFuture = b.bind(KeimonsServer.KeimonsConfig.getPort()).addListener((ChannelFutureListener) future -> System.out.println("服务监听端口：" + 8080)).sync();
+			ChannelFuture channelFuture = b.bind(port).addListener((ChannelFutureListener) future -> System.out.println("服务监听端口：" + 8080)).sync();
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {
@@ -94,7 +81,8 @@ public class KeimonsTcpService<T> {
 	 * 初始化通讯模块
 	 */
 	public void init() {
-		Thread thread = new Thread(this::start, "TCP-SERVER");
+		Thread thread = new Thread(() -> start(-1), "TCP-SERVER");
+		thread.setName("NetService");
 		thread.start();
 	}
 }

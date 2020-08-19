@@ -13,6 +13,11 @@ import java.util.Map;
  */
 public class CodeUtil {
 
+	static {
+		// 由程序自行缓存，关闭工具的自带缓存
+		ProtobufProxy.enableCache(false);
+	}
+
 	/**
 	 * 整个jar包中所有的ProtoBuf对象
 	 */
@@ -48,8 +53,6 @@ public class CodeUtil {
 			synchronized (CodeUtil.class) {
 				codec = (Codec<T>) codecs.get(clazz);
 				if (codec == null) {
-					// 由程序自行缓存，关闭工具的自带缓存
-					ProtobufProxy.enableCache(false);
 					codec = ProtobufProxy.create(clazz, true);
 					codecs.put(clazz, (Codec<ISerializable>) codec);
 				}

@@ -31,7 +31,7 @@ public class HotClassLoader extends ClassLoader {
 		try {
 			byte[] data = getClassFileBytes(getObjFile());
 			clazz = defineClass(name, data, 0, data.length);//这个方法非常重要
-			if (null == clazz) {//如果在这个类加载器中都不能找到这个类的话，就真的找不到了
+			if (null == clazz) { // 如果在这个类加载器中都不能找到这个类的话，就真的找不到了
 
 			}
 		} catch (Exception e) {

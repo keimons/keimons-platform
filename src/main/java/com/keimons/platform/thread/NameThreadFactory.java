@@ -1,7 +1,7 @@
-package com.keimons.platform.executor;
+package com.keimons.platform.thread;
 
-import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,31 +39,43 @@ public class NameThreadFactory implements ThreadFactory {
 	private final String prefix;
 
 	/**
+	 * 线程权限
+	 */
+	private final Enum<? extends IThreadPermission>[] permissions;
+
+	/**
 	 * 创建线程池工厂
-	 *
+	 * <p>
 	 * 使用{@link Thread#NORM_PRIORITY}默认的线程优先级
 	 *
-	 * @param prefix 线程名前缀
+	 * @param prefix      线程名前缀
+	 * @param permissions 线程权限
 	 */
-	public NameThreadFactory(@NotNull String prefix) {
-		this(Thread.NORM_PRIORITY, prefix);
+	public NameThreadFactory(@NotNull String prefix, Enum<? extends IThreadPermission>... permissions) {
+		this(Thread.NORM_PRIORITY, prefix, permissions);
 	}
 
 	/**
 	 * 创建线程池工厂
 	 *
-	 * @param priority 线程优先级
-	 * @param prefix   线程名前缀
+	 * @param priority    线程优先级
+	 * @param prefix      线程名前缀
+	 * @param permissions 线程权限
 	 */
-	public NameThreadFactory(@MagicConstant(intValues = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}) int priority, @NotNull String prefix) {
+	public NameThreadFactory(@Range(from = 1, to = 10) int priority,
+							 @NotNull String prefix,
+							 Enum<? extends IThreadPermission>... permissions) {
+		this.permissions = permissions;
 		this.priority = priority;
 		this.prefix = prefix;
 		SecurityManager s = System.getSecurityManager();
 		group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 	}
 
+	@Override
 	public Thread newThread(@NotNull Runnable task) {
-		Thread thread = new Thread(group, task, prefix + number.getAndIncrement(), 0);
+		String name = prefix + number.getAndIncrement();
+		Thread thread = KeimonsThread.createThread(group, task, name, permissions);
 		if (thread.isDaemon()) {
 			thread.setDaemon(false);
 		}

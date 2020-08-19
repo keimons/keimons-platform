@@ -106,7 +106,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	public <V extends ISingularPlayerData> V get(Class<V> clazz) {
 		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		String moduleName = annotation.moduleName();
-		ISingularModule<?> module = (ISingularModule<?>) modules.get(moduleName);
+		ISingularModule<V> module = (ISingularModule<V>) modules.get(moduleName);
 		if (module == null && !modules.containsKey(moduleName)) {
 			synchronized (this) {
 				if (!modules.containsKey(moduleName)) {
@@ -120,12 +120,12 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 					}
 				}
 			}
-			module = (ISingularModule<?>) modules.get(moduleName);
+			module = (ISingularModule<V>) modules.get(moduleName);
 		}
 		if (module == null) {
 			return null;
 		}
-		return (V) module.get();
+		return module.get();
 	}
 
 	/**

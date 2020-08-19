@@ -1,16 +1,19 @@
 package com.keimons.platform.module;
 
+import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.iface.IRepeatedData;
+
 /**
  * 组持久化方案，这一步是将可重叠的数据进行合并，合并之后才能存入数据库
  * <p>
  * 系统中提供的一种持久化方案，例如装备，实际上是将数据
  *
  * @param <K> 模块中的数据Key类型
- * @param <T> 模块中的数据类型
+ * @param <V> 模块中的数据类型
  * @author monkey1993
  * @version 1.0
  **/
-public interface IRepeatedModule<K, T extends IRepeatedPlayerData<?>> extends IModule<T> {
+public interface IRepeatedModule<K, V extends IGameData & IRepeatedData<K>> extends IModule<V> {
 
 	/**
 	 * 增加数据
@@ -20,7 +23,7 @@ public interface IRepeatedModule<K, T extends IRepeatedPlayerData<?>> extends IM
 	 *
 	 * @param data 玩家数据
 	 */
-	void add(T data);
+	void add(V data);
 
 	/**
 	 * 获取数据
@@ -28,7 +31,7 @@ public interface IRepeatedModule<K, T extends IRepeatedPlayerData<?>> extends IM
 	 * @param dataId 数据ID
 	 * @return 数据
 	 */
-	T get(K dataId);
+	V get(K dataId);
 
 	/**
 	 * 移除数据
@@ -36,5 +39,5 @@ public interface IRepeatedModule<K, T extends IRepeatedPlayerData<?>> extends IM
 	 * @param dataId 数据ID
 	 * @return 数据
 	 */
-	T remove(K dataId);
+	V remove(K dataId);
 }

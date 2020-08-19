@@ -33,8 +33,9 @@ public class SerializeUtil {
 	 */
 	public static <T> T serialize(
 			Class<? extends IModuleSerializable<T>> clazz,
-			IModule<? extends IGameData> module,
-			boolean coercive) throws IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+			IModule<?> module,
+			boolean coercive
+	) throws IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
 		IModuleSerializable<T> serializable = clazz.getDeclaredConstructor().newInstance();
 		return serializable.serialize(module, coercive);
 	}

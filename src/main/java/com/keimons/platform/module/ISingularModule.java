@@ -1,9 +1,7 @@
 package com.keimons.platform.module;
 
 import com.keimons.platform.iface.IGameData;
-
-import java.util.Collection;
-import java.util.Collections;
+import com.keimons.platform.iface.ISingularData;
 
 /**
  * 组持久化方案，这一步是将可重叠的数据进行合并，合并之后才能存入数据库
@@ -14,7 +12,7 @@ import java.util.Collections;
  * @author monkey1993
  * @version 1.0
  **/
-public interface ISingularModule<T extends IGameData> extends IModule<T> {
+public interface ISingularModule<T extends IGameData & ISingularData> extends IModule<T> {
 
 	/**
 	 * 获取数据
@@ -22,9 +20,4 @@ public interface ISingularModule<T extends IGameData> extends IModule<T> {
 	 * @return 数据
 	 */
 	T get();
-
-	@Override
-	default Collection<T> toCollection() {
-		return Collections.singletonList(get());
-	}
 }

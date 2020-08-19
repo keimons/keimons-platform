@@ -2,6 +2,7 @@ package com.keimons.platform;
 
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
+import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.coder.CodecAdapter;
 
 import java.util.Collection;
@@ -43,9 +44,9 @@ public class KeimonsServer {
 	 * <p>
 	 * 采用默认的配置文件
 	 *
-	 * @param path      文件路径
+	 * @param path         文件路径
 	 * @param codecAdapter 消息转化器
-	 * @param <T>       输入/输出类型
+	 * @param <T>          输入/输出类型
 	 * @deprecated 暂未完成
 	 */
 	@Deprecated
@@ -57,10 +58,11 @@ public class KeimonsServer {
 	 * 启动入口
 	 *
 	 * @param keimonsConfig 启动入口
-	 * @param codecAdapter     消息转化器
+	 * @param codecAdapter  消息转化器
 	 * @param <T>           输入/输出类型
 	 */
 	public static <T> void start(KeimonsConfig keimonsConfig, CodecAdapter<T> codecAdapter) {
+		Thread.setDefaultUncaughtExceptionHandler(KeimonsServer::uncaughtException);
 		KeimonsConfig = keimonsConfig;
 		Keimons<T> platform = new Keimons<>(keimonsConfig, codecAdapter);
 		KeimonsServer.platform = platform;
@@ -125,5 +127,15 @@ public class KeimonsServer {
 	 */
 	public Collection<IService> getServices() {
 		return platform.services.values();
+	}
+
+	/**
+	 * 未捕获的异常，全局处理
+	 *
+	 * @param t 线程
+	 * @param e 异常
+	 */
+	public static void uncaughtException(Thread t, Throwable e) {
+		LogService.error(e, "Thread " + t.getName());
 	}
 }

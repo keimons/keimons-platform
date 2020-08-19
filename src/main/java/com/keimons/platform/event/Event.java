@@ -16,12 +16,12 @@ public class Event {
 	/**
 	 * 玩家Uuid
 	 */
-	private IPlayer player;
+	private IPlayer<?> player;
 
 	/**
 	 * 事件号
 	 */
-	private Enum<? extends IEventCode> eventCode;
+	private Enum<? extends IEventCode<?>> eventCode;
 
 	/**
 	 * 参数列表
@@ -29,7 +29,7 @@ public class Event {
 	private Object[] params;
 
 	@SuppressWarnings("unchecked")
-	public <T extends Enum<T> & IEventCode> T getEventCode() {
+	public <T extends Enum<T> & IEventCode<?>> T getEventCode() {
 		return (T) eventCode;
 	}
 
@@ -41,26 +41,24 @@ public class Event {
 	 * @return 参数
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T getParams(int index) {
+	public <T> T getParam(int index) {
 		return (T) params[index];
 	}
 
-	public IPlayer getPlayer() {
+	public IPlayer<?> getPlayer() {
 		return player;
 	}
 
-	public Event setPlayer(IPlayer player) {
+	public Event setPlayer(IPlayer<?> player) {
 		this.player = player;
 		return this;
 	}
 
-	public Event setEventCode(Enum<? extends IEventCode> eventCode) {
+	public void setEventCode(Enum<? extends IEventCode<?>> eventCode) {
 		this.eventCode = eventCode;
-		return this;
 	}
 
-	public Event setParams(Object[] params) {
+	public void setParams(Object... params) {
 		this.params = params;
-		return this;
 	}
 }

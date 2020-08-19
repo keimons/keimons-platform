@@ -1,4 +1,4 @@
-package com.keimons.platform.game;
+package com.keimons.platform.module;
 
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
@@ -30,15 +30,6 @@ public class GameDataManager {
 	 * 版本自动升级，一旦发现新加载上来的class文件有变动，则升级版本号
 	 */
 	private static Map<String, Integer> versions = new HashMap<>();
-
-	/**
-	 * 加载一个玩家的数据
-	 *
-	 * @param gameData 模块
-	 */
-	public static void addGameData(IGameData gameData) {
-		GameData.INSTANCE.addGameData(gameData);
-	}
 
 	/**
 	 * 加载一个玩家的数据

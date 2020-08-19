@@ -21,7 +21,15 @@ public class RingBuffer<T> {
 	 * 现在的64位计算机，会每次读取64个字节，另外，处理器的缓存行预取功能(Adjacent Cache-Line Prefetch)，
 	 * 实际上是缓存了两个缓存行，所以需要填充左右各128个字节
 	 */
-	private static final int BUFFER_PAD;
+	private static final int BUFFER_PAD_R;
+
+	/**
+	 * 填充数据
+	 * <p>
+	 * 现在的64位计算机，会每次读取64个字节，另外，处理器的缓存行预取功能(Adjacent Cache-Line Prefetch)，
+	 * 实际上是缓存了两个缓存行，所以需要填充左右各128个字节
+	 */
+	private static final int BUFFER_PAD_L;
 
 	/**
 	 * 计算在实际使用的真实位置
@@ -32,6 +40,16 @@ public class RingBuffer<T> {
 	 * 引用类型占用字节数 开启指针压缩，每个引用占用4个字节，关闭指针压缩，每个引用占用8个字节
 	 */
 	private static final int REF_ELEMENT_SHIFT;
+
+	/**
+	 * 位置
+	 */
+	private static final int REF_ARRAY_INDEX;
+
+	/**
+	 * 填充对齐
+	 */
+	private static final int PAD_MARK;
 
 	/**
 	 * Unsafe操作类
@@ -49,8 +67,15 @@ public class RingBuffer<T> {
 			throw new IllegalStateException("Unknown pointer size");
 		}
 		// 计算填充元素数量
-		BUFFER_PAD = 128 / scale;
-		REF_ARRAY_BASE = UNSAFE.arrayBaseOffset(Node[].class) + (BUFFER_PAD << REF_ELEMENT_SHIFT);
+		BUFFER_PAD_R = 128 / scale;
+		REF_ARRAY_BASE = UNSAFE.arrayBaseOffset(Node[].class) + (BUFFER_PAD_R << REF_ELEMENT_SHIFT);
+		System.out.println(REF_ARRAY_BASE);
+		BUFFER_PAD_L = ((1 << (UnsafeUtil.log2(REF_ARRAY_BASE) + 1)) - UNSAFE.arrayBaseOffset(Node[].class)) / scale - 1;
+		REF_ARRAY_INDEX = UnsafeUtil.log2(BUFFER_PAD_L);
+		PAD_MARK = (int) Math.pow(2, REF_ARRAY_INDEX) - 1;
+		System.out.println(BUFFER_PAD_L);
+		System.out.println(REF_ARRAY_INDEX);
+		System.out.println(PAD_MARK);
 	}
 
 	/**
@@ -88,7 +113,7 @@ public class RingBuffer<T> {
 		this.sequencer = new Sequencer(bufferSize);
 		this.bufferSize = bufferSize;
 
-		this.entries = new Object[bufferSize + 2 * BUFFER_PAD];
+		this.entries = new Object[BUFFER_PAD_L + bufferSize + BUFFER_PAD_R];
 		fill(Node::new);
 	}
 
@@ -99,7 +124,7 @@ public class RingBuffer<T> {
 	 */
 	private void fill(Supplier<Node<T>> factory) {
 		for (int i = 0; i < bufferSize; i++) {
-			entries[BUFFER_PAD + i] = factory.get();
+			entries[BUFFER_PAD_L + i] = factory.get();
 		}
 	}
 
@@ -115,7 +140,7 @@ public class RingBuffer<T> {
 		if (index == -1) {
 			return false;
 		}
-		Node<T> node = (Node<T>) UNSAFE.getObject(entries, REF_ARRAY_BASE + (index << REF_ELEMENT_SHIFT));
+		Node<T> node = (Node<T>) UNSAFE.getObject(entries, index << REF_ARRAY_INDEX | PAD_MARK);
 		node.setValue(object);
 		sequencer.markNext();
 		return true;

@@ -1,6 +1,6 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.ISingularGameData;
+import com.keimons.platform.iface.ISingularData;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.player.IPlayerData;
 
@@ -10,7 +10,7 @@ import com.keimons.platform.player.IPlayerData;
  * @author monkey1993
  * @version 1.0
  **/
-public interface ISingularPlayerData extends IPlayerData, ISingularGameData {
+public interface ISingularPlayerData extends IPlayerData, ISingularData {
 
 	/**
 	 * 初始化（当且仅当对象被创建时调用）

@@ -3,12 +3,13 @@ package com.keimons.platform.iface;
 /**
  * 可重复的游戏数据结构
  *
- * @param <T> 数据主键类型
+ * @param <K> 数据主键类型
  * @author monkey1993
  * @version 1.0
+ * @see com.keimons.platform.module.IRepeatedModule 重复数据模块
  * @since 1.8
  **/
-public interface IRepeatedGameData<T> extends IGameData {
+public interface IRepeatedData<K> {
 
 	/**
 	 * 数据主键
@@ -17,5 +18,5 @@ public interface IRepeatedGameData<T> extends IGameData {
 	 *
 	 * @return 数据唯一标识
 	 */
-	T getDataId();
+	K getDataId();
 }
