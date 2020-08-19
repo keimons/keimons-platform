@@ -5,7 +5,7 @@ import com.keimons.platform.iface.IGameData;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SystemData {
+public abstract class SystemData {
 
 	/**
 	 * 系统数据 Key:数据名称 Value:数据

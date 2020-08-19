@@ -1,4 +1,7 @@
-package com.keimons.platform.module;
+package com.keimons.platform.keimons;
+
+import com.keimons.platform.module.BaseRepeatedModule;
+import com.keimons.platform.module.IRepeatedPlayerData;
 
 /**
  * String作为Key的可重复的数据实现
