@@ -10,6 +10,7 @@ public class IRpcTestImpl implements IRpcTest {
 
 	@Override
 	public String test(String threadName) {
+		System.out.println("test 线程="+Thread.currentThread().getName());
 		return threadName + " call " + Thread.currentThread().getName();
 	}
 }

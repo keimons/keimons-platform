@@ -16,7 +16,7 @@ tasks.withType(JavaCompile) {
 
 repositories {
     // 不要用 mavenCentral() 太慢了
-    // mavenCentral()
+//     mavenCentral()
     jcenter()
 }
 
@@ -55,73 +55,73 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    classifier 'sources'
-}
+//task sourcesJar(type: Jar) {
+//    from sourceSets.main.allJava
+//    classifier 'sources'
+//}
 
-task javadocJar(type: Jar) {
-    from javadoc
-    classifier 'javadoc'
-}
+//task javadocJar(type: Jar) {
+//    from javadoc
+//    classifier 'javadoc'
+//}
 
 
-publishing {
-    // 定义发布什么
-    publications.create('publish', MavenPublication, {
-        // groupId = project.group
-        // artifactId = project.name
-        // version = project.version
-        // groupId,artifactId,version，如果不定义，则会按照以上默认值执行
-        from components.findByName('java')
+//publishing {
+//    // 定义发布什么
+//    publications.create('publish', MavenPublication, {
+//        // groupId = project.group
+//        // artifactId = project.name
+//        // version = project.version
+//        // groupId,artifactId,version，如果不定义，则会按照以上默认值执行
+//        from components.findByName('java')
+//
+//        artifact sourcesJar
+//        artifact javadocJar
+//        pom {
+//            // 构件名称
+//            // 区别于artifactId，可以理解为artifactName
+//            name = 'Keimons Platform'
+//            // 构件描述
+//            description = 'Keimons Platform Library'
+//            // 构件主页
+//            url = 'https://keimons.com'
+//            // 许可证名称和地址
+//            licenses {
+//                license {
+//                    name = 'The Apache License, Version 2.0'
+//                    url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                }
+//            }
+//            // 开发者信息
+//            developers {
+//                developer {
+//                    name = 'monkey1993'
+//                    email = 'monkey1993@keimons.com'
+//                }
+//            }
+//            // 版本控制仓库地址
+//            scm {
+//                url = 'https://github.com/keimons/keimons-platform'
+//                connection = 'scm:git:git://github.com/keimons/keimons-platform.git'
+//                developerConnection = 'scm:git:ssh://git@github.com:keimons/keimons-platform.git'
+//            }
+//        }
+//    })
+//    // 定义发布到哪里
+//    repositories.maven {
+//        url "https://oss.sonatype.org/content/repositories/snapshots"
+//        //url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+//        credentials {
+//            // 这里就是之前在issues.sonatype.org注册的账号
+//            username sonatypeUsername
+//            password sonatypePassword
+//        }
+//    }
+//}
 
-        artifact sourcesJar
-        artifact javadocJar
-        pom {
-            // 构件名称
-            // 区别于artifactId，可以理解为artifactName
-            name = 'Keimons Platform'
-            // 构件描述
-            description = 'Keimons Platform Library'
-            // 构件主页
-            url = 'https://keimons.com'
-            // 许可证名称和地址
-            licenses {
-                license {
-                    name = 'The Apache License, Version 2.0'
-                    url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                }
-            }
-            // 开发者信息
-            developers {
-                developer {
-                    name = 'monkey1993'
-                    email = 'monkey1993@keimons.com'
-                }
-            }
-            // 版本控制仓库地址
-            scm {
-                url = 'https://github.com/keimons/keimons-platform'
-                connection = 'scm:git:git://github.com/keimons/keimons-platform.git'
-                developerConnection = 'scm:git:ssh://git@github.com:keimons/keimons-platform.git'
-            }
-        }
-    })
-    // 定义发布到哪里
-    repositories.maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots"
-        //url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-        credentials {
-            // 这里就是之前在issues.sonatype.org注册的账号
-            username sonatypeUsername
-            password sonatypePassword
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.publish
-}
+//signing {
+//    sign publishing.publications.publish
+//}
 
 javadoc {
     options.encoding = "UTF-8"

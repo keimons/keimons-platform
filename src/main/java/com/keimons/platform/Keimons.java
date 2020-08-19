@@ -189,5 +189,16 @@ public class Keimons<T> {
 	}
 
 	public static void main(String[] args) {
+
+		System.out.println(f1());
+	}
+
+	private static int f1() {
+		Integer integer = 3;
+
+
+
+		return integer;
+
 	}
 }
