@@ -3,7 +3,7 @@ package com.keimons.platform.module;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.unit.ClassUtil;
-import com.keimons.platform.unit.CodeUtil;
+import com.keimons.platform.unit.JProtobufUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class GameDataManager {
 		byte[] data = null; //RedissonManager.getMapValue(ByteArrayCodec.INSTANCE, RedisKeys.keyOfPlayerData(playerId), CharsetUtil.getUTF8(moduleType.toString()));
 		// 反序列化
 		Class<? extends IGameData> clazz = modules.get(moduleName);
-		IGameData module = CodeUtil.decode(clazz, data);
+		IGameData module = JProtobufUtil.decode(clazz, data);
 		return (T) module;
 	}
 

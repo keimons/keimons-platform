@@ -1,9 +1,9 @@
 package com.keimons.platform.module;
 
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
-import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.unit.CodeUtil;
+import com.keimons.platform.unit.JProtobufUtil;
+import org.jetbrains.annotations.Nullable;
 import org.xerial.snappy.Snappy;
 
 import java.io.IOException;
@@ -36,15 +36,19 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 	private boolean compress;
 
 	@Override
+	@Nullable
 	public byte[] serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException {
 		BytesSerializeModule serializable = new BytesSerializeModule();
-		serializable.serialize(module, coercive);
-		bytes = CodeUtil.encode(serializable);
-		compress = serializable.isCompress();
+		serializable.merge(module, coercive);
+		if (serializable.getElements().size() <= 0) {
+			return null;
+		}
+		bytes = JProtobufUtil.encode(serializable);
+		compress = module.isCompress();
 		if (compress) {
 			bytes = Snappy.compress(bytes);
 		}
-		return CodeUtil.encode(this);
+		return JProtobufUtil.encode(this);
 	}
 
 	@Override
@@ -52,10 +56,10 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 		if (compress) {
 			bytes = Snappy.uncompress(bytes);
 		}
-		BytesSerializeModule serializable = CodeUtil.decode(BytesSerializeModule.class, bytes);
+		BytesSerializeModule serializable = JProtobufUtil.decode(BytesSerializeModule.class, bytes);
 		List<V> elements = new ArrayList<>(serializable.getElements().size());
 		for (byte[] bytes : serializable.getElements()) {
-			V data = CodeUtil.decode(clazz, bytes);
+			V data = JProtobufUtil.decode(clazz, bytes);
 			if (data == null) {
 				continue;
 			}
@@ -78,39 +82,15 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 		@Protobuf(order = 0, description = "模块数据")
 		private List<byte[]> elements = new ArrayList<>();
 
-		/**
-		 * 数据是否压缩
-		 * <p>
-		 * 这个字段仅仅表明该模块是否需要进行压缩。这个字段和 {@link #elements} 平级，所以，这个字段如果写入数据库中，
-		 * 是无法在解压之前读出该字段的。
-		 */
-		private transient boolean compress;
-
-		@Override
-		public void serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException {
-			if (module instanceof IRepeatedPlayerData) {
-				coercive = true;
-			}
-			for (IGameData data : module) {
-				if (data instanceof IGameDataSerialize) {
-					IGameDataSerialize serializable = (IGameDataSerialize) data;
-					APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
-					compress = annotation.isCompress();
-					byte[] persistence = serializable.serialize(coercive);
+		public void merge(IModule<? extends IGameData> module, boolean coercive) throws IOException {
+			if (coercive || module.isUpdate()) {
+				for (IGameData data : module) {
+					byte[] persistence =  JProtobufUtil.encode(data);
 					if (persistence != null) {
 						this.elements.add(persistence);
 					}
 				}
 			}
-		}
-
-		@Override
-		public boolean isCompress() {
-			return compress;
-		}
-
-		public void setCompress(boolean compress) {
-			this.compress = compress;
 		}
 
 		@Override

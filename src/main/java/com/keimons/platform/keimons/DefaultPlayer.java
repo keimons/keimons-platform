@@ -3,17 +3,15 @@ package com.keimons.platform.keimons;
 import com.keimons.platform.KeimonsServer;
 import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.datebase.RedissonManager;
-import com.keimons.platform.module.*;
-import com.keimons.platform.player.IPlayerData;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.module.*;
 import com.keimons.platform.player.BasePlayer;
+import com.keimons.platform.player.IPlayerData;
 import com.keimons.platform.player.PlayerManager;
-import com.keimons.platform.unit.CodeUtil;
+import com.keimons.platform.unit.JProtobufUtil;
 import com.keimons.platform.unit.SerializeUtil;
 import org.redisson.client.codec.ByteArrayCodec;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -32,7 +30,7 @@ public class DefaultPlayer extends BasePlayer<String> {
 
 	@Override
 	public void init() {
-		
+
 	}
 
 	@Override
@@ -67,9 +65,13 @@ public class DefaultPlayer extends BasePlayer<String> {
 		for (Map.Entry<String, IModule<? extends IPlayerData>> entry : modules.entrySet()) {
 			byte[] moduleName = entry.getKey().getBytes(StandardCharsets.UTF_8);
 			try {
-				byte[] serialize = SerializeUtil.serialize(BytesModuleSerialize.class, entry.getValue(), coercive);
-				bytes.put(moduleName, serialize);
-			} catch (IOException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+				byte[] serialize = SerializeUtil.serialize(
+						BytesModuleSerialize.class, entry.getValue(), coercive
+				);
+				if (serialize != null) {
+					bytes.put(moduleName, serialize);
+				}
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -102,7 +104,7 @@ public class DefaultPlayer extends BasePlayer<String> {
 					for (Map.Entry<byte[], byte[]> entry : moduleBytes.entrySet()) {
 						String moduleName = new String(entry.getKey(), StandardCharsets.UTF_8);
 						Class<? extends IPlayerData> clazz = PlayerManager.classes.get(moduleName);
-						BytesModuleSerialize serialize = CodeUtil.decode(BytesModuleSerialize.class, entry.getValue());
+						BytesModuleSerialize serialize = JProtobufUtil.decode(BytesModuleSerialize.class, entry.getValue());
 
 						List<? extends IPlayerData> deserialize = SerializeUtil.deserialize(serialize, clazz);
 						for (IPlayerData playerData : deserialize) {

@@ -19,4 +19,9 @@ public interface ISingularModule<T extends IGameData & ISingularData> extends IM
 	 * @return 数据
 	 */
 	T get();
+
+	@Override
+	default int getSize() {
+		return 1;
+	}
 }

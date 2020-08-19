@@ -3,6 +3,7 @@ package com.keimons.platform.unit;
 import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.module.IModule;
 import com.keimons.platform.module.IModuleSerializable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -24,18 +25,16 @@ public class SerializeUtil {
 	 * @param module   模块
 	 * @param coercive 是否强制序列化
 	 * @param <T>      序列化类型
-	 * @return 序列化后的数据
-	 * @throws IOException               序列化异常
+	 * @return 序列化后的数据 {@code null} 没有数据
+	 * @throws Exception                 序列化异常
 	 * @throws IllegalAccessException    反射创建对象异常
 	 * @throws InstantiationException    反射创建对象异常
 	 * @throws NoSuchMethodException     反射创建对象异常
 	 * @throws InvocationTargetException 反射创建对象异常
 	 */
-	public static <T> T serialize(
-			Class<? extends IModuleSerializable<T>> clazz,
-			IModule<?> module,
-			boolean coercive
-	) throws IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+	@Nullable
+	public static <T> T serialize(Class<? extends IModuleSerializable<T>> clazz,
+								  IModule<?> module, boolean coercive) throws Exception {
 		IModuleSerializable<T> serializable = clazz.getDeclaredConstructor().newInstance();
 		return serializable.serialize(module, coercive);
 	}

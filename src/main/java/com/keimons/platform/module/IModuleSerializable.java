@@ -2,6 +2,7 @@ package com.keimons.platform.module;
 
 import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.iface.ISerializable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,9 +26,10 @@ public interface IModuleSerializable<T> extends ISerializable {
 	 *
 	 * @param module   模块
 	 * @param coercive 强制存储
-	 * @return 序列化后的数据
+	 * @return 序列化后的数据 {@code null} 表示没有数据需要存储
 	 * @throws IOException 序列化错误
 	 */
+	@Nullable
 	T serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException;
 
 	/**
@@ -59,14 +61,7 @@ public interface IModuleSerializable<T> extends ISerializable {
 		List<T> getElements();
 
 		/**
-		 * 是否压缩
-		 *
-		 * @return 该数据是否经过压缩
-		 */
-		boolean isCompress();
-
-		/**
-		 * 获取序列化后的数据。
+		 * 讲一个模块的数据合并到这个对象中
 		 * <p>
 		 * 获取合并后的数据，这是存入数据库的最终数据。
 		 *
@@ -74,6 +69,6 @@ public interface IModuleSerializable<T> extends ISerializable {
 		 * @param coercive 强制存储
 		 * @throws IOException 序列化错误
 		 */
-		void serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException;
+		void merge(IModule<? extends IGameData> module, boolean coercive) throws IOException;
 	}
 }

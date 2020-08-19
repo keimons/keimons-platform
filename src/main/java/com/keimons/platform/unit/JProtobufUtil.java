@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * POJO转化为byte[]工具
  */
-public class CodeUtil {
+public class JProtobufUtil {
 
 	static {
 		// 由程序自行缓存，关闭工具的自带缓存
@@ -50,7 +50,7 @@ public class CodeUtil {
 	public static <T extends ISerializable> T decode(Class<T> clazz, byte[] data) throws IOException {
 		Codec<T> codec = (Codec<T>) codecs.get(clazz);
 		if (codec == null) {
-			synchronized (CodeUtil.class) {
+			synchronized (JProtobufUtil.class) {
 				codec = (Codec<T>) codecs.get(clazz);
 				if (codec == null) {
 					codec = ProtobufProxy.create(clazz, true);

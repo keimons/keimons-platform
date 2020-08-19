@@ -16,6 +16,24 @@ import java.util.Collection;
 public interface IModule<T extends IGameData> extends Iterable<T> {
 
 	/**
+	 * 是否已改变
+	 *
+	 * @return 是否已改变
+	 */
+	default boolean isUpdate() {
+		return true;
+	}
+
+	/**
+	 * 是否压缩
+	 *
+	 * @return 该数据是否需要压缩
+	 */
+	default boolean isCompress() {
+		return false;
+	}
+
+	/**
 	 * 获取数据的版本
 	 *
 	 * @return 数据版本
@@ -23,6 +41,13 @@ public interface IModule<T extends IGameData> extends Iterable<T> {
 	default int getVersion() {
 		return 0;
 	}
+
+	/**
+	 * 获取容器中的元素数量
+	 *
+	 * @return 元素数量
+	 */
+	int getSize();
 
 	/**
 	 * 获取模块中所有数据
