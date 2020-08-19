@@ -10,6 +10,9 @@
 
 ## 玩家数据
 
+注解`@APlayerData`表明最是玩家的数据。玩家数据的两个主要接口`IRepeatedPlayerData`和`ISingularPlayerData`，
+所有的玩家数据都应该是实现自这两个接口的。
+
 ### 玩家唯一数据
 
 ![player-singular-data](@/design/player-singular-data.png)
@@ -19,6 +22,9 @@
 ![player-repeated-data](@/design/player-repeated-data.png)
 
 ## 公共数据
+
+注解`@ASystemData`表明最是公共的数据。公共数据的两个主要接口`IRepeatedSystemData`和`ISingularSystemData`，
+所有的公共数据都应该是实现自这两个接口的。
 
 ### 公共唯一数据
 
@@ -30,7 +36,9 @@
 
 # 游戏模块
 
-游戏数据是存放于游戏模块中。对应以上四种数据，设计了4个存储模块。对于数据的管理，是依赖于模块的，
-同时，模块也是数据存储的最小单元。允许每个模块自定义存储方式、位置。
+顶层接口`IModule`定义了这是一个`数据容器`，
+将`数据容器`分为：存放单数数据的`ISingularModule`和存放复数数据的`IRepeatedModule`。
+玩家数据和公共数据也是存放于`数据容器`中的，对于数据的管理，也是依赖于`数据容器`的，
+而`数据容器`也是数据存储的最小单元。我们允许为每个`数据容器`编写不同的存储方式、位置。
 
-
+![module](@/design/module.png)

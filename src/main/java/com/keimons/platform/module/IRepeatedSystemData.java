@@ -1,7 +1,5 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IRepeatedData;
-
 /**
  * 组织公共数据
  *

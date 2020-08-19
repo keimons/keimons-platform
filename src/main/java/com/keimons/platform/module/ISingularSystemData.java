@@ -1,7 +1,5 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.ISingularData;
-
 /**
  * 组织公共数据
  *

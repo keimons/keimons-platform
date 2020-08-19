@@ -1,4 +1,4 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.module;
 
 /**
  * 可重复的游戏数据结构

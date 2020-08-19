@@ -1,6 +1,5 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IRepeatedData;
 import com.keimons.platform.player.IPlayerData;
 
 /**
