@@ -40,7 +40,14 @@ public interface IModuleSerializable<T> extends ISerializable {
 	 * @return 玩家数据
 	 * @throws IOException 反序列化异常
 	 */
-	<V extends IGameData> List<V> deserialize(Class<V> clazz) throws IOException;
+	<V extends IGameData> List<V> deserialize(Class<V> clazz, T data) throws IOException;
+
+	/**
+	 * 持久化容器
+	 */
+	interface ISerializeEntity extends ISerializable {
+
+	}
 
 	/**
 	 * 针对于模块的序列化方案
@@ -59,16 +66,5 @@ public interface IModuleSerializable<T> extends ISerializable {
 		 * @return 数据
 		 */
 		List<T> getElements();
-
-		/**
-		 * 讲一个模块的数据合并到这个对象中
-		 * <p>
-		 * 获取合并后的数据，这是存入数据库的最终数据。
-		 *
-		 * @param module   模块
-		 * @param coercive 强制存储
-		 * @throws IOException 序列化错误
-		 */
-		void merge(IModule<? extends IGameData> module, boolean coercive) throws IOException;
 	}
 }

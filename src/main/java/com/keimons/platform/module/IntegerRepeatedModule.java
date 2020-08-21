@@ -9,6 +9,6 @@ package com.keimons.platform.module;
  * @version 1.0
  * @since 1.0
  **/
-public class IntegerRepeatedModule<T extends IRepeatedPlayerData<Long>> extends BaseRepeatedModule<Long, T> {
+public class IntegerRepeatedModule<T extends IRepeatedPlayerData<Integer>> extends BaseRepeatedModule<Integer, T> {
 
 }

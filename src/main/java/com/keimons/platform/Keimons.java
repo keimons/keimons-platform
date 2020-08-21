@@ -5,11 +5,12 @@ import com.keimons.platform.annotation.AModular;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
-import com.keimons.platform.module.GameDataManager;
 import com.keimons.platform.iface.IEventHandler;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.module.BytesModuleSerialize;
+import com.keimons.platform.module.GameDataManager;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.player.PlayerManager;
@@ -196,9 +197,10 @@ public class Keimons<T> {
 		EventService.init();
 		PlayerManager.init();
 
-		keimons.add(KeimonsOption.NET, new KeimonsTcpService());
 		keimons.add(KeimonsOption.ADAPTER, null);
 		keimons.add(KeimonsOption.EVENT, null);
+		keimons.add(KeimonsOption.SERIALIZE, new BytesModuleSerialize());
+		keimons.add(KeimonsOption.NET, new KeimonsTcpService());
 
 		LogService.init();
 		EventService.init();
@@ -207,8 +209,10 @@ public class Keimons<T> {
 		keimons.start();
 	}
 
-	public <T> void add(KeimonsOption<T> option, @NotNull T value) {
+	public <Z> void add(KeimonsOption<Z> option, @NotNull Z value) {
+	}
 
+	public static <T> void set(KeimonsOption<T> option, @NotNull T value) {
 	}
 
 	public void init() {

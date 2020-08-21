@@ -33,8 +33,10 @@ public class SerializeUtil {
 	 * @throws InvocationTargetException 反射创建对象异常
 	 */
 	@Nullable
-	public static <T> T serialize(Class<? extends IModuleSerializable<T>> clazz,
-								  IModule<?> module, boolean coercive) throws Exception {
+	public static <T> T serialize(
+			Class<? extends IModuleSerializable<T>> clazz,
+			IModule<?> module,
+			boolean coercive) throws Exception {
 		IModuleSerializable<T> serializable = clazz.getDeclaredConstructor().newInstance();
 		return serializable.serialize(module, coercive);
 	}
@@ -43,14 +45,17 @@ public class SerializeUtil {
 	 * 序列化模块
 	 *
 	 * @param serializable 序列化方案
-	 * @param dataClass    数据类型
+	 * @param clazz        数据类型
 	 * @param <T>          序列化类型
 	 * @param <V>          数据化类型
 	 * @return 序列化后的数据
 	 * @throws IOException 序列化异常
 	 */
-	public static <T, V extends IGameData> List<V> deserialize(IModuleSerializable<T> serializable,
-															   Class<V> dataClass) throws IOException {
-		return serializable.deserialize(dataClass);
+	public static <T, V extends IGameData> List<V> deserialize(
+			Class<? extends IModuleSerializable<T>> serializable,
+			Class<V> clazz,
+			T data) throws Exception {
+		IModuleSerializable<T> obj = serializable.getDeclaredConstructor().newInstance();
+		return obj.deserialize(clazz, data);
 	}
 }

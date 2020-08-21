@@ -7,11 +7,11 @@ import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 
 /**
@@ -53,7 +53,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * <p>
 	 * 警告：如果模块已经初始化，再次初始化模块，会导致数据被覆盖。
 	 */
-	protected final ConcurrentSkipListSet<String> moduleNames = new ConcurrentSkipListSet<>();
+	protected final Set<String> moduleNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
 	/**
 	 * 最后活跃时间

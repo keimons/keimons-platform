@@ -15,17 +15,6 @@ import com.keimons.platform.session.ISession;
 public interface IPlayer<T> extends IPersistence<T> {
 
 	/**
-	 * 获取用于标识唯一玩家的数据唯一标识符
-	 * <p>
-	 * 将玩家数据进行持久化时，需要依赖这个这个唯一数据标识符号，这个唯一标识符是不能重复的。
-	 * 将数据存储至数据库时，uuid即为标识唯一用户的主键，根据主键对玩家进行索引查询。注意，合
-	 * 服后需要依然能够准追找到这个玩家。
-	 *
-	 * @return 唯一标识符
-	 */
-	T getIdentifier();
-
-	/**
 	 * 初始化
 	 */
 	void init();
@@ -48,14 +37,6 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	boolean hasModules(Class<? extends IPlayerData>... classes);
-
-	/**
-	 * 删除这些模块，模块一旦被删除，将会删除这个模块以及数据库中的数据。
-	 *
-	 * @param classes 模块
-	 */
-	@SuppressWarnings("unchecked")
-	void remove(Class<? extends IPlayerData>... classes);
 
 	/**
 	 * 从内存中卸载这些模块，被卸载的模块依然存在于数据库中，随时可以加载到内存。

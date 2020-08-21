@@ -1,6 +1,7 @@
 package com.keimons.platform;
 
 import com.keimons.platform.event.EventService;
+import com.keimons.platform.module.IModuleSerializable;
 import com.keimons.platform.network.NetService;
 import com.keimons.platform.network.coder.CodecAdapter;
 
@@ -17,14 +18,22 @@ public class KeimonsOption<T> {
 	/**
 	 * TCP连接选项
 	 */
-	public static final KeimonsOption<? extends NetService> NET = new KeimonsOption<>(true);
+	public static final KeimonsOption<NetService> NET = new KeimonsOption<>(true);
 
 	/**
 	 * 消息适配器 功能层消息于网络层包体转化器
 	 */
 	public static final KeimonsOption<CodecAdapter<?>> ADAPTER = new KeimonsOption<>(true);
 
+	/**
+	 * 事件系统
+	 */
 	public static final KeimonsOption<EventService> EVENT = new KeimonsOption<>(false);
+
+	/**
+	 * 序列化方案
+	 */
+	public static final KeimonsOption<IModuleSerializable<?>> SERIALIZE = new KeimonsOption<>(true);
 
 	/**
 	 * 是否必要的

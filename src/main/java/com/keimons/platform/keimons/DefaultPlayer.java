@@ -8,7 +8,6 @@ import com.keimons.platform.module.*;
 import com.keimons.platform.player.BasePlayer;
 import com.keimons.platform.player.IPlayerData;
 import com.keimons.platform.player.PlayerManager;
-import com.keimons.platform.unit.JProtobufUtil;
 import com.keimons.platform.unit.SerializeUtil;
 import org.redisson.client.codec.ByteArrayCodec;
 
@@ -104,9 +103,9 @@ public class DefaultPlayer extends BasePlayer<String> {
 					for (Map.Entry<byte[], byte[]> entry : moduleBytes.entrySet()) {
 						String moduleName = new String(entry.getKey(), StandardCharsets.UTF_8);
 						Class<? extends IPlayerData> clazz = PlayerManager.classes.get(moduleName);
-						BytesModuleSerialize serialize = JProtobufUtil.decode(BytesModuleSerialize.class, entry.getValue());
-
-						List<? extends IPlayerData> deserialize = SerializeUtil.deserialize(serialize, clazz);
+						List<? extends IPlayerData> deserialize = SerializeUtil.deserialize(
+								BytesModuleSerialize.class, clazz, entry.getValue()
+						);
 						for (IPlayerData playerData : deserialize) {
 							if (playerData == null) {
 								continue;

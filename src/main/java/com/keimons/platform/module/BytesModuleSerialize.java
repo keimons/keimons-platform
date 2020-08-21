@@ -20,52 +20,70 @@ import java.util.List;
  **/
 public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 
-	/**
-	 * 模块数据
-	 */
-	@Protobuf(order = 0, description = "模块数据")
-	private byte[] bytes;
-
-	/**
-	 * 是否压缩
-	 * <p>
-	 * 为了标识数据是否被压缩过，所以，此数据时和存库数据平级关系，根据这个字段，{@link #bytes}
-	 * 从数据库中读出的数据是否解压。
-	 */
-	@Protobuf(order = 1, description = "是否压缩")
-	private boolean compress;
-
 	@Override
 	@Nullable
 	public byte[] serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException {
-		BytesSerializeModule serializable = new BytesSerializeModule();
-		serializable.merge(module, coercive);
-		if (serializable.getElements().size() <= 0) {
-			return null;
+		if (coercive || module.isUpdate()) {
+			BytesSerializeModule bsm = new BytesSerializeModule(module.getSize());
+			for (IGameData data : module) {
+				bsm.elements.add(JProtobufUtil.encode(data));
+			}
+			BytesSerializeEntity entity = new BytesSerializeEntity();
+			entity.setCompress(module.isCompress());
+			if (module.isCompress()) {
+				entity.setValue(Snappy.compress(JProtobufUtil.encode(bsm)));
+			} else {
+				entity.setValue(JProtobufUtil.encode(bsm));
+			}
+			return JProtobufUtil.encode(entity);
 		}
-		bytes = JProtobufUtil.encode(serializable);
-		compress = module.isCompress();
-		if (compress) {
-			bytes = Snappy.compress(bytes);
-		}
-		return JProtobufUtil.encode(this);
+		return null;
 	}
 
 	@Override
-	public <V extends IGameData> List<V> deserialize(Class<V> clazz) throws IOException {
-		if (compress) {
-			bytes = Snappy.uncompress(bytes);
+	public <V extends IGameData> List<V> deserialize(Class<V> clazz, byte[] data) throws IOException {
+		BytesSerializeEntity entity = JProtobufUtil.decode(BytesSerializeEntity.class, data);
+		byte[] value;
+		if (entity.compress) {
+			value = Snappy.uncompress(entity.value);
+		} else {
+			value = entity.value;
 		}
-		BytesSerializeModule serializable = JProtobufUtil.decode(BytesSerializeModule.class, bytes);
-		List<V> elements = new ArrayList<>(serializable.getElements().size());
-		for (byte[] bytes : serializable.getElements()) {
-			V data = JProtobufUtil.decode(clazz, bytes);
-			if (data == null) {
+		BytesSerializeModule module = JProtobufUtil.decode(BytesSerializeModule.class, value);
+		List<V> elements = new ArrayList<>(module.getElements().size());
+		for (byte[] bytes : module.getElements()) {
+			V item = JProtobufUtil.decode(clazz, bytes);
+			if (item == null) {
 				continue;
 			}
-			elements.add(data);
+			elements.add(item);
 		}
 		return elements;
+	}
+
+	static class BytesSerializeEntity implements ISerializeEntity {
+
+		@Protobuf(order = 0, description = "是否压缩")
+		private boolean compress;
+
+		@Protobuf(order = 1, description = "存储数据")
+		private byte[] value;
+
+		public boolean isCompress() {
+			return compress;
+		}
+
+		public void setCompress(boolean compress) {
+			this.compress = compress;
+		}
+
+		public byte[] getValue() {
+			return value;
+		}
+
+		public void setValue(byte[] value) {
+			this.value = value;
+		}
 	}
 
 	/**
@@ -80,17 +98,14 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 		 * 模块数据
 		 */
 		@Protobuf(order = 0, description = "模块数据")
-		private List<byte[]> elements = new ArrayList<>();
+		private List<byte[]> elements;
 
-		public void merge(IModule<? extends IGameData> module, boolean coercive) throws IOException {
-			if (coercive || module.isUpdate()) {
-				for (IGameData data : module) {
-					byte[] persistence =  JProtobufUtil.encode(data);
-					if (persistence != null) {
-						this.elements.add(persistence);
-					}
-				}
-			}
+		public BytesSerializeModule() {
+			this.elements = new ArrayList<>();
+		}
+
+		public BytesSerializeModule(int size) {
+			this.elements = new ArrayList<>(size);
 		}
 
 		@Override
