@@ -17,7 +17,7 @@ import java.util.List;
  * @version 1.0
  * @since 1.8
  **/
-public interface IModuleSerializable<T> extends ISerializable {
+public interface IModuleSerializable<T> {
 
 	/**
 	 * 序列化为存库数据

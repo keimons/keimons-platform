@@ -1,9 +1,9 @@
 package com.keimons.platform;
 
-import com.keimons.platform.event.EventService;
 import com.keimons.platform.module.IModuleSerializable;
 import com.keimons.platform.network.NetService;
 import com.keimons.platform.network.coder.CodecAdapter;
+import com.keimons.platform.unit.BaseEnum;
 
 /**
  * 选项
@@ -13,38 +13,40 @@ import com.keimons.platform.network.coder.CodecAdapter;
  * @version 1.0
  * @since 1.8
  **/
-public class KeimonsOption<T> {
+public class KeimonsOption<T> extends BaseEnum<KeimonsOption<T>> {
 
 	/**
-	 * TCP连接选项
+	 * 网络层
 	 */
-	public static final KeimonsOption<NetService> NET = new KeimonsOption<>(true);
+	public static KeimonsOption<NetService> NET;
 
 	/**
 	 * 消息适配器 功能层消息于网络层包体转化器
 	 */
-	public static final KeimonsOption<CodecAdapter<?>> ADAPTER = new KeimonsOption<>(true);
-
-	/**
-	 * 事件系统
-	 */
-	public static final KeimonsOption<EventService> EVENT = new KeimonsOption<>(false);
+	public static final KeimonsOption<CodecAdapter<?>> ADAPTER;
 
 	/**
 	 * 序列化方案
 	 */
-	public static final KeimonsOption<IModuleSerializable<?>> SERIALIZE = new KeimonsOption<>(true);
+	public static final KeimonsOption<IModuleSerializable<?>> SERIALIZE;
 
-	/**
-	 * 是否必要的
-	 */
-	private final boolean necessary;
-
-	public KeimonsOption(boolean necessary) {
-		this.necessary = necessary;
+	static {
+		NET = new KeimonsOption<>("NET", 0);
+		ADAPTER = new KeimonsOption<>("ADAPTER", 1);
+		SERIALIZE = new KeimonsOption<>("SERIALIZE", 2);
 	}
 
-	public boolean isNecessary() {
-		return necessary;
+	private T option;
+
+	private KeimonsOption(String name, int ordinal) {
+		super(name, ordinal);
+	}
+
+	public T getOption() {
+		return option;
+	}
+
+	public void setOption(T option) {
+		this.option = option;
 	}
 }

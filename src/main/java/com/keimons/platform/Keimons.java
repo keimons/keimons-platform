@@ -198,7 +198,6 @@ public class Keimons<T> {
 		PlayerManager.init();
 
 		keimons.add(KeimonsOption.ADAPTER, null);
-		keimons.add(KeimonsOption.EVENT, null);
 		keimons.add(KeimonsOption.SERIALIZE, new BytesModuleSerialize());
 		keimons.add(KeimonsOption.NET, new KeimonsTcpService());
 
@@ -210,9 +209,6 @@ public class Keimons<T> {
 	}
 
 	public <Z> void add(KeimonsOption<Z> option, @NotNull Z value) {
-	}
-
-	public static <T> void set(KeimonsOption<T> option, @NotNull T value) {
 	}
 
 	public void init() {
