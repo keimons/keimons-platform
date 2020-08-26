@@ -1,7 +1,6 @@
 package com.keimons.platform.module;
 
 import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
-import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.unit.JProtobufUtil;
 import org.jetbrains.annotations.Nullable;
 import org.xerial.snappy.Snappy;

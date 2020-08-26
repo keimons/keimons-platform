@@ -29,6 +29,8 @@ public abstract class BaseEnum<E extends BaseEnum<E>>
 		this.ordinal = ordinal;
 	}
 
+	public abstract int size();
+
 	public String toString() {
 		return name;
 	}

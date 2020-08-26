@@ -1,4 +1,4 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.module;
 
 /**
  * 可以进行序列化的数据

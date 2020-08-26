@@ -1,6 +1,5 @@
 package com.keimons.platform.event;
 
-import com.keimons.platform.iface.IEventCode;
 import com.keimons.platform.player.IPlayer;
 
 /**

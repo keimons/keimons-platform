@@ -1,6 +1,6 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IDataVersion;
+import com.keimons.platform.module.IDataVersion;
 
 import java.util.function.BiConsumer;
 

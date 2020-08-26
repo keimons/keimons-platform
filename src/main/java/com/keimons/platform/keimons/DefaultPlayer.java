@@ -1,7 +1,7 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.annotation.APlayerData;
+import com.keimons.platform.player.APlayerData;
 import com.keimons.platform.datebase.RedissonManager;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.*;
@@ -65,7 +65,7 @@ public class DefaultPlayer extends BasePlayer<String> {
 			byte[] moduleName = entry.getKey().getBytes(StandardCharsets.UTF_8);
 			try {
 				byte[] serialize = SerializeUtil.serialize(
-						BytesModuleSerialize.class, entry.getValue(), coercive
+						entry.getValue(), coercive
 				);
 				if (serialize != null) {
 					bytes.put(moduleName, serialize);
@@ -103,9 +103,7 @@ public class DefaultPlayer extends BasePlayer<String> {
 					for (Map.Entry<byte[], byte[]> entry : moduleBytes.entrySet()) {
 						String moduleName = new String(entry.getKey(), StandardCharsets.UTF_8);
 						Class<? extends IPlayerData> clazz = PlayerManager.classes.get(moduleName);
-						List<? extends IPlayerData> deserialize = SerializeUtil.deserialize(
-								BytesModuleSerialize.class, clazz, entry.getValue()
-						);
+						List<? extends IPlayerData> deserialize = SerializeUtil.deserialize(clazz, entry.getValue());
 						for (IPlayerData playerData : deserialize) {
 							if (playerData == null) {
 								continue;

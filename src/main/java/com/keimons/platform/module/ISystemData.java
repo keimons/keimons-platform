@@ -1,7 +1,5 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IGameData;
-
 /**
  * 公共数据结构
  * <p>

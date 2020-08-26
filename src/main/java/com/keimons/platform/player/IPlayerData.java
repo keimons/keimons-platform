@@ -1,6 +1,6 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.module.IGameData;
 
 /**
  * 玩家数据结构

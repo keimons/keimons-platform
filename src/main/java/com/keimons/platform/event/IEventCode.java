@@ -1,4 +1,4 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.event;
 
 /**
  * 事件接口

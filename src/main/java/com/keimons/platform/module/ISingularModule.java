@@ -1,7 +1,5 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IGameData;
-
 /**
  * 组持久化方案，这一步是将可重叠的数据进行合并，合并之后才能存入数据库
  * <p>

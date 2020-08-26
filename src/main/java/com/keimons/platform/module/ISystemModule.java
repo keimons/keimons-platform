@@ -1,4 +1,6 @@
-package com.keimons.platform;
+package com.keimons.platform.module;
+
+import com.keimons.platform.Optional;
 
 import java.util.Map;
 
@@ -11,7 +13,7 @@ import java.util.Map;
  **/
 public interface ISystemModule {
 
-	void init(Map<KeimonsOption<?>, ?> options);
+	void init(Map<Optional<?>, ?> options);
 
 	void start();
 

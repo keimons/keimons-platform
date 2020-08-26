@@ -1,12 +1,12 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.annotation.APlayerData;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.*;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -102,25 +102,28 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @return 数据模块
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public <V extends ISingularPlayerData> V get(Class<V> clazz) {
+	@Nullable
+	public <V extends ISingularPlayerData> V get(@NotNull Class<V> clazz) {
 		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+		if (annotation == null) {
+			throw new AnnotationNotFoundException(clazz, APlayerData.class);
+		}
 		String moduleName = annotation.moduleName();
-		ISingularModule<V> module = (ISingularModule<V>) modules.get(moduleName);
+		ISingularModule<V> module = findModule(clazz);
 		if (module == null && !modules.containsKey(moduleName)) {
 			synchronized (this) {
 				if (!modules.containsKey(moduleName)) {
 					try {
-						ISingularPlayerData data = clazz.getDeclaredConstructor().newInstance();
+						var data = clazz.getDeclaredConstructor().newInstance();
 						data.init(this);
 						addSingularData(data);
 						moduleNames.add(moduleName);
-					} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+					} catch (Exception e) {
 						LogService.error(e);
 					}
 				}
 			}
-			module = (ISingularModule<V>) modules.get(moduleName);
+			module = findModule(clazz);
 		}
 		if (module == null) {
 			return null;
@@ -137,11 +140,9 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @return 数据模块
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public <K, V extends IRepeatedPlayerData<K>> V get(Class<V> clazz, K dataId) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-		String moduleName = annotation.moduleName();
-		IRepeatedModule<K, V> module = (IRepeatedModule<K, V>) modules.get(moduleName);
+	@Nullable
+	public <K, V extends IRepeatedPlayerData<K>> V get(@NotNull Class<V> clazz, @NotNull K dataId) {
+		IRepeatedModule<K, V> module = findModule(clazz);
 		if (module == null) {
 			return null;
 		}
@@ -154,15 +155,35 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @param clazz  模块名称
 	 * @param dataId 数据唯一IDs
 	 * @param <V>    模块类型
-	 * @return 数据模块
+	 * @return 数据 {@code null} 表示未找到这个模块或数据
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public <K, V extends IRepeatedPlayerData<K>> V remove(Class<V> clazz, K dataId) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-		String moduleName = annotation.moduleName();
-		IRepeatedModule<K, V> module = (IRepeatedModule<K, V>) modules.get(moduleName);
+	@Nullable
+	public <K, V extends IRepeatedPlayerData<K>> V remove(@NotNull Class<V> clazz, @NotNull K dataId) {
+		IRepeatedModule<K, V> module = findModule(clazz);
+		if (module == null) {
+			return null;
+		}
 		return module.remove(dataId);
+	}
+
+	/**
+	 * 查找一个模块
+	 *
+	 * @param clazz 数据类型
+	 * @param <V>   数据类型
+	 * @param <R>   模块类型
+	 * @return 模块 {@code null} 模块不存在
+	 */
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <V extends IPlayerData, R extends IModule<V>> R findModule(@NotNull Class<V> clazz) {
+		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+		if (annotation == null) {
+			throw new AnnotationNotFoundException(clazz, APlayerData.class);
+		}
+		String moduleName = annotation.moduleName();
+		return (R) modules.get(moduleName);
 	}
 
 	/**

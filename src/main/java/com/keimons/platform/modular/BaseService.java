@@ -2,8 +2,8 @@ package com.keimons.platform.modular;
 
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.event.Event;
-import com.keimons.platform.iface.IEventCode;
-import com.keimons.platform.iface.IEventHandler;
+import com.keimons.platform.event.IEventCode;
+import com.keimons.platform.event.IEventHandler;
 import com.keimons.platform.iface.IService;
 
 /**

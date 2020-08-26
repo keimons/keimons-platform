@@ -1,7 +1,5 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.iface.IGameData;
-import com.keimons.platform.iface.ISerializable;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

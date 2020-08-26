@@ -1,6 +1,4 @@
-package com.keimons.platform.iface;
-
-import com.keimons.platform.event.Event;
+package com.keimons.platform.event;
 
 /**
  * 事件处理器

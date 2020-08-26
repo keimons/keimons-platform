@@ -1,9 +1,8 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.annotation.APlayerData;
-import com.keimons.platform.annotation.ASystemData;
-import com.keimons.platform.iface.IGameData;
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.player.APlayerData;
+import com.keimons.platform.player.ASystemData;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;

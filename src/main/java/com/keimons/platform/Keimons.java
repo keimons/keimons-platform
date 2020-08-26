@@ -5,7 +5,7 @@ import com.keimons.platform.annotation.AModular;
 import com.keimons.platform.annotation.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
-import com.keimons.platform.iface.IEventHandler;
+import com.keimons.platform.event.IEventHandler;
 import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
@@ -197,9 +197,9 @@ public class Keimons<T> {
 		EventService.init();
 		PlayerManager.init();
 
-		keimons.add(KeimonsOption.ADAPTER, null);
-		keimons.add(KeimonsOption.SERIALIZE, new BytesModuleSerialize());
-		keimons.add(KeimonsOption.NET, new KeimonsTcpService());
+		Keimons.set(Optional.ADAPTER, null);
+		Keimons.set(Optional.SERIALIZE, new BytesModuleSerialize());
+		Keimons.set(Optional.NET, new KeimonsTcpService());
 
 		LogService.init();
 		EventService.init();
@@ -208,7 +208,15 @@ public class Keimons<T> {
 		keimons.start();
 	}
 
-	public <Z> void add(KeimonsOption<Z> option, @NotNull Z value) {
+	private static final Object[] optionals = new Object[64];
+
+	public static synchronized <Z> void set(Optional<Z> option, @NotNull Z value) {
+		optionals[option.ordinal()] = value;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T get(Optional<T> option) {
+		return (T) optionals[option.ordinal()];
 	}
 
 	public void init() {

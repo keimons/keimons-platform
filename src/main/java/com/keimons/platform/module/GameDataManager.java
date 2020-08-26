@@ -1,7 +1,6 @@
 package com.keimons.platform.module;
 
-import com.keimons.platform.annotation.APlayerData;
-import com.keimons.platform.iface.IGameData;
+import com.keimons.platform.player.APlayerData;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.JProtobufUtil;
 

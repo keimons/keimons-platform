@@ -3,7 +3,6 @@ package com.keimons.platform.module;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.keimons.platform.iface.IGameData;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

@@ -2,7 +2,7 @@ package com.keimons.platform.unit;
 
 import com.baidu.bjf.remoting.protobuf.Codec;
 import com.baidu.bjf.remoting.protobuf.ProtobufProxy;
-import com.keimons.platform.iface.ISerializable;
+import com.keimons.platform.module.ISerializable;
 
 import java.io.IOException;
 import java.util.HashMap;

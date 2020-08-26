@@ -1,4 +1,4 @@
-package com.keimons.platform.annotation;
+package com.keimons.platform.player;
 
 import java.lang.annotation.*;
 
@@ -15,7 +15,7 @@ import java.lang.annotation.*;
 @Inherited
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface APlayerData {
+public @interface ASystemData {
 
 	/**
 	 * 模块名称

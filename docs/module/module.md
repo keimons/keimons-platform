@@ -8,9 +8,13 @@
 分别对应了`IRepeatedData`和`ISingularData`两个接口。所以，共计设计4个数据模块：
 玩家唯一数据，玩家重复数据，公共唯一数据，公共重复数据。
 
+我们尝试将数据存入一个`Map`的映射中，`key`是模块的名称，`value`是模块的数据，这样更有利于控制前期流失的低等级玩家大小。
+例如：某一个功能65级解锁，那么在65级以前，实际上玩家是不需要初始化这个功能相关的数据的，我们可以通过这种方法，
+来避免提前创建出来这个对象，造成内存以及存储空间的浪费。
+
 ## 玩家数据
 
-注解`@APlayerData`表明最是玩家的数据。玩家数据的两个主要接口`IRepeatedPlayerData`和`ISingularPlayerData`，
+注解`@APlayerData`表明最是玩家的数据，`moduleName`是用来存储这个模块的名字。玩家数据的两个主要接口`IRepeatedPlayerData`和`ISingularPlayerData`，
 所有的玩家数据都应该是实现自这两个接口的。
 
 ### 玩家唯一数据
