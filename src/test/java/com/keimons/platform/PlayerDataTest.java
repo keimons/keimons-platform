@@ -1,6 +1,7 @@
 package com.keimons.platform;
 
 import com.keimons.platform.keimons.DefaultPlayer;
+import com.keimons.platform.keimons.DefaultSingularModule;
 import com.keimons.platform.module.IModule;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -66,7 +67,7 @@ public class PlayerDataTest {
 		task.getFinishTasks().add("TaskId.1");
 		task.getFinishTasks().add("TaskId.2");
 		task.getFinishTasks().add("TaskId.3");
-		IModule<Task> module = player.findModule(Task.class);
+		DefaultSingularModule<Task> module = player.findModule(Task.class);
 		assert module != null;
 		for (Task item : module) {
 			System.out.println(item.toString());

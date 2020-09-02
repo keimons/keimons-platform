@@ -21,9 +21,141 @@
 
 ![player-singular-data](@/design/player-singular-data.png)
 
+数据示例：
+
+```
+package com.keimons.platform;
+
+import com.alibaba.fastjson.JSONObject;
+import com.keimons.platform.keimons.DefaultPlayer;
+import com.keimons.platform.module.ISingularPlayerData;
+import com.keimons.platform.player.APlayerData;
+import com.keimons.platform.player.IPlayer;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * 任务系统
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @since 1.8
+ **/
+@APlayerData(moduleName = "task")
+public class Task implements ISingularPlayerData {
+
+	/**
+	 * 已经完成的任务
+	 */
+	private Set<String> finishTasks = new HashSet<>();
+
+	@Override
+	public <T extends IPlayer<?>> void init(T player) {
+		DefaultPlayer dp = (DefaultPlayer) player;
+		System.out.println("玩家ID：" + dp.getIdentifier());
+	}
+
+	public Set<String> getFinishTasks() {
+		return finishTasks;
+	}
+
+	public void setFinishTasks(Set<String> finishTasks) {
+		this.finishTasks = finishTasks;
+	}
+
+	@Override
+	public String toString() {
+		return "任务模块，已完成任务：" + JSONObject.toJSONString(finishTasks);
+	}
+}
+```
+
 ### 玩家重复数据
 
 ![player-repeated-data](@/design/player-repeated-data.png)
+
+数据示例：
+
+```
+package com.keimons.platform;
+
+import com.keimons.platform.module.IRepeatedPlayerData;
+import com.keimons.platform.player.APlayerData;
+
+/**
+ * 测试装备
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @since 1.8
+ **/
+@APlayerData(moduleName = "equip")
+public class Equip implements IRepeatedPlayerData<Integer> {
+
+	/**
+	 * 装备唯一ID
+	 */
+	private int dataId;
+
+	/**
+	 * 装备表ID
+	 */
+	private String itemId;
+
+	/**
+	 * 装备等级
+	 */
+	private int level;
+
+	/**
+	 * 装备星级
+	 */
+	private int star;
+
+	@Override
+	public Integer getDataId() {
+		return dataId;
+	}
+
+	public void setDataId(int dataId) {
+		this.dataId = dataId;
+	}
+
+	public String getItemId() {
+		return itemId;
+	}
+
+	public void setItemId(String itemId) {
+		this.itemId = itemId;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public int getStar() {
+		return star;
+	}
+
+	public void setStar(int star) {
+		this.star = star;
+	}
+
+	@Override
+	public String toString() {
+		return "装备ID：" + dataId +
+				"，物品ID：" + itemId +
+				"，等级：" + level +
+				"，星级：" + star
+				;
+	}
+}
+```
 
 ## 公共数据
 
