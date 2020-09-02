@@ -58,6 +58,7 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * 增加一个模块数据
 	 *
 	 * @param data 数据
+	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
 	void add(IPlayerData data);
 
@@ -67,17 +68,19 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * @param clazz 模块
 	 * @param <V>   模块类型
 	 * @return 数据模块
+	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
 	<V extends ISingularPlayerData> V get(Class<V> clazz);
 
 	/**
 	 * 获取玩家的一个模块
 	 *
-	 * @param clazz  模块
+	 * @param clazz  模块，模块中需要包含{@link APlayerData}注解。
 	 * @param dataId 唯一ID
 	 * @param <K>    键类型
 	 * @param <V>    值类型
 	 * @return 模块
+	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
 	<K, V extends IRepeatedPlayerData<K>> V get(Class<V> clazz, K dataId);
 
@@ -89,6 +92,7 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * @param <K>    键类型
 	 * @param <V>    值类型
 	 * @return 模块
+	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
 	<K, V extends IRepeatedPlayerData<K>> V remove(Class<V> clazz, K dataId);
 

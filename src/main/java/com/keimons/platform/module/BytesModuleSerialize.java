@@ -23,7 +23,7 @@ public class BytesModuleSerialize implements IModuleSerializable<byte[]> {
 	@Nullable
 	public byte[] serialize(IModule<? extends IGameData> module, boolean coercive) throws IOException {
 		if (coercive || module.isUpdate()) {
-			BytesSerializeModule bsm = new BytesSerializeModule(module.getSize());
+			BytesSerializeModule bsm = new BytesSerializeModule(module.size());
 			for (IGameData data : module) {
 				bsm.elements.add(JProtobufUtil.encode(data));
 			}

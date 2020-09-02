@@ -104,11 +104,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	@Override
 	@Nullable
 	public <V extends ISingularPlayerData> V get(@NotNull Class<V> clazz) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-		if (annotation == null) {
-			throw new AnnotationNotFoundException(clazz, APlayerData.class);
-		}
-		String moduleName = annotation.moduleName();
+		String moduleName = findModuleName(clazz);
 		ISingularModule<V> module = findModule(clazz);
 		if (module == null && !modules.containsKey(moduleName)) {
 			synchronized (this) {
@@ -131,14 +127,6 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 		return module.get();
 	}
 
-	/**
-	 * 获取玩家的一个模块
-	 *
-	 * @param clazz  模块名称
-	 * @param dataId 数据唯一IDs
-	 * @param <V>    模块类型
-	 * @return 数据模块
-	 */
 	@Override
 	@Nullable
 	public <K, V extends IRepeatedPlayerData<K>> V get(@NotNull Class<V> clazz, @NotNull K dataId) {
@@ -168,6 +156,22 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	}
 
 	/**
+	 * 查找模块的模块名称
+	 *
+	 * @param clazz 模块
+	 * @param <V>   模块数据类型
+	 * @return 模块名称
+	 * @throws AnnotationNotFoundException 注解查找失败异常
+	 */
+	public <V extends IPlayerData> String findModuleName(@NotNull Class<V> clazz) {
+		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
+		if (annotation == null) {
+			throw new AnnotationNotFoundException(clazz, APlayerData.class);
+		}
+		return annotation.moduleName();
+	}
+
+	/**
 	 * 查找一个模块
 	 *
 	 * @param clazz 数据类型
@@ -178,11 +182,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public <V extends IPlayerData, R extends IModule<V>> R findModule(@NotNull Class<V> clazz) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-		if (annotation == null) {
-			throw new AnnotationNotFoundException(clazz, APlayerData.class);
-		}
-		String moduleName = annotation.moduleName();
+		String moduleName = findModuleName(clazz);
 		return (R) modules.get(moduleName);
 	}
 
@@ -205,24 +205,22 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * 增加一个可重复的模块数据
 	 *
 	 * @param data 数据
+	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
-	public abstract <K> void addRepeatedData(IRepeatedPlayerData<K> data);
+	public abstract <K> void addRepeatedData(@NotNull IRepeatedPlayerData<K> data);
 
 	/**
 	 * 增加一个非重复的模块数据
 	 *
 	 * @param data 数据
+	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
-	public abstract void addSingularData(ISingularPlayerData data);
+	public abstract void addSingularData(@NotNull ISingularPlayerData data);
 
 	@Override
 	public boolean hasModules(Class<? extends IPlayerData>[] classes) {
 		for (Class<? extends IPlayerData> clazz : classes) {
-			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-			if (annotation == null) {
-				return false;
-			}
-			if (!modules.containsKey(annotation.moduleName())) {
+			if (!modules.containsKey(findModuleName(clazz))) {
 				return false;
 			}
 		}
@@ -232,12 +230,9 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	@Override
 	public void unload(Class<? extends IPlayerData>[] classes) {
 		for (Class<? extends IPlayerData> clazz : classes) {
-			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-			if (annotation == null) {
-				continue;
-			}
-			this.modules.remove(annotation.moduleName());
-			this.moduleNames.remove(annotation.moduleName());
+			String moduleName = findModuleName(clazz);
+			this.modules.remove(moduleName);
+			this.moduleNames.remove(moduleName);
 		}
 	}
 
@@ -245,11 +240,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	public void unloadIfNot(Class<? extends IPlayerData>[] classes) {
 		Set<String> moduleNames = new HashSet<>(classes.length);
 		for (Class<? extends IPlayerData> clazz : classes) {
-			APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-			if (annotation == null) {
-				continue;
-			}
-			moduleNames.add(annotation.moduleName());
+			moduleNames.add(findModuleName(clazz));
 		}
 		for (String moduleName : this.modules.keySet()) {
 			if (!moduleNames.contains(moduleName)) {

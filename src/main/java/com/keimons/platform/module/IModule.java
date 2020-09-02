@@ -45,7 +45,7 @@ public interface IModule<T extends IGameData> extends Iterable<T> {
 	 *
 	 * @return 元素数量
 	 */
-	int getSize();
+	int size();
 
 	/**
 	 * 获取模块中所有数据

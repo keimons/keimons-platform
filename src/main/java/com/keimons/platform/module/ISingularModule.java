@@ -19,7 +19,7 @@ public interface ISingularModule<T extends IGameData & ISingularData> extends IM
 	T get();
 
 	@Override
-	default int getSize() {
+	default int size() {
 		return 1;
 	}
 }

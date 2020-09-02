@@ -1,14 +1,12 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.player.APlayerData;
+import com.keimons.platform.player.*;
 import com.keimons.platform.datebase.RedissonManager;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.*;
-import com.keimons.platform.player.BasePlayer;
-import com.keimons.platform.player.IPlayerData;
-import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.unit.SerializeUtil;
+import org.jetbrains.annotations.NotNull;
 import org.redisson.client.codec.ByteArrayCodec;
 
 import java.nio.charset.StandardCharsets;
@@ -43,17 +41,15 @@ public class DefaultPlayer extends BasePlayer<String> {
 	}
 
 	@Override
-	public <K> void addRepeatedData(IRepeatedPlayerData<K> data) {
-		APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
-		String moduleName = annotation.moduleName();
+	public <K> void addRepeatedData(@NotNull IRepeatedPlayerData<K> data) {
+		String moduleName = findModuleName(data.getClass());
 		IRepeatedModule<K, IRepeatedPlayerData<K>> module = computeIfAbsent(moduleName, v -> new DefaultRepeatedModule<>());
 		module.add(data);
 	}
 
 	@Override
-	public void addSingularData(ISingularPlayerData data) {
-		APlayerData annotation = data.getClass().getAnnotation(APlayerData.class);
-		String moduleName = annotation.moduleName();
+	public void addSingularData(@NotNull ISingularPlayerData data) {
+		String moduleName = findModuleName(data.getClass());
 		computeIfAbsent(moduleName, v -> new DefaultSingularModule<>(data));
 		moduleNames.add(moduleName);
 	}

@@ -22,7 +22,7 @@ public abstract class BaseRepeatedModule<K, T extends IRepeatedPlayerData<K>> im
 	protected ConcurrentHashMap<K, T> repeated = new ConcurrentHashMap<>();
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return repeated.size();
 	}
 

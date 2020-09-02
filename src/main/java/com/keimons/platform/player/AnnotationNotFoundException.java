@@ -13,7 +13,13 @@ import java.lang.annotation.Annotation;
  **/
 public class AnnotationNotFoundException extends RuntimeException {
 
+	/**
+	 * 注解未找到异常
+	 *
+	 * @param clazz      要查找注解的类
+	 * @param annotation 要查找的注解
+	 */
 	public AnnotationNotFoundException(Class<?> clazz, Class<? extends Annotation> annotation) {
-		super("not found " + annotation.getName() + " in class " + clazz.getName());
+		super("not found annotation " + annotation.getSimpleName() + " in class " + clazz.getName());
 	}
 }

@@ -1,5 +1,7 @@
+## 黑名单
 .idea/*
 .gradle/*
+DUMP_CLASS_FILES/*
 gradle/*
 out/*
 gradlew
@@ -7,5 +9,8 @@ gradlew.bat
 build/*
 logs/*
 publish/*
-src/test/*
+src/test/**/*.*
+!src/test/java/com/keimons/platform/*
 keimons-platform.iml
+
+## 白名单
