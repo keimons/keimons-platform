@@ -1,7 +1,8 @@
 package com.keimons.platform.keimons;
 
 import com.keimons.platform.module.BaseRepeatedModule;
-import com.keimons.platform.module.IRepeatedPlayerData;
+import com.keimons.platform.module.IGameData;
+import com.keimons.platform.module.IRepeatedData;
 
 /**
  * String作为Key的可重复的数据实现
@@ -12,6 +13,6 @@ import com.keimons.platform.module.IRepeatedPlayerData;
  * @version 1.0
  * @since 1.0
  **/
-public class DefaultRepeatedModule<K, T extends IRepeatedPlayerData<K>> extends BaseRepeatedModule<K, T> {
+public class DefaultRepeatedModule<K, T extends IGameData & IRepeatedData<K>> extends BaseRepeatedModule<K, T> {
 
 }

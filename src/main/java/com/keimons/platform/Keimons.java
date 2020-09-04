@@ -10,7 +10,7 @@ import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.BytesModuleSerialize;
-import com.keimons.platform.module.GameDataManager;
+import com.keimons.platform.keimons.SystemDataManager;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.player.PlayerManager;
@@ -88,7 +88,6 @@ public class Keimons<T> {
 //			executor.addProcessor(packageName);
 			SchedulerService.addJobs(packageName);
 			PlayerManager.addGameData(packageName);
-			GameDataManager.addGameData(packageName);
 
 			System.out.println("************************* 完成安装模块 *************************");
 		}

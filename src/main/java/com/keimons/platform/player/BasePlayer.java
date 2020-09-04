@@ -1,9 +1,9 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.*;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.TimeUtil;
+import jdk.internal.vm.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,16 +82,6 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 		this.identifier = identifier;
 	}
 
-	@Override
-	public void add(IPlayerData data) {
-		if (data instanceof ISingularPlayerData) {
-			addSingularData((ISingularPlayerData) data);
-		}
-		if (data instanceof IRepeatedPlayerData) {
-			addRepeatedData((IRepeatedPlayerData<?>) data);
-		}
-	}
-
 	/**
 	 * 获取玩家的一个模块
 	 * <p>
@@ -102,33 +92,52 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @return 数据模块
 	 */
 	@Override
-	@Nullable
+	@NotNull
+	@ForceInline
 	public <V extends ISingularPlayerData> V get(@NotNull Class<V> clazz) {
-		String moduleName = findModuleName(clazz);
 		ISingularModule<V> module = findModule(clazz);
-		if (module == null && !modules.containsKey(moduleName)) {
-			synchronized (this) {
-				if (!modules.containsKey(moduleName)) {
-					try {
-						var data = clazz.getDeclaredConstructor().newInstance();
-						data.init(this);
-						addSingularData(data);
-						moduleNames.add(moduleName);
-					} catch (Exception e) {
-						LogService.error(e);
-					}
-				}
-			}
-			module = findModule(clazz);
-		}
 		if (module == null) {
-			return null;
+			// inline
+			module = createSingularModule(clazz);
 		}
 		return module.get();
 	}
 
+	/**
+	 * 创建一个模块
+	 *
+	 * @param clazz 模块类型
+	 * @param <V>   数据类型
+	 * @return 模块
+	 */
+	@NotNull
+	private <V extends ISingularPlayerData> ISingularModule<V> createSingularModule(Class<V> clazz) {
+		String moduleName = findModuleName(clazz);
+		synchronized (this) {
+			if (!modules.containsKey(moduleName)) {
+				try {
+					var constructor = clazz.getDeclaredConstructor();
+					var data = constructor.newInstance();
+					data.init(this);
+					addSingularData(data);
+					moduleNames.add(moduleName);
+				} catch (Exception e) {
+					throw new ModuleCreateFailException(clazz, e);
+				}
+			}
+		}
+		return Objects.requireNonNull(findModule(clazz));
+	}
+
+	@Override
+	@ForceInline
+	public void add(IRepeatedPlayerData<?> data) {
+		addRepeatedData(data);
+	}
+
 	@Override
 	@Nullable
+	@ForceInline
 	public <K, V extends IRepeatedPlayerData<K>> V get(@NotNull Class<V> clazz, @NotNull K dataId) {
 		IRepeatedModule<K, V> module = findModule(clazz);
 		if (module == null) {
@@ -147,6 +156,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 */
 	@Override
 	@Nullable
+	@ForceInline
 	public <K, V extends IRepeatedPlayerData<K>> V remove(@NotNull Class<V> clazz, @NotNull K dataId) {
 		IRepeatedModule<K, V> module = findModule(clazz);
 		if (module == null) {
@@ -163,6 +173,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @return 模块名称
 	 * @throws AnnotationNotFoundException 注解查找失败异常
 	 */
+	@ForceInline
 	public <V extends IPlayerData> String findModuleName(@NotNull Class<V> clazz) {
 		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
 		if (annotation == null) {
@@ -181,6 +192,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
+	@ForceInline
 	public <V extends IPlayerData, R extends IModule<V>> R findModule(@NotNull Class<V> clazz) {
 		String moduleName = findModuleName(clazz);
 		return (R) modules.get(moduleName);
@@ -203,11 +215,14 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 
 	/**
 	 * 增加一个可重复的模块数据
+	 * <p>
+	 * (线程安全的实现)
 	 *
 	 * @param data 数据
 	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
-	public abstract <K> void addRepeatedData(@NotNull IRepeatedPlayerData<K> data);
+	@ForceInline
+	protected abstract <K> void addRepeatedData(@NotNull IRepeatedPlayerData<K> data);
 
 	/**
 	 * 增加一个非重复的模块数据
@@ -215,7 +230,8 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 * @param data 数据
 	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
-	public abstract void addSingularData(@NotNull ISingularPlayerData data);
+	@ForceInline
+	protected abstract void addSingularData(@NotNull ISingularPlayerData data);
 
 	@Override
 	public boolean hasModules(Class<? extends IPlayerData>[] classes) {

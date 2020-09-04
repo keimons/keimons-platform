@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * @author monkey1993
  * @version 1.0
  **/
-public abstract class BaseRepeatedModule<K, T extends IRepeatedPlayerData<K>> implements IRepeatedModule<K, T> {
+public abstract class BaseRepeatedModule<K, T extends IGameData & IRepeatedData<K>> implements IRepeatedModule<K, T> {
 
 	/**
 	 * 可重复的数据模块

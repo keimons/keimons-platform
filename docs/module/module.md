@@ -29,7 +29,7 @@ package com.keimons.platform;
 import com.alibaba.fastjson.JSONObject;
 import com.keimons.platform.keimons.DefaultPlayer;
 import com.keimons.platform.module.ISingularPlayerData;
-import com.keimons.platform.player.APlayerData;
+import com.keimons.platform.module.APlayerData;
 import com.keimons.platform.player.IPlayer;
 
 import java.util.HashSet;
@@ -71,6 +71,9 @@ public class Task implements ISingularPlayerData {
 }
 ```
 
+玩家唯一数据不需要主动添加，该数据对象是由框架直接反射创建的，所以，需要提供默认的构造方法，否则会抛出
+`ModuleCreateFailException`异常。
+
 ### 玩家重复数据
 
 ![player-repeated-data](@/design/player-repeated-data.png)
@@ -81,7 +84,7 @@ public class Task implements ISingularPlayerData {
 package com.keimons.platform;
 
 import com.keimons.platform.module.IRepeatedPlayerData;
-import com.keimons.platform.player.APlayerData;
+import com.keimons.platform.module.APlayerData;
 
 /**
  * 测试装备
@@ -166,9 +169,119 @@ public class Equip implements IRepeatedPlayerData<Integer> {
 
 ![system-singular-data](@/design/system-singular-data.png)
 
+代码示例：
+
+```
+package com.keimons.platform.system.data;
+
+import com.alibaba.fastjson.JSONObject;
+import com.keimons.platform.module.ASystemData;
+import com.keimons.platform.module.ISingularSystemData;
+
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 记录游戏中的一些状态值
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @since 1.8
+ **/
+@ASystemData(moduleName = "state")
+public class SystemState implements ISingularSystemData {
+
+	/**
+	 * 各种时间值
+	 */
+	private ConcurrentHashMap<String, Long> times = new ConcurrentHashMap<>();
+
+	public long take(String key) {
+		return times.getOrDefault(key, 0L);
+	}
+
+	public ConcurrentHashMap<String, Long> getTimes() {
+		return times;
+	}
+
+	public void setTimes(ConcurrentHashMap<String, Long> times) {
+		this.times = times;
+	}
+
+	@Override
+	public String toString() {
+		return "SystemState{" +
+				"times=" + JSONObject.toJSONString(times) +
+				'}';
+	}
+}
+```
+
+公共唯一数据不需要主动添加，该数据对象是由框架直接反射创建的，所以，需要提供默认的构造方法，否则会抛出
+`ModuleCreateFailException`异常。
+
 ### 公共重复数据
 
 ![system-repeated-data](@/design/system-repeated-data.png)
+
+代码示例：
+
+```
+package com.keimons.platform.system.data;
+
+import com.keimons.platform.module.ASystemData;
+import com.keimons.platform.module.IRepeatedSystemData;
+
+/**
+ * 联盟
+ *
+ * @author monkey1993
+ * @version 1.0
+ * @since 1.8
+ **/
+@ASystemData(moduleName = "league")
+public class League implements IRepeatedSystemData<String> {
+
+	private String dataId;
+
+	private String nickname;
+
+	private int level;
+
+	@Override
+	public String getDataId() {
+		return dataId;
+	}
+
+	public void setDataId(String dataId) {
+		this.dataId = dataId;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	@Override
+	public String toString() {
+		return "League{" +
+				"dataId='" + dataId + '\'' +
+				", nickname='" + nickname + '\'' +
+				", level=" + level +
+				'}';
+	}
+}
+```
 
 # 游戏模块
 
@@ -178,3 +291,4 @@ public class Equip implements IRepeatedPlayerData<Integer> {
 而`数据容器`也是数据存储的最小单元。我们允许为每个`数据容器`编写不同的存储方式、位置。
 
 ![module](@/design/module.png)
+

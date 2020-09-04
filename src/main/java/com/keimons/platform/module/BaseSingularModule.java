@@ -11,7 +11,7 @@ import java.util.function.Consumer;
  * @author monkey1993
  * @version 1.0
  **/
-public abstract class BaseSingularModule<T extends ISingularPlayerData> implements ISingularModule<T> {
+public abstract class BaseSingularModule<T extends IGameData & ISingularData> implements ISingularModule<T> {
 
 	/**
 	 * 玩家数据

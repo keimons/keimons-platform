@@ -1,5 +1,7 @@
 package com.keimons.platform.player;
 
+import com.keimons.platform.module.APlayerData;
+import com.keimons.platform.module.AnnotationNotFoundException;
 import com.keimons.platform.module.IRepeatedPlayerData;
 import com.keimons.platform.module.ISingularPlayerData;
 import com.keimons.platform.session.ISession;
@@ -60,7 +62,7 @@ public interface IPlayer<T> extends IPersistence<T> {
 	 * @param data 数据
 	 * @throws AnnotationNotFoundException 注解查找失败异常。
 	 */
-	void add(IPlayerData data);
+	void add(IRepeatedPlayerData<?> data);
 
 	/**
 	 * 获取玩家的一个模块

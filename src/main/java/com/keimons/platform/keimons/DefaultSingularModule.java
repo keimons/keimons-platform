@@ -1,7 +1,8 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.module.ISingularPlayerData;
 import com.keimons.platform.module.BaseSingularModule;
+import com.keimons.platform.module.IGameData;
+import com.keimons.platform.module.ISingularData;
 
 /**
  * 默认非重复数据实现
@@ -9,7 +10,7 @@ import com.keimons.platform.module.BaseSingularModule;
  * @author monkey1993
  * @version 1.0
  **/
-public class DefaultSingularModule<T extends ISingularPlayerData> extends BaseSingularModule<T> {
+public class DefaultSingularModule<T extends IGameData & ISingularData> extends BaseSingularModule<T> {
 
 	/**
 	 * 构造方法

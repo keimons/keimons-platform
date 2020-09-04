@@ -104,7 +104,12 @@ public class DefaultPlayer extends BasePlayer<String> {
 							if (playerData == null) {
 								continue;
 							}
-							add(playerData);
+							if (playerData instanceof ISingularPlayerData) {
+								addSingularData((ISingularPlayerData) playerData);
+							}
+							if (playerData instanceof IRepeatedPlayerData) {
+								addRepeatedData((IRepeatedPlayerData<?>) playerData);
+							}
 						}
 					}
 				}

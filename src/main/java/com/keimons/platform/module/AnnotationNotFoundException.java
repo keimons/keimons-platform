@@ -1,9 +1,9 @@
-package com.keimons.platform.player;
+package com.keimons.platform.module;
 
 import java.lang.annotation.Annotation;
 
 /**
- * 注解查找异常
+ * 注解查找失败异常
  * <p>
  * {@code RuntimeException}运行时异常的一种。我们需要直接
  *
@@ -14,7 +14,7 @@ import java.lang.annotation.Annotation;
 public class AnnotationNotFoundException extends RuntimeException {
 
 	/**
-	 * 注解未找到异常
+	 * 注解查找失败异常
 	 *
 	 * @param clazz      要查找注解的类
 	 * @param annotation 要查找的注解
