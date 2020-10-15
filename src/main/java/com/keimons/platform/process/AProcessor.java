@@ -1,7 +1,5 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.keimons.DefaultExecutorEnum;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -54,24 +52,4 @@ public @interface AProcessor {
 	 * @return 描述
 	 */
 	String Desc() default "没有描述";
-
-	/**
-	 * 线程优先级，系统允许每个协议自定义自己运行的线程优先级，
-	 * 如果没有指定线程优先级，将采用自动的动态优先级，根据配置
-	 * 文件和程序运行时消息处理速度，自动的进行运行优先级的升级
-	 *
-	 * @return 自动升级线程池
-	 */
-	DefaultExecutorEnum Executor() default DefaultExecutorEnum.FAST;
-
-	/**
-	 * 采样频率
-	 * <p>
-	 * 允许自适应线程等级的协议自定义采样频率，该值必须是2的整数
-	 * 次幂。采样频率越多，则消息升级越慢，所以不建议将该值设置过
-	 * 大。
-	 *
-	 * @return 采样频率
-	 */
-	int Sampling() default 16;
 }

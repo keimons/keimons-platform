@@ -2,6 +2,7 @@ package com.keimons.platform.player;
 
 import com.keimons.platform.module.*;
 import com.keimons.platform.session.ISession;
+import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
 import jdk.internal.vm.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
@@ -175,10 +176,7 @@ public abstract class BasePlayer<T> implements IPlayer<T> {
 	 */
 	@ForceInline
 	public <V extends IPlayerData> String findModuleName(@NotNull Class<V> clazz) {
-		APlayerData annotation = clazz.getAnnotation(APlayerData.class);
-		if (annotation == null) {
-			throw new AnnotationNotFoundException(clazz, APlayerData.class);
-		}
+		APlayerData annotation = ClassUtil.findAnnotation(clazz, APlayerData.class);
 		return annotation.moduleName();
 	}
 

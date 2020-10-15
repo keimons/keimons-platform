@@ -7,7 +7,14 @@ package com.keimons.platform.executor;
  * @version 1.0
  * @since 1.8
  **/
-public interface IExecutorEnum {
+public interface IExecutorType {
+
+	/**
+	 * 线程池名称
+	 *
+	 * @return 名称
+	 */
+	String getName();
 
 	/**
 	 * 获取线程命名规则

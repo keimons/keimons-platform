@@ -219,7 +219,7 @@ public class PlayerManager {
 	 * @param packageName 包名
 	 */
 	public static void addGameData(String packageName) {
-		List<Class<IPlayerData>> classes = ClassUtil.loadClasses(packageName, APlayerData.class);
+		List<Class<IPlayerData>> classes = ClassUtil.findClasses(packageName, APlayerData.class);
 		for (Class<IPlayerData> clazz : classes) {
 			APlayerData annotation = clazz.getDeclaredAnnotation(APlayerData.class);
 			PlayerManager.classes.put(annotation.moduleName(), clazz);

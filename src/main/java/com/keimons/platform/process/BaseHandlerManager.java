@@ -1,8 +1,10 @@
 package com.keimons.platform.process;
 
+import com.keimons.platform.Keimons;
+import com.keimons.platform.Optional;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.executor.IExecutor;
-import com.keimons.platform.executor.IExecutorEnum;
+import com.keimons.platform.executor.IExecutorStrategy;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -25,7 +27,8 @@ import java.util.function.Function;
  * @version 1.0
  * @since 1.8
  */
-public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> implements IHandlerManager<SessionT, MessageT> {
+public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, DataT>
+		implements IHandlerManager<SessionT> {
 
 	/**
 	 * 线程执行器
@@ -33,9 +36,14 @@ public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> im
 	private final IExecutor executor;
 
 	/**
+	 * 消息解析策略
+	 */
+	private final IPacketParseStrategy<PacketT, DataT> packetStrategy;
+
+	/**
 	 * 消息处理器
 	 */
-	private final Map<Integer, IHandler<SessionT, MessageT>> handlers = new HashMap<>();
+	private final Map<Integer, IHandler<SessionT, DataT, ?>> handlers;
 
 	/**
 	 * 构造方法
@@ -44,37 +52,77 @@ public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> im
 	 */
 	public BaseHandlerManager(IExecutor executor) {
 		this.executor = executor;
+		this.handlers = new HashMap<>();
+		this.packetStrategy = Keimons.get(Optional.MESSAGE_PARSE);
 	}
 
 	/**
 	 * 消息处理
 	 *
 	 * @param session 客户端服务器会话
-	 * @param message 消息体
+	 * @param raw     原始消息
 	 */
 	@Override
-	public void handler(SessionT session, MessageT message) {
-		int msgCode = this.getMsgCode(message);
-		IHandler<SessionT, MessageT> info = handlers.get(msgCode);
+	public void handler(SessionT session, byte[] raw) {
+		handler0(session, raw);
+	}
 
-		Enum<? extends IExecutorEnum> config = info.getExecutorType();
-		SelectionThreadFunction<SessionT, MessageT> rule = info.getRule();
-		if (rule == null) {
-			executor.execute(config, info.createTask(session, message));
-		} else {
-			int maxIndex = ((IExecutorEnum) config).getThreadNumb();
-			int index = rule.selection(session, message, maxIndex);
-			executor.execute(config, index, info.createTask(session, message));
+	public <MessageT> void handler0(SessionT session, byte[] raw) {
+		PacketT packet;
+		try {
+			packet = packetStrategy.parsePacket(raw);
+		} catch (Exception e) {
+			exceptionCaught(session, raw, new PacketParseException(e));
+			return;
 		}
+		int msgCode = packetStrategy.findMsgCode(packet);
+		IHandler<SessionT, DataT, MessageT> handler = findHandler(msgCode);
+		if (handler == null) {
+			exceptionCaught(session, raw, new HandlerNotFoundException(msgCode));
+			return;
+		}
+		DataT data = packetStrategy.findData(packet);
+		MessageT message;
+		try {
+			message = handler.parseMessage(data);
+		} catch (Exception e) {
+			exceptionCaught(session, raw, e);
+			return;
+		}
+
+		IProcessor<SessionT, MessageT> processor = handler.getProcessor();
+
+		IExecutorStrategy<SessionT, MessageT> executorStrategy = handler.getExecutorStrategy();
+		if (executorStrategy == null) {
+			session.commit0(() -> processor.processor(session, message));
+		} else {
+			executorStrategy.execute(session, message);
+		}
+
+		int threadCode = processor.threadCode(session, message);
+//		Enum<? extends IExecutorType> config = handler.getExecutorType();
+//		SelectionThreadFunction<SessionT, MessageT> rule = handler.getRule();
+//
+//		Runnable task = handler.createTask(session, message);
+//		if (rule == null) {
+//			executor.execute(config, task);
+//		} else {
+//			int maxIndex = ((IExecutorType) config).getThreadNumb();
+//			int index = rule.selection(session, message, maxIndex);
+//			executor.execute(config, index, task);
+//		}
 	}
 
 	/**
-	 * 从消息体中获取消息号
+	 * 查找消息号
 	 *
-	 * @param message 消息体
-	 * @return 消息号
+	 * @param msgCode 消息号
+	 * @return 消息处理器
 	 */
-	protected abstract int getMsgCode(MessageT message);
+	@SuppressWarnings("unchecked")
+	public <MessageT> IHandler<SessionT, DataT, MessageT> findHandler(int msgCode) {
+		return (IHandler<SessionT, DataT, MessageT>) handlers.get(msgCode);
+	}
 
 	/**
 	 * 添加消息号
@@ -87,15 +135,16 @@ public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> im
 	 * @param annotation  扫描的注解
 	 * @param creator     转化函数
 	 */
-	protected void addJavaProcessor(
+	protected void addHandler(
 			String packageName,
 			Class<? extends Annotation> annotation,
-			Function<? super Class<IProcessor<SessionT, MessageT>>, ? extends IHandler<SessionT, MessageT>> creator
+			Function<? super Class<IProcessor<SessionT, ?>>,
+					? extends IHandler<SessionT, DataT, ?>> creator
 	) {
-		List<Class<IProcessor<SessionT, MessageT>>> classes = ClassUtil.loadClasses(packageName, annotation);
-		for (Class<IProcessor<SessionT, MessageT>> clazz : classes) {
-			IHandler<SessionT, MessageT> handler = creator.apply(clazz);
-			addProcessor(handler);
+		List<Class<IProcessor<SessionT, ?>>> classes = ClassUtil.findClasses(packageName, annotation);
+		for (Class<IProcessor<SessionT, ?>> clazz : classes) {
+			IHandler<SessionT, DataT, ?> handler = creator.apply(clazz);
+			addHandler(handler);
 		}
 	}
 
@@ -104,7 +153,7 @@ public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> im
 	 *
 	 * @param handler 消息信息
 	 */
-	public void addProcessor(IHandler<SessionT, MessageT> handler) {
+	public void addHandler(IHandler<SessionT, DataT, ?> handler) {
 		if (handlers.containsKey(handler.getMsgCode())) {
 			throw new ModuleException("重复的消息号：" + handler.getMsgCode());
 		}
@@ -112,4 +161,22 @@ public abstract class BaseHandlerManager<SessionT extends ISession, MessageT> im
 		System.out.println("消息处理器：" + "消息号：" + handler.getMsgCode()
 				+ "，描述：" + handler.getDesc());
 	}
+
+	/**
+	 * 获取消息解析策略
+	 *
+	 * @return 消息解析策略
+	 */
+	public IPacketParseStrategy<PacketT, DataT> getPacketStrategy() {
+		return packetStrategy;
+	}
+
+	/**
+	 * 异常处理
+	 *
+	 * @param session 客户端-服务器会话
+	 * @param raw     原始数据
+	 * @param cause   异常信息
+	 */
+	public abstract void exceptionCaught(SessionT session, byte[] raw, Throwable cause);
 }

@@ -1,7 +1,5 @@
 package com.keimons.platform.thread;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -24,7 +22,8 @@ public class KeimonsClassLoader extends URLClassLoader {
 	 * @param name 类装载器的名字
 	 */
 	public KeimonsClassLoader(String name) {
-		super(new URL[]{}, null);
+		super(new URL[]{}, null
+		);
 		this.name = name;
 	}
 
@@ -35,7 +34,7 @@ public class KeimonsClassLoader extends URLClassLoader {
 	 * @param name   类装载器的名字
 	 */
 	public KeimonsClassLoader(ClassLoader parent, String name) {
-		super(new URL[]{}, parent);
+		super(new URL[]{KeimonsClassLoader.class.getResource("")}, parent);
 		this.name = name;
 	}
 
@@ -52,14 +51,15 @@ public class KeimonsClassLoader extends URLClassLoader {
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		try {
-			String fileName = "/" + name.replaceAll("\\.", "/") + ".class";
-			InputStream is = getClass().getResourceAsStream(fileName);
-			byte[] b = is.readAllBytes();
-			return defineClass(name, b, 0, b.length);
-		} catch (IOException e) {
-			throw new ClassNotFoundException(name);
-		}
+		return super.findClass(name);
+//		try {
+//			String fileName = "/" + name.replaceAll("\\.", "/") + ".class";
+//			InputStream is = getClass().getResourceAsStream(fileName);
+//			byte[] b = is.readAllBytes();
+//			return defineClass(name, b, 0, b.length);
+//		} catch (IOException e) {
+//			throw new ClassNotFoundException(name);
+//		}
 	}
 
 	@Override

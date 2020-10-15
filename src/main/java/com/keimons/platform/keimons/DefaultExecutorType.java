@@ -1,8 +1,8 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.executor.IExecutorEnum;
+import com.keimons.platform.executor.IExecutorType;
 
-public enum DefaultExecutorEnum implements IExecutorEnum {
+public enum DefaultExecutorType implements IExecutorType {
 	/**
 	 * 快速消息执行器，例如消息执行时间小于10毫秒。
 	 */
@@ -17,6 +17,8 @@ public enum DefaultExecutorEnum implements IExecutorEnum {
 	 * 可选线程消息执行器，根据消息体，选择消息执行器。
 	 */
 	RULE("EXECUTOR-RULE-", 20, true);
+
+	private String name;
 
 	/**
 	 * 线程命名规则
@@ -40,10 +42,16 @@ public enum DefaultExecutorEnum implements IExecutorEnum {
 	 * @param threadNumb 执行器线程数量
 	 * @param route      执行器类型
 	 */
-	DefaultExecutorEnum(String threadName, int threadNumb, boolean route) {
+	DefaultExecutorType(String threadName, int threadNumb, boolean route) {
+		this.name = "";
 		this.threadName = threadName;
 		this.threadNumb = threadNumb;
 		this.route = route;
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import com.keimons.platform.iface.IManager;
 import com.keimons.platform.iface.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.BytesModuleSerialize;
-import com.keimons.platform.keimons.SystemDataManager;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.player.PlayerManager;
@@ -124,7 +123,7 @@ public class Keimons<T> {
 	 * @param packageName 包名
 	 */
 	private void addManager(String packageName) {
-		List<Class<IManager>> list = ClassUtil.loadClasses(packageName, AManager.class);
+		List<Class<IManager>> list = ClassUtil.findClasses(packageName, AManager.class);
 		for (Class<IManager> clazz : list) {
 			System.out.println("正在安装模块管理器：" + clazz.getSimpleName());
 			try {
@@ -144,7 +143,7 @@ public class Keimons<T> {
 	 * @param packageName 包名
 	 */
 	private void addService(String packageName) {
-		List<Class<IService>> list = ClassUtil.loadClasses(packageName, AService.class);
+		List<Class<IService>> list = ClassUtil.findClasses(packageName, AService.class);
 		for (Class<IService> clazz : list) {
 			System.out.println("正在安装模块服务器：" + clazz.getSimpleName());
 			try {
@@ -199,6 +198,7 @@ public class Keimons<T> {
 		Keimons.set(Optional.ADAPTER, null);
 		Keimons.set(Optional.SERIALIZE, new BytesModuleSerialize());
 		Keimons.set(Optional.NET, new KeimonsTcpService());
+		Keimons.set(Optional.MESSAGE_PARSE, null);
 
 		LogService.init();
 		EventService.init();
@@ -214,7 +214,7 @@ public class Keimons<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T get(Optional<T> option) {
+	public static <T> T get(Optional<?> option) {
 		return (T) optionals[option.ordinal()];
 	}
 

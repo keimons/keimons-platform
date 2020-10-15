@@ -3,6 +3,7 @@ package com.keimons.platform;
 import com.keimons.platform.module.IModuleSerializable;
 import com.keimons.platform.network.NetService;
 import com.keimons.platform.network.coder.CodecAdapter;
+import com.keimons.platform.process.IPacketParseStrategy;
 import com.keimons.platform.unit.BaseEnum;
 
 /**
@@ -30,10 +31,16 @@ public class Optional<T> extends BaseEnum<Optional<T>> {
 	 */
 	public static final Optional<IModuleSerializable<?>> SERIALIZE;
 
+	/**
+	 * 消息解析策略
+	 */
+	public static final Optional<IPacketParseStrategy> MESSAGE_PARSE;
+
 	static {
 		NET = new Optional<>("NET", 0);
 		ADAPTER = new Optional<>("ADAPTER", 1);
 		SERIALIZE = new Optional<>("SERIALIZE", 2);
+		MESSAGE_PARSE = new Optional<>("MESSAGE_PARSE", 3);
 	}
 
 	private T option;

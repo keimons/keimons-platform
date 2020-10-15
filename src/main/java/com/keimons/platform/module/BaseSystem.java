@@ -1,5 +1,6 @@
 package com.keimons.platform.module;
 
+import com.keimons.platform.unit.ClassUtil;
 import jdk.internal.vm.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -120,10 +121,7 @@ public abstract class BaseSystem {
 	 */
 	@ForceInline
 	public <V extends ISystemData> String findModuleName(@NotNull Class<V> clazz) {
-		ASystemData annotation = clazz.getAnnotation(ASystemData.class);
-		if (annotation == null) {
-			throw new AnnotationNotFoundException(clazz, ASystemData.class);
-		}
+		ASystemData annotation = ClassUtil.findAnnotation(clazz, ASystemData.class);
 		return annotation.moduleName();
 	}
 

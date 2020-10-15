@@ -22,7 +22,7 @@ dependencies {
 
     // 序列化相关
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.54'
-    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.5.1'
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.13.0'
     compile group: 'com.baidu', name: 'jprotobuf', version: '2.2.14', transitive: false
 
     // 数据压缩

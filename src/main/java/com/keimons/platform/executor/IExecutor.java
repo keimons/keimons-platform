@@ -18,7 +18,7 @@ public interface IExecutor {
 	 * @param type 线程池类型
 	 * @param task 任务
 	 */
-	void execute(Enum<? extends IExecutorEnum> type, Runnable task);
+	void execute(Enum<? extends IExecutorType> type, Runnable task);
 
 	/**
 	 * 选择线程池执行业务
@@ -27,7 +27,7 @@ public interface IExecutor {
 	 * @param index 线程池ID
 	 * @param task  任务
 	 */
-	void execute(Enum<? extends IExecutorEnum> type, int index, Runnable task);
+	void execute(Enum<? extends IExecutorType> type, int index, Runnable task);
 
 	/**
 	 * 选择线程池执行业务并返回执行结果
@@ -39,7 +39,7 @@ public interface IExecutor {
 	 * @throws ExecutionException   执行异常
 	 * @throws InterruptedException 线程阻断异常
 	 */
-	<ResultT> ResultT execute(Enum<? extends IExecutorEnum> type, Callable<ResultT> task) throws ExecutionException, InterruptedException;
+	<ResultT> ResultT execute(Enum<? extends IExecutorType> type, Callable<ResultT> task) throws ExecutionException, InterruptedException;
 
 	/**
 	 * 选择线程池执行业务并返回执行结果
@@ -52,5 +52,5 @@ public interface IExecutor {
 	 * @throws ExecutionException   执行异常
 	 * @throws InterruptedException 线程阻断异常
 	 */
-	<ResultT> ResultT execute(Enum<? extends IExecutorEnum> type, int index, Callable<ResultT> task) throws ExecutionException, InterruptedException;
+	<ResultT> ResultT execute(Enum<? extends IExecutorType> type, int index, Callable<ResultT> task) throws ExecutionException, InterruptedException;
 }

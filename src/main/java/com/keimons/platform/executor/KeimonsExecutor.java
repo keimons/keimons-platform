@@ -20,16 +20,16 @@ import java.util.concurrent.*;
  **/
 public class KeimonsExecutor implements IExecutor {
 
-	private final Map<? extends Enum<? extends IExecutorEnum>, Object> executors;
+	private final Map<? extends Enum<? extends IExecutorType>, Object> executors;
 
 	@SuppressWarnings("unchecked")
-	public <T extends Enum<T>> KeimonsExecutor(Class<? extends IExecutorEnum> clazz) {
+	public <T extends Enum<T>> KeimonsExecutor(Class<? extends IExecutorType> clazz) {
 		Map<T, Object> executors = new HashMap<>();
 		try {
 			Method values = clazz.getMethod("values");
 			T[] executorsInfo = (T[]) values.invoke(null);
 			for (T executorInfo : executorsInfo) {
-				IExecutorEnum info = (IExecutorEnum) executorInfo;
+				IExecutorType info = (IExecutorType) executorInfo;
 				if (info.isRoute()) {
 					ThreadPoolExecutor service = (ThreadPoolExecutor) Executors.newFixedThreadPool(info.getThreadNumb());
 					Executor[] routeExecutors = new Executor[info.getThreadNumb()];
@@ -51,24 +51,24 @@ public class KeimonsExecutor implements IExecutor {
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
-		this.executors = (Map<? extends Enum<? extends IExecutorEnum>, Object>) new EnumMap<>(executors);
+		this.executors = (Map<? extends Enum<? extends IExecutorType>, Object>) new EnumMap<>(executors);
 	}
 
 	@Override
-	public void execute(Enum<? extends IExecutorEnum> type, Runnable runnable) {
+	public void execute(Enum<? extends IExecutorType> type, Runnable runnable) {
 		ExecutorService service = (ExecutorService) this.executors.get(type);
 		service.execute(runnable);
 	}
 
 	@Override
-	public void execute(Enum<? extends IExecutorEnum> type, int route, Runnable runnable) {
+	public void execute(Enum<? extends IExecutorType> type, int route, Runnable runnable) {
 		Executor[] executor = (Executor[]) this.executors.get(type);
 		executor[route].add(runnable);
 	}
 
 	@Override
-	public <ResultT> ResultT execute(Enum<? extends IExecutorEnum> type, Callable<ResultT> callable) throws ExecutionException, InterruptedException {
-		if (((IExecutorEnum) type).isRoute()) {
+	public <ResultT> ResultT execute(Enum<? extends IExecutorType> type, Callable<ResultT> callable) throws ExecutionException, InterruptedException {
+		if (((IExecutorType) type).isRoute()) {
 			ExecutorService service = (ExecutorService) this.executors.get(type);
 			return service.submit(callable).get();
 		} else {
@@ -77,7 +77,7 @@ public class KeimonsExecutor implements IExecutor {
 	}
 
 	@Override
-	public <ResultT> ResultT execute(Enum<? extends IExecutorEnum> type, int index, Callable<ResultT> task) throws ExecutionException, InterruptedException {
+	public <ResultT> ResultT execute(Enum<? extends IExecutorType> type, int index, Callable<ResultT> task) throws ExecutionException, InterruptedException {
 		ExecutorService service = (ExecutorService) this.executors.get(type);
 		Future<ResultT> future = service.submit(task);
 		return future.get();

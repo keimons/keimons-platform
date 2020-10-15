@@ -1,5 +1,6 @@
 package com.keimons.platform.session;
 
+import com.keimons.platform.keimons.DefaultPlayer;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.player.IPlayer;
@@ -69,7 +70,7 @@ public class Session implements ISession {
 	/**
 	 * 玩家
 	 */
-	private IPlayer<?> player;
+	private DefaultPlayer player;
 
 	/**
 	 * 消息号请求时间
@@ -222,12 +223,13 @@ public class Session implements ISession {
 		this.landed = landed;
 	}
 
-	public IPlayer<?> getPlayer() {
+	public DefaultPlayer getPlayer() {
 		return player;
 	}
 
+	@Override
 	public void setPlayer(IPlayer<?> player) {
-		this.player = player;
+		this.player = (DefaultPlayer) player;
 	}
 
 	public int getSessionId() {

@@ -1,5 +1,6 @@
 package com.keimons.platform.session;
 
+import com.keimons.platform.executor.IExecutorStrategy;
 import com.keimons.platform.player.IPlayer;
 
 /**
@@ -17,6 +18,12 @@ public interface ISession {
 	 * @param packet 消息体
 	 */
 	void commit(Object packet);
+
+
+	default <SessionT extends ISession, MessageT> void commit0(
+			IExecutorStrategy<SessionT, MessageT> strategy, MessageT message) {
+		strategy.execute((SessionT) this, message);
+	}
 
 	/**
 	 * 完成消息执行

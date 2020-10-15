@@ -16,7 +16,7 @@ import java.util.List;
 public abstract class CodecAdapter<OUT_BOUND> extends MessageToMessageCodec<byte[], OUT_BOUND> {
 
 	@SuppressWarnings("unchecked")
-	private Class<OUT_BOUND> messageType = (Class<OUT_BOUND>) ClassUtil.find(
+	private Class<OUT_BOUND> messageType = (Class<OUT_BOUND>) ClassUtil.findGenericType(
 			this, CodecAdapter.class, "OUT_BOUND"
 	);
 

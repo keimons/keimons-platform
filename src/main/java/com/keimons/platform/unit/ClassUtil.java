@@ -1,6 +1,8 @@
 package com.keimons.platform.unit;
 
 import com.keimons.platform.log.LogService;
+import com.keimons.platform.module.AnnotationNotFoundException;
+import jdk.internal.vm.annotation.ForceInline;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.lang.reflect.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -24,6 +27,71 @@ import java.util.stream.Collectors;
 public class ClassUtil {
 
 	/**
+	 * 判断一个类是否是一个普通类
+	 *
+	 * @param clazz 类
+	 * @return 是否普通类
+	 */
+	private static boolean isNormalClass(Class<?> clazz) {
+		int modifiers = Modifier.ABSTRACT | Modifier.INTERFACE;
+		return (clazz.getModifiers() & modifiers) == 0;
+	}
+
+	/**
+	 * 是否包含注解
+	 *
+	 * @param clazz  需要查找注解的类
+	 * @param target 注解类
+	 * @return 是否包含该注解
+	 * @throws AnnotationNotFoundException 注解查找失败异常
+	 */
+	@ForceInline
+	public static boolean hasAnnotation(
+			Class<?> clazz, Class<? extends Annotation> target) {
+		Annotation annotation = clazz.getAnnotation(target);
+		return annotation != null;
+	}
+
+	/**
+	 * 判断一个类是否包含某个注解
+	 *
+	 * @param clazz
+	 * @param target
+	 * @param <T>
+	 * @return
+	 */
+	public static <T extends Annotation> T findAnnotation(
+			Class<?> clazz, Class<T> target) {
+		T annotation = clazz.getAnnotation(target);
+		if (annotation == null) {
+			throw new AnnotationNotFoundException(clazz, target);
+		}
+		return annotation;
+	}
+
+	/**
+	 * 加载所有使用该注解的类
+	 *
+	 * @param packageName 包名
+	 * @param target      注解
+	 * @param <T>         泛型类型
+	 * @return 使用该注解的类
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> List<Class<T>> findClassesWithInterface(
+			String packageName, Class<?> target, Class<? extends Annotation> ext) {
+		if (!Modifier.isInterface(target.getModifiers())) {
+			String info = "target class " + target.getSimpleName() + " not interface";
+			throw new IllegalStateException(info);
+		}
+		return ClassUtil.findClasses(packageName).stream()
+				.filter(target::isAssignableFrom)
+				.filter(ClassUtil::isNormalClass)
+				.map(clazz -> (Class<T>) clazz)
+				.collect(Collectors.toList());
+	}
+
+	/**
 	 * 加载所有使用该注解的类
 	 *
 	 * @param packageName 包名
@@ -32,11 +100,11 @@ public class ClassUtil {
 	 * @return 使用该注解的类
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> List<Class<T>> loadClasses(String packageName, Class<? extends Annotation> annotation) {
-		return ClassUtil.getClasses(packageName)
-				.stream()
+	public static <T> List<Class<T>> findClasses(
+			String packageName, Class<? extends Annotation> annotation) {
+		return ClassUtil.findClasses(packageName).stream()
 				.filter(clazz -> clazz.isAnnotationPresent(annotation))
-				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()))
+				.filter(ClassUtil::isNormalClass)
 				.map(clazz -> (Class<T>) clazz)
 				.collect(Collectors.toList());
 	}
@@ -47,7 +115,7 @@ public class ClassUtil {
 	 * @param pack 包名
 	 * @return 该包下所有的class文件
 	 */
-	public static Set<Class<?>> getClasses(String pack) {
+	private static Set<Class<?>> findClasses(String pack) {
 		// 第一个class类的集合
 		Set<Class<?>> classes = new LinkedHashSet<>();
 		// 获取包的名字 并进行替换
@@ -125,12 +193,31 @@ public class ClassUtil {
 	/**
 	 * 查找一个对象的泛型类型
 	 *
-	 * @param object 对象
-	 * @param clazz  类型
-	 * @param param  泛型参数名
+	 * @param object   对象
+	 * @param clazz    类型
+	 * @param typeName 泛型参数名
 	 * @return 类型
 	 */
-	public static Class<?> find(final Object object, Class<?> clazz, String param) {
+	public static <T> Class<T> findGenericType(final Object object, Class<?> clazz, String typeName) {
+		if (clazz.isInterface()) {
+			return findGenericTypeInInterface(object, clazz, typeName);
+		} else {
+			return findGenericTypeInClass(object, clazz, typeName);
+		}
+	}
+
+	/**
+	 * 在类中查找泛型类型
+	 *
+	 * @param object   要查找泛型类型的对象
+	 * @param clazz    要查找泛型的类
+	 * @param typeName 查找的泛型字段名
+	 * @param <T>      类类型
+	 * @return 类
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> Class<T> findGenericTypeInClass(
+			final Object object, Class<?> clazz, String typeName) {
 		final Class<?> thisClass = object.getClass();
 		Class<?> currentClass = thisClass;
 		for (; ; ) {
@@ -138,7 +225,7 @@ public class ClassUtil {
 				int typeParamIndex = -1;
 				TypeVariable<?>[] typeParams = currentClass.getSuperclass().getTypeParameters();
 				for (int i = 0; i < typeParams.length; i++) {
-					if (param.equals(typeParams[i].getName())) {
+					if (typeName.equals(typeParams[i].getName())) {
 						typeParamIndex = i;
 						break;
 					}
@@ -146,12 +233,12 @@ public class ClassUtil {
 
 				if (typeParamIndex < 0) {
 					throw new IllegalStateException(
-							"unknown type parameter '" + param + "': " + clazz);
+							"unknown type parameter '" + typeName + "': " + clazz);
 				}
 
 				Type genericSuperType = currentClass.getGenericSuperclass();
 				if (!(genericSuperType instanceof ParameterizedType)) {
-					return Object.class;
+					return (Class<T>) Object.class;
 				}
 
 				Type[] actualTypeParams = ((ParameterizedType) genericSuperType).getActualTypeArguments();
@@ -161,7 +248,7 @@ public class ClassUtil {
 					actualTypeParam = ((ParameterizedType) actualTypeParam).getRawType();
 				}
 				if (actualTypeParam instanceof Class) {
-					return (Class<?>) actualTypeParam;
+					return (Class<T>) actualTypeParam;
 				}
 				if (actualTypeParam instanceof GenericArrayType) {
 					Type componentType = ((GenericArrayType) actualTypeParam).getGenericComponentType();
@@ -169,7 +256,7 @@ public class ClassUtil {
 						componentType = ((ParameterizedType) componentType).getRawType();
 					}
 					if (componentType instanceof Class) {
-						return Array.newInstance((Class<?>) componentType, 0).getClass();
+						return (Class<T>) Array.newInstance((Class<?>) componentType, 0).getClass();
 					}
 				}
 				if (actualTypeParam instanceof TypeVariable) {
@@ -177,25 +264,63 @@ public class ClassUtil {
 					TypeVariable<?> v = (TypeVariable<?>) actualTypeParam;
 					currentClass = thisClass;
 					if (!(v.getGenericDeclaration() instanceof Class)) {
-						return Object.class;
+						return (Class<T>) Object.class;
 					}
 
 					clazz = (Class<?>) v.getGenericDeclaration();
-					param = v.getName();
+					typeName = v.getName();
 					if (clazz.isAssignableFrom(thisClass)) {
 						continue;
 					} else {
-						return Object.class;
+						return (Class<T>) Object.class;
 					}
 				}
 
-				return fail(thisClass, param);
+				fail(thisClass, typeName);
 			}
 			currentClass = currentClass.getSuperclass();
 			if (currentClass == null) {
-				return fail(thisClass, param);
+				fail(thisClass, typeName);
 			}
 		}
+	}
+
+	/**
+	 * 在接口中查找泛型类型
+	 *
+	 * @param object   要查找泛型类型的对象
+	 * @param clazz    要查找泛型的类
+	 * @param typeName 查找的泛型字段名
+	 * @param <T>      类类型
+	 * @return 类
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> Class<T> findGenericTypeInInterface(
+			final Object object, Class<?> clazz, String typeName) {
+		Type[] interfaces = object.getClass().getGenericInterfaces();
+		for (Type interfaceType : interfaces) {
+			ParameterizedType paramType = (ParameterizedType) interfaceType;
+			if (paramType.getRawType() != clazz) {
+				continue;
+			}
+			Class<?> rawType = (Class<?>) paramType.getRawType();
+			TypeVariable<? extends Class<?>>[] variables = rawType.getTypeParameters();
+			int index = -1;
+			for (int i = 0; i < variables.length; i++) {
+				if (variables[i].getName().equals(typeName)) {
+					index = i;
+					break;
+				}
+			}
+			if (index < 0) {
+				return null;
+			}
+			Type[] arguments = paramType.getActualTypeArguments();
+			if (arguments[index] instanceof Class) {
+				return (Class<T>) arguments[index];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -281,7 +406,7 @@ public class ClassUtil {
 				// 如果是以文件的形式保存在服务器上
 				if ("file".equals(protocol)) {
 					// 获取包的物理路径
-					String filePath = URLDecoder.decode(url.getFile(), "UTF-8");
+					String filePath = URLDecoder.decode(url.getFile(), StandardCharsets.UTF_8);
 					// 以文件的方式扫描整个包下的文件 并添加到集合中
 					findPackageByFile(pack, filePath, packages);
 				} else if ("jar".equals(protocol)) {
@@ -389,7 +514,7 @@ public class ClassUtil {
 	 * @param param 参数名
 	 * @return 抛出异常，并且不会返回任何内容
 	 */
-	private static Class<?> fail(Class<?> type, String param) {
+	private static void fail(Class<?> type, String param) {
 		throw new IllegalStateException(
 				"泛型类型参数查找失败 '" + param + "': " + type);
 	}
