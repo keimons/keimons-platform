@@ -4,7 +4,6 @@ import com.keimons.platform.Keimons;
 import com.keimons.platform.Optional;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.executor.IExecutor;
-import com.keimons.platform.executor.IExecutorStrategy;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -31,11 +30,6 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 		implements IHandlerManager<SessionT> {
 
 	/**
-	 * 线程执行器
-	 */
-	private final IExecutor executor;
-
-	/**
 	 * 消息解析策略
 	 */
 	private final IPacketParseStrategy<PacketT, DataT> packetStrategy;
@@ -51,34 +45,34 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 	 * @param executor 业务执行器
 	 */
 	public BaseHandlerManager(IExecutor executor) {
-		this.executor = executor;
 		this.handlers = new HashMap<>();
 		this.packetStrategy = Keimons.get(Optional.MESSAGE_PARSE);
+	}
+
+	@Override
+	public void handler(SessionT session, byte[] bytes) {
+		handler0(session, bytes);
 	}
 
 	/**
 	 * 消息处理
 	 *
-	 * @param session 客户端服务器会话
-	 * @param raw     原始消息
+	 * @param session    客户端-服务器会话
+	 * @param bytes      原始消息体
+	 * @param <MessageT> 消息体类型
 	 */
-	@Override
-	public void handler(SessionT session, byte[] raw) {
-		handler0(session, raw);
-	}
-
-	public <MessageT> void handler0(SessionT session, byte[] raw) {
+	public <MessageT> void handler0(SessionT session, byte[] bytes) {
 		PacketT packet;
 		try {
-			packet = packetStrategy.parsePacket(raw);
+			packet = packetStrategy.parsePacket(bytes);
 		} catch (Exception e) {
-			exceptionCaught(session, raw, new PacketParseException(e));
+			exceptionCaught(session, bytes, new PacketParseException(e));
 			return;
 		}
 		int msgCode = packetStrategy.findMsgCode(packet);
 		IHandler<SessionT, DataT, MessageT> handler = findHandler(msgCode);
 		if (handler == null) {
-			exceptionCaught(session, raw, new HandlerNotFoundException(msgCode));
+			exceptionCaught(session, bytes, new HandlerNotFoundException(msgCode));
 			return;
 		}
 		DataT data = packetStrategy.findData(packet);
@@ -86,18 +80,18 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 		try {
 			message = handler.parseMessage(data);
 		} catch (Exception e) {
-			exceptionCaught(session, raw, e);
+			exceptionCaught(session, bytes, e);
 			return;
 		}
 
 		IProcessor<SessionT, MessageT> processor = handler.getProcessor();
 
-		IExecutorStrategy<SessionT, MessageT> executorStrategy = handler.getExecutorStrategy();
-		if (executorStrategy == null) {
-			session.commit0(() -> processor.processor(session, message));
-		} else {
-			executorStrategy.execute(session, message);
-		}
+//		IExecutorStrategy<SessionT, MessageT> executorStrategy = handler.getExecutorStrategy();
+//		if (executorStrategy == null) {
+////			session.commit(() -> processor.processor(session, message));
+//		} else {
+//			executorStrategy.execute(session, message);
+//		}
 
 		int threadCode = processor.threadCode(session, message);
 //		Enum<? extends IExecutorType> config = handler.getExecutorType();
@@ -173,6 +167,12 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 
 	/**
 	 * 异常处理
+	 * <p>
+	 * 可能出现的异常：
+	 * <ul>
+	 *     <li>{@link PacketParseException}消息解析异常</li>
+	 *     <li>{@link HandlerNotFoundException}消息处理器未找到异常</li>
+	 * </ul>
 	 *
 	 * @param session 客户端-服务器会话
 	 * @param raw     原始数据

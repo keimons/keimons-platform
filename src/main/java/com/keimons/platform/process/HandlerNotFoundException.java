@@ -10,6 +10,11 @@ package com.keimons.platform.process;
  **/
 public class HandlerNotFoundException extends RuntimeException {
 
+	/**
+	 * 消息处理器查找失败异常
+	 *
+	 * @param msgCode 消息号
+	 */
 	public HandlerNotFoundException(int msgCode) {
 		super("msg code " + msgCode + " handler not found");
 	}

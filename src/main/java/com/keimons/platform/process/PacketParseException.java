@@ -9,7 +9,12 @@ package com.keimons.platform.process;
  **/
 public class PacketParseException extends RuntimeException {
 
+	/**
+	 * 异常信息
+	 *
+	 * @param e 异常
+	 */
 	public PacketParseException(Exception e) {
-		super("error packet", e);
+		super("packet parse exception", e);
 	}
 }

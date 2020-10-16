@@ -1,6 +1,5 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.executor.IExecutorStrategy;
 import com.keimons.platform.session.ISession;
 
 /**
@@ -62,13 +61,4 @@ public interface IHandler<SessionT extends ISession, DataT, MessageT> {
 	 * @throws Exception 消息解析异常
 	 */
 	MessageT parseMessage(DataT packet) throws Exception;
-
-	/**
-	 * 返回业务执行器策略
-	 *
-	 * @return 业务执行策略 {@code null}表示不使用执行器策略直接处理
-	 */
-	default IExecutorStrategy<SessionT, MessageT> getExecutorStrategy() {
-		return null;
-	}
 }
