@@ -3,7 +3,7 @@ package com.keimons.platform.executor;
 import java.util.concurrent.Callable;
 
 /**
- * 业务执行器策略
+ * 任务执行策略
  *
  * @author monkey1993
  * @version 1.0
@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 public interface IExecutorStrategy {
 
 	/**
-	 * 获取线程池的名称
+	 * 获取策略的名称
 	 *
 	 * @return 线程池名称
 	 */
@@ -35,12 +35,30 @@ public interface IExecutorStrategy {
 	 */
 	void execute(int threadCode, Runnable task);
 
+	/**
+	 * 提交一个任务
+	 * <p>
+	 * 该方法可能会阻塞当前线程，直到任务执行完毕
+	 *
+	 * @param threadCode 线程码
+	 * @param task       任务
+	 * @throws ExecutionFailException 任务执行失败异常
+	 */
 	void submit(int threadCode, Runnable task);
 
+	/**
+	 * 提交一个任务
+	 *
+	 * @param threadCode 线程码
+	 * @param task       任务
+	 * @param <T>        返回值类型
+	 * @return 返回值
+	 * @throws ExecutionFailException 任务执行失败异常
+	 */
 	<T> T submit(int threadCode, Callable<T> task);
 
 	/**
-	 * 线程是否结束
+	 * 关闭线程池
 	 */
 	void shutdown();
 }

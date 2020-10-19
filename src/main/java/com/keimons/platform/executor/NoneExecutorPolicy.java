@@ -3,7 +3,7 @@ package com.keimons.platform.executor;
 import java.util.concurrent.Callable;
 
 /**
- * 直接业务执行策略
+ * 无操作业务执行策略，使用调用者线程直接执行任务
  *
  * @author monkey1993
  * @version 1.0

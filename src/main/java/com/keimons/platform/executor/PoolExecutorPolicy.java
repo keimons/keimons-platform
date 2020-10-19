@@ -14,11 +14,11 @@ public class PoolExecutorPolicy extends BaseExecutorStrategy {
 	/**
 	 * 执行器
 	 */
-	private final ExecutorService service;
+	private final ThreadPoolExecutor service;
 
 	public PoolExecutorPolicy(String name, int nThreads) {
 		super(name, nThreads);
-		service = Executors.newFixedThreadPool(nThreads);
+		service = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
 	}
 
 	@Override

@@ -13,8 +13,6 @@ import java.util.concurrent.*;
  **/
 public class CodeExecutorPolicy extends BaseExecutorStrategy {
 
-	public static final String NAME = "CODE";
-
 	/**
 	 * 业务执行器
 	 */
@@ -56,7 +54,7 @@ public class CodeExecutorPolicy extends BaseExecutorStrategy {
 		for (Executor executor : executors) {
 			executor.shutdown();
 		}
-		service.shutdown();
+		service.shutdownNow();
 	}
 
 	/**
@@ -85,11 +83,11 @@ public class CodeExecutorPolicy extends BaseExecutorStrategy {
 		/**
 		 * 是否执行中
 		 */
-		private boolean run = true;
+		private volatile boolean running = true;
 
 		@Override
 		public void run() {
-			while (run) {
+			while (running) {
 				try {
 					Runnable runnable = queue.take();
 					runnable.run();
@@ -143,7 +141,10 @@ public class CodeExecutorPolicy extends BaseExecutorStrategy {
 		 * 关闭线程
 		 */
 		public void shutdown() {
-			run = false;
+			running = false;
+			// 增加一个空消息，保证能够正常结束任务
+			queue.add(() -> {
+			});
 		}
 	}
 }
