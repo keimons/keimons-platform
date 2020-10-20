@@ -26,14 +26,14 @@ public interface IExecutorStrategy {
 	int size();
 
 	/**
-	 * 执行任务
+	 * 提交任务
 	 * <p>
 	 * 依赖于不同的实现，该任务可能在新线程池或线程中执行，也可能直接使用调用者的线程立即执行。
 	 *
 	 * @param threadCode 线程码
 	 * @param task       任务
 	 */
-	void execute(int threadCode, Runnable task);
+	void commit(int threadCode, Runnable task);
 
 	/**
 	 * 提交一个任务

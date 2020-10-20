@@ -14,9 +14,9 @@ import com.keimons.platform.session.Session;
  **/
 public class JsonHandler extends BaseHandler<Session, JSONObject, JSONObject> {
 
-	public JsonHandler(int msgCode, int interval, String desc,
-					   IProcessor<Session, JSONObject> processor) {
-		super(msgCode, interval, desc, processor);
+	public JsonHandler(IProcessor<Session, JSONObject> processor,
+					   int msgCode, int taskStrategy, int executorStrategy, int interval, String desc) {
+		super(processor, msgCode, taskStrategy, executorStrategy, interval, desc);
 	}
 
 	@Override

@@ -32,23 +32,14 @@ public class ProtobufHandler<MessageT extends Message> extends BaseHandler<Sessi
 	private Parser<MessageT> parser;
 
 	@SuppressWarnings("unchecked")
-	public ProtobufHandler(int msgCode, int interval, String desc,
-						   IProcessor<Session, MessageT> processor) {
-		super(msgCode, interval, desc, processor);
+	public ProtobufHandler(IProcessor<Session, MessageT> processor,
+						   int msgCode, int taskStrategy, int executorStrategy,
+						   int interval, String desc) {
+		super(processor, msgCode, taskStrategy, executorStrategy, interval, desc);
 
 		Class<MessageT> messageType = getMessageType();
 		MessageT instance = Internal.getDefaultInstance(messageType);
 		parser = (Parser<MessageT>) instance.getParserForType();
-	}
-
-	public Runnable createTask(Session session, MessageT message) {
-		return () -> {
-			try {
-				processor.processor(session, message);
-			} finally {
-				session.finish();
-			}
-		};
 	}
 
 	@Override

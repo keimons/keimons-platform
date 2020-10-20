@@ -1,5 +1,8 @@
 package com.keimons.platform.process;
 
+import com.keimons.platform.executor.ExecutorManager;
+import com.keimons.platform.executor.IExecutorStrategy;
+import com.keimons.platform.executor.NoneExecutorPolicy;
 import com.keimons.platform.session.ISession;
 
 /**
@@ -17,6 +20,25 @@ public interface IHandler<SessionT extends ISession, DataT, MessageT> {
 	 * @return 消息号
 	 */
 	int getMsgCode();
+
+	/**
+	 * 任务提交策略
+	 *
+	 * @return 任务提交策略
+	 */
+	int getTaskStrategy();
+
+	/**
+	 * 任务执行器策略
+	 * <p>
+	 * 如果没有指定策略，则使用{@link NoneExecutorPolicy}无操作任务执行策略。如果指定某一个自定义的任务执行器，
+	 * 需要先注册{@link ExecutorManager#registerExecutorStrategy(int, IExecutorStrategy)}这个任务执行
+	 * 器，这样才能被任务执行器所检测到。
+	 *
+	 * @return 策略
+	 * @see ExecutorManager 执行器管理
+	 */
+	int getExecutorStrategy();
 
 	/**
 	 * 获取消息描述

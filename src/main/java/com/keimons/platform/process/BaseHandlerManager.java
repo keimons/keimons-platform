@@ -3,7 +3,7 @@ package com.keimons.platform.process;
 import com.keimons.platform.Keimons;
 import com.keimons.platform.Optional;
 import com.keimons.platform.exception.ModuleException;
-import com.keimons.platform.executor.IExecutor;
+import com.keimons.platform.executor.TaskManager;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -15,39 +15,23 @@ import java.util.function.Function;
 
 /**
  * 消息处理管理器
- * <p>
- * 消息处理器封装了3个消息执行器，系统共计定义了3个线程模型。分别命名为短耗时线程，长耗时线程，
- * 可自定义分配线程。系统消息默认由短耗时线程处理，短耗时线程中，所有的消息都是执行时间短，执行速度
- * 快，不涉及或消耗极小的IO/串行的操作。长耗时线程中是执行速度慢或执行时间不确定的线程。可自定义分
- * 配线程是用来处理有特殊需要的功能，例如，公会操作等。另外，类似于一键申请的功能，建议放在一个单独
- * 的单线程中执行，可以避免并发问题。
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  */
 public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, DataT>
-		implements IHandlerManager<SessionT> {
+		implements IHandlerManager<SessionT, byte[]> {
 
 	/**
 	 * 消息解析策略
 	 */
-	private final IPacketParseStrategy<PacketT, DataT> packetStrategy;
+	protected final IPacketParseStrategy<PacketT, DataT> packetStrategy = Keimons.get(Optional.MESSAGE_PARSE);
 
 	/**
 	 * 消息处理器
 	 */
-	private final Map<Integer, IHandler<SessionT, DataT, ?>> handlers;
-
-	/**
-	 * 构造方法
-	 *
-	 * @param executor 业务执行器
-	 */
-	public BaseHandlerManager(IExecutor executor) {
-		this.handlers = new HashMap<>();
-		this.packetStrategy = Keimons.get(Optional.MESSAGE_PARSE);
-	}
+	protected final Map<Integer, IHandler<SessionT, DataT, ?>> handlers = new HashMap<>();
 
 	@Override
 	public void handler(SessionT session, byte[] bytes) {
@@ -61,7 +45,7 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 	 * @param bytes      原始消息体
 	 * @param <MessageT> 消息体类型
 	 */
-	public <MessageT> void handler0(SessionT session, byte[] bytes) {
+	private <MessageT> void handler0(SessionT session, byte[] bytes) {
 		PacketT packet;
 		try {
 			packet = packetStrategy.parsePacket(bytes);
@@ -86,25 +70,12 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 
 		IProcessor<SessionT, MessageT> processor = handler.getProcessor();
 
-//		IExecutorStrategy<SessionT, MessageT> executorStrategy = handler.getExecutorStrategy();
-//		if (executorStrategy == null) {
-////			session.commit(() -> processor.processor(session, message));
-//		} else {
-//			executorStrategy.execute(session, message);
-//		}
-
-		int threadCode = processor.threadCode(session, message);
-//		Enum<? extends IExecutorType> config = handler.getExecutorType();
-//		SelectionThreadFunction<SessionT, MessageT> rule = handler.getRule();
-//
-//		Runnable task = handler.createTask(session, message);
-//		if (rule == null) {
-//			executor.execute(config, task);
-//		} else {
-//			int maxIndex = ((IExecutorType) config).getThreadNumb();
-//			int index = rule.selection(session, message, maxIndex);
-//			executor.execute(config, index, task);
-//		}
+		TaskManager.commitTask(handler.getTaskStrategy(),
+				session,
+				handler.getExecutorStrategy(),
+				processor.threadCode(session, message),
+				() -> processor.processor(session, message)
+		);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.keimons.platform.session;
 
+import com.keimons.platform.executor.ITaskStrategy;
 import com.keimons.platform.keimons.DefaultPlayer;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
@@ -9,8 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,16 +37,6 @@ public class Session implements ISession {
 	 * 客户端-服务器连接
 	 */
 	private ChannelHandlerContext ctx;
-
-	/**
-	 * 消息队列
-	 */
-	private ConcurrentLinkedQueue<Object> messages = new ConcurrentLinkedQueue<>();
-
-	/**
-	 * 是否空闲中
-	 */
-	private AtomicBoolean busy = new AtomicBoolean(false);
 
 	/**
 	 * 最后活跃时间
@@ -92,40 +81,6 @@ public class Session implements ISession {
 		this.sessionId = sessionIndex.getAndIncrement();
 	}
 
-	public void commit(Object packet) {
-		if (packet != null) {
-			messages.offer(packet);
-		}
-		execute();
-	}
-
-	private void execute() {
-		if (!messages.isEmpty()) {
-			if (busy.compareAndSet(false, true)) {
-				Object packet = messages.poll();
-				if (packet == null) {
-					// 没能取到消息，设置当前空闲的
-					busy.set(false);
-				} else {
-					try {
-						// TODO 执行消息体
-					} catch (Exception e) {
-						busy.set(false);
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * 完成消息执行
-	 */
-	public void finish() {
-		busy.set(false);
-		execute();
-	}
-
 	/**
 	 * 请求间隔的验证和更新
 	 * <p>
@@ -146,6 +101,11 @@ public class Session implements ISession {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public Object getExecutorCode() {
+		return player == null ? ITaskStrategy.DEFAULT : player.getIdentifier();
 	}
 
 	/**
@@ -234,13 +194,5 @@ public class Session implements ISession {
 
 	public int getSessionId() {
 		return sessionId;
-	}
-
-	public ConcurrentLinkedQueue<Object> getMessages() {
-		return messages;
-	}
-
-	public AtomicBoolean getBusy() {
-		return busy;
 	}
 }

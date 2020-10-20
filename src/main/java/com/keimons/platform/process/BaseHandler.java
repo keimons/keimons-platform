@@ -17,6 +17,16 @@ public abstract class BaseHandler<SessionT extends ISession, DataT, MessageT>
 	protected final int msgCode;
 
 	/**
+	 * 任务提交策略
+	 */
+	protected int taskStrategy;
+
+	/**
+	 * 任务执行策略
+	 */
+	protected int executorStrategy;
+
+	/**
 	 * 消息描述
 	 */
 	protected final String desc;
@@ -41,12 +51,14 @@ public abstract class BaseHandler<SessionT extends ISession, DataT, MessageT>
 	 */
 	protected final IProcessor<SessionT, MessageT> processor;
 
-	public BaseHandler(int msgCode, int interval, String desc,
-					   IProcessor<SessionT, MessageT> processor) {
+	public BaseHandler(IProcessor<SessionT, MessageT> processor,
+					   int msgCode, int taskStrategy, int executorStrategy, int interval, String desc) {
+		this.processor = processor;
 		this.msgCode = msgCode;
+		this.taskStrategy = taskStrategy;
+		this.executorStrategy = executorStrategy;
 		this.interval = interval;
 		this.desc = desc;
-		this.processor = processor;
 
 		this.dataType = ClassUtil.findGenericType(
 				this, IHandler.class, "DataT"
@@ -59,6 +71,15 @@ public abstract class BaseHandler<SessionT extends ISession, DataT, MessageT>
 	@Override
 	public int getMsgCode() {
 		return msgCode;
+	}
+
+	@Override
+	public int getTaskStrategy() {
+		return taskStrategy;
+	}
+
+	public int getExecutorStrategy() {
+		return executorStrategy;
 	}
 
 	@Override

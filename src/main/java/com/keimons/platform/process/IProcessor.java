@@ -1,6 +1,6 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.executor.KeimonsExecutor;
+import com.keimons.platform.executor.ExecutorManager;
 import com.keimons.platform.session.ISession;
 
 /**
@@ -13,7 +13,7 @@ import com.keimons.platform.session.ISession;
  *
  * @author monkey1993
  * @version 1.0
- * @see KeimonsExecutor 业务处理线程池
+ * @see ExecutorManager 任务执行器
  * @since 1.8
  */
 public interface IProcessor<SessionT extends ISession, MessageT>

@@ -3,7 +3,7 @@ package com.keimons.platform.executor;
 import java.util.concurrent.Callable;
 
 /**
- * 无操作业务执行策略，使用调用者线程直接执行任务
+ * 无操作任务执行策略，使用调用者线程直接执行任务
  *
  * @author monkey1993
  * @version 1.0
@@ -22,7 +22,7 @@ public class NoneExecutorPolicy extends BaseExecutorStrategy {
 	}
 
 	@Override
-	public void execute(int threadCode, Runnable task) {
+	public void commit(int threadCode, Runnable task) {
 		task.run();
 	}
 

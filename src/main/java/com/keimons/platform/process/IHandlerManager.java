@@ -9,7 +9,7 @@ import com.keimons.platform.session.ISession;
  * @version 1.0
  * @since 1.8
  */
-public interface IHandlerManager<SessionT extends ISession> {
+public interface IHandlerManager<SessionT extends ISession, InboundT> {
 
 	/**
 	 * 消息处理
@@ -17,5 +17,5 @@ public interface IHandlerManager<SessionT extends ISession> {
 	 * @param session 客户端-服务器会话
 	 * @param message 消息体
 	 */
-	void handler(SessionT session, byte[] message);
+	void handler(SessionT session, InboundT message);
 }

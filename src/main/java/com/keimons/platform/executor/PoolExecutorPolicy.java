@@ -3,7 +3,7 @@ package com.keimons.platform.executor;
 import java.util.concurrent.*;
 
 /**
- * 线程池业务执行策略
+ * 线程池任务执行策略
  *
  * @author monkey1993
  * @version 1.0
@@ -22,7 +22,7 @@ public class PoolExecutorPolicy extends BaseExecutorStrategy {
 	}
 
 	@Override
-	public void execute(int threadCode, Runnable task) {
+	public void commit(int threadCode, Runnable task) {
 		service.execute(task);
 	}
 

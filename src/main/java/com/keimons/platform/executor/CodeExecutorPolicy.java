@@ -5,7 +5,7 @@ import com.keimons.platform.log.LogService;
 import java.util.concurrent.*;
 
 /**
- * 线程ID业务执行策略
+ * 线程码任务执行策略
  *
  * @author monkey1993
  * @version 1.0
@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 public class CodeExecutorPolicy extends BaseExecutorStrategy {
 
 	/**
-	 * 业务执行器
+	 * 任务执行器
 	 */
 	private final Executor[] executors;
 
@@ -35,7 +35,7 @@ public class CodeExecutorPolicy extends BaseExecutorStrategy {
 	}
 
 	@Override
-	public void execute(int threadCode, Runnable task) {
+	public void commit(int threadCode, Runnable task) {
 		executors[threadCode % nThreads].execute(task);
 	}
 

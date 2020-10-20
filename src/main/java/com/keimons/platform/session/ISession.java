@@ -1,5 +1,8 @@
 package com.keimons.platform.session;
 
+import com.keimons.platform.executor.ITaskStrategy;
+import com.keimons.platform.executor.NoneExecutorPolicy;
+import com.keimons.platform.executor.CommitTaskPolicy;
 import com.keimons.platform.player.IPlayer;
 
 /**
@@ -12,16 +15,13 @@ import com.keimons.platform.player.IPlayer;
 public interface ISession {
 
 	/**
-	 * 提交消息
-	 *
-	 * @param packet 消息体
+	 * 获取任务队列的Key
+	 * <p>
+	 * 可以参考的设计：每个玩家应该拥有一个属于自己的任务队列。如果这个{@code session}还没有绑定玩家，
+	 * 则可以指定该消息使用{@link CommitTaskPolicy}排队策略。使用{@link ITaskStrategy#DEFAULT}默认的
+	 * 任务队列。如果使用默认任务队列，则不建议使用{@link NoneExecutorPolicy}
 	 */
-	void commit(Object packet);
-
-	/**
-	 * 完成消息执行
-	 */
-	void finish();
+	Object getExecutorCode();
 
 	/**
 	 * 断开连接
