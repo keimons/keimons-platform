@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
  **/
 public class NoneExecutorPolicy extends BaseExecutorStrategy {
 
-	private static final String NAME = "none";
+	private static final String NAME = "None";
 
 	public NoneExecutorPolicy() {
 		this(NAME);

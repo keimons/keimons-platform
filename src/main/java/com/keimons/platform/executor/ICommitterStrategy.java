@@ -1,15 +1,13 @@
 package com.keimons.platform.executor;
 
 /**
- * 任务策略
+ * 任务提交策略
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  **/
-public interface ITaskStrategy {
-
-	Object DEFAULT = new Object();
+public interface ICommitterStrategy {
 
 	/**
 	 * 提交一个任务
@@ -19,4 +17,11 @@ public interface ITaskStrategy {
 	 * @param task       任务
 	 */
 	void commitTask(int executor, int threadCode, Runnable task);
+
+	/**
+	 * 获取刷新时间
+	 *
+	 * @return 上次刷新时间
+	 */
+	long getRefreshTime();
 }

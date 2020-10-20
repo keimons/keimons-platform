@@ -1,9 +1,9 @@
 package com.keimons.platform.session;
 
-import com.keimons.platform.executor.ITaskStrategy;
+import com.keimons.platform.executor.LocaleCommitterPolicy;
 import com.keimons.platform.executor.NoneExecutorPolicy;
-import com.keimons.platform.executor.CommitTaskPolicy;
 import com.keimons.platform.player.IPlayer;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 会话接口
@@ -18,10 +18,10 @@ public interface ISession {
 	 * 获取任务队列的Key
 	 * <p>
 	 * 可以参考的设计：每个玩家应该拥有一个属于自己的任务队列。如果这个{@code session}还没有绑定玩家，
-	 * 则可以指定该消息使用{@link CommitTaskPolicy}排队策略。使用{@link ITaskStrategy#DEFAULT}默认的
-	 * 任务队列。如果使用默认任务队列，则不建议使用{@link NoneExecutorPolicy}
+	 * 则可以指定该消息使用{@link LocaleCommitterPolicy}排队策略。使用{@link LocaleCommitterPolicy#DEFAULT}默认的
+	 * 任务队列。如果使用默认任务队列，则不建议使用{@link NoneExecutorPolicy}。
 	 */
-	Object getExecutorCode();
+	@NotNull Object getExecutorCode();
 
 	/**
 	 * 断开连接

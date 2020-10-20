@@ -4,13 +4,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 排队执行任务队列策略
+ * 任务排队提交策略
+ * <p>
+ * 将任务排队提交到任务执行器中，当且仅当当前的任务完成了，才会将下一个任务提交到任务执行器中。
  *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  **/
-public class LinkedTaskPolicy implements ITaskStrategy {
+public class LinkedCommitterPolicy implements ICommitterStrategy {
 
 	/**
 	 * 空闲中的状态
@@ -22,6 +24,9 @@ public class LinkedTaskPolicy implements ITaskStrategy {
 	 */
 	private static final boolean FREE = false;
 
+	/**
+	 * 任务队列的key
+	 */
 	private final Object key;
 
 	/**
@@ -32,14 +37,14 @@ public class LinkedTaskPolicy implements ITaskStrategy {
 	/**
 	 * 等待执行的任务
 	 */
-	private ConcurrentLinkedQueue<Work> works = new ConcurrentLinkedQueue<>();
+	private final ConcurrentLinkedQueue<Work> works = new ConcurrentLinkedQueue<>();
 
 	/**
 	 * 上次刷新时间
 	 */
 	private long refreshTime;
 
-	public LinkedTaskPolicy(Object key) {
+	public LinkedCommitterPolicy(Object key) {
 		this.key = key;
 	}
 
@@ -95,10 +100,7 @@ public class LinkedTaskPolicy implements ITaskStrategy {
 		return works;
 	}
 
-	public void setTasks(ConcurrentLinkedQueue<Work> works) {
-		this.works = works;
-	}
-
+	@Override
 	public long getRefreshTime() {
 		return refreshTime;
 	}

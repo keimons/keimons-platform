@@ -1,6 +1,7 @@
 package com.keimons.platform.process;
 
-import com.keimons.platform.executor.TaskManager;
+import com.keimons.platform.executor.CommitterManager;
+import com.keimons.platform.executor.ExecutorManager;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,18 +36,18 @@ public @interface AProcessor {
 	int MsgCode();
 
 	/**
-	 * 任务排队策略
+	 * 任务提交策略
 	 *
-	 * @return 任务排队策略
+	 * @return 任务提交策略
 	 */
-	int TaskStrategy() default TaskManager.DEFAULT_TASK_STRATEGY;
+	int CommitterStrategy() default CommitterManager.DEFAULT_COMMITTER_STRATEGY;
 
 	/**
 	 * 任务执行策略
 	 *
 	 * @return 任务执行策略
 	 */
-	int ExecutorStrategy() default 0;
+	int ExecutorStrategy() default ExecutorManager.DEFAULT_EXECUTOR_STRATEGY;
 
 	/**
 	 * 协议接受的间隔时间

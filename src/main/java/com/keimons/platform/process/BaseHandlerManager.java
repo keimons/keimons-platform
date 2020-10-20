@@ -3,7 +3,7 @@ package com.keimons.platform.process;
 import com.keimons.platform.Keimons;
 import com.keimons.platform.Optional;
 import com.keimons.platform.exception.ModuleException;
-import com.keimons.platform.executor.TaskManager;
+import com.keimons.platform.executor.CommitterManager;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.ClassUtil;
 
@@ -70,8 +70,10 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 
 		IProcessor<SessionT, MessageT> processor = handler.getProcessor();
 
-		TaskManager.commitTask(handler.getTaskStrategy(),
-				session,
+		// 调用任务提交策略提交任务
+		CommitterManager.commitTask(
+				handler.getCommitterStrategy(),
+				session.getExecutorCode(),
 				handler.getExecutorStrategy(),
 				processor.threadCode(session, message),
 				() -> processor.processor(session, message)

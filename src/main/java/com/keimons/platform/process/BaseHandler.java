@@ -19,7 +19,7 @@ public abstract class BaseHandler<SessionT extends ISession, DataT, MessageT>
 	/**
 	 * 任务提交策略
 	 */
-	protected int taskStrategy;
+	protected int committerStrategy;
 
 	/**
 	 * 任务执行策略
@@ -52,10 +52,14 @@ public abstract class BaseHandler<SessionT extends ISession, DataT, MessageT>
 	protected final IProcessor<SessionT, MessageT> processor;
 
 	public BaseHandler(IProcessor<SessionT, MessageT> processor,
-					   int msgCode, int taskStrategy, int executorStrategy, int interval, String desc) {
+					   int msgCode,
+					   int committerStrategy,
+					   int executorStrategy,
+					   int interval,
+					   String desc) {
 		this.processor = processor;
 		this.msgCode = msgCode;
-		this.taskStrategy = taskStrategy;
+		this.committerStrategy = committerStrategy;
 		this.executorStrategy = executorStrategy;
 		this.interval = interval;
 		this.desc = desc;
@@ -74,8 +78,8 @@ public abstract class BaseHandler<SessionT extends ISession, DataT, MessageT>
 	}
 
 	@Override
-	public int getTaskStrategy() {
-		return taskStrategy;
+	public int getCommitterStrategy() {
+		return committerStrategy;
 	}
 
 	public int getExecutorStrategy() {

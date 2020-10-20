@@ -26,7 +26,7 @@ public interface IHandler<SessionT extends ISession, DataT, MessageT> {
 	 *
 	 * @return 任务提交策略
 	 */
-	int getTaskStrategy();
+	int getCommitterStrategy();
 
 	/**
 	 * 任务执行器策略
