@@ -26,7 +26,7 @@ public class LinkedCommitterPolicy implements ICommitterStrategy {
 	private final ConcurrentHashMap<Object, Committer> committers = new ConcurrentHashMap<>();
 
 	public LinkedCommitterPolicy() {
-		this(5 * 60 * 100);
+		this(5 * 60 * 1000);
 	}
 
 	public LinkedCommitterPolicy(int overtime) {
