@@ -1,5 +1,6 @@
 package com.keimons.platform.executor;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -15,98 +16,156 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LinkedCommitterPolicy implements ICommitterStrategy {
 
 	/**
-	 * 空闲中的状态
+	 * 过期时间
 	 */
-	private static final boolean BUSY = true;
+	private int overtime;
 
 	/**
-	 * 运行中的状态
+	 * 任务提交者
 	 */
-	private static final boolean FREE = false;
+	private final ConcurrentHashMap<Object, Committer> committers = new ConcurrentHashMap<>();
 
-	/**
-	 * 任务队列的key
-	 */
-	private final Object key;
+	public LinkedCommitterPolicy() {
+		this(5 * 60 * 100);
+	}
 
-	/**
-	 * 是否正在执行中
-	 */
-	private final AtomicBoolean busy = new AtomicBoolean(FREE);
-
-	/**
-	 * 等待执行的任务
-	 */
-	private final ConcurrentLinkedQueue<Work> works = new ConcurrentLinkedQueue<>();
-
-	/**
-	 * 上次刷新时间
-	 */
-	private long refreshTime;
-
-	public LinkedCommitterPolicy(Object key) {
-		this.key = key;
+	public LinkedCommitterPolicy(int overtime) {
+		this.overtime = overtime;
 	}
 
 	@Override
-	public void commitTask(int executor, int threadCode, Runnable task) {
-		Work work = new Work(executor, threadCode, task);
-		works.offer(work);
-		refreshTime = System.currentTimeMillis();
-		tryStartTask();
+	public void commit(Object key, int executorStrategy, int threadCode, Runnable task) {
+		Committer committer = committers.computeIfAbsent(key, Committer::new);
+		committer.commitTask(executorStrategy, threadCode, task);
 	}
 
-	/**
-	 * 尝试开始一个任务
-	 */
-	private void tryStartTask() {
-		if (!works.isEmpty() && busy.compareAndSet(FREE, BUSY)) {
-			Work work = works.peek();
-			if (work == null) {
-				busy.set(FREE);
-				return;
-			}
-			IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(work.getExecutor());
-			strategy.commit(work.getThreadCode(), buildLinkedTask(work));
+	@Override
+	public void refresh() {
+		long currentTime = System.currentTimeMillis();
+		for (Object key : committers.keySet()) {
+			committers.compute(key, (k, v) -> {
+				if (v == null) {
+					return null;
+				}
+				if (currentTime - v.activeTime >= overtime) {
+					return null;
+				}
+				return v;
+			});
 		}
 	}
 
-	/**
-	 * 完成任务
-	 *
-	 * @param finish 已经完成的任务
-	 */
-	public void finishTask(Work finish) {
-		works.poll();
-		busy.set(FREE);
+	public int getOvertime() {
+		return overtime;
 	}
 
-	private Runnable buildLinkedTask(Work work) {
-		return () -> {
-			try {
-				work.getTask().run();
-			} finally {
-				finishTask(work);
-			}
+	public void setOvertime(int overtime) {
+		this.overtime = overtime;
+	}
+
+	public ConcurrentHashMap<Object, Committer> getCommitters() {
+		return committers;
+	}
+
+	public static class Committer {
+		/**
+		 * 空闲中的状态
+		 */
+		private static final boolean BUSY = true;
+
+		/**
+		 * 运行中的状态
+		 */
+		private static final boolean FREE = false;
+
+		/**
+		 * 任务队列的key
+		 */
+		private final Object key;
+
+		/**
+		 * 是否正在执行中
+		 */
+		private final AtomicBoolean busy = new AtomicBoolean(FREE);
+
+		/**
+		 * 等待执行的任务
+		 */
+		private final ConcurrentLinkedQueue<Work> works = new ConcurrentLinkedQueue<>();
+
+		/**
+		 * 上次活跃时间
+		 */
+		private long activeTime;
+
+		public Committer(Object key) {
+			this.key = key;
+		}
+
+		public void commitTask(int executor, int threadCode, Runnable task) {
+			Work work = new Work(executor, threadCode, task);
+			works.offer(work);
+			activeTime = System.currentTimeMillis();
 			tryStartTask();
-		};
-	}
+		}
 
-	public Object getKey() {
-		return key;
-	}
+		/**
+		 * 尝试开始一个任务
+		 */
+		private void tryStartTask() {
+			if (!works.isEmpty() && busy.compareAndSet(FREE, BUSY)) {
+				Work work = works.peek();
+				if (work == null) {
+					busy.set(FREE);
+					return;
+				}
+				IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(work.getExecutor());
+				strategy.commit(work.getThreadCode(), buildLinkedTask(work));
+			}
+		}
 
-	public ConcurrentLinkedQueue<Work> getTasks() {
-		return works;
-	}
+		/**
+		 * 完成任务
+		 *
+		 * @param finish 已经完成的任务
+		 */
+		public void finishTask(Work finish) {
+			works.poll();
+			busy.set(FREE);
+		}
 
-	@Override
-	public long getRefreshTime() {
-		return refreshTime;
-	}
+		/**
+		 * 构造一个可以连续执行的任务
+		 *
+		 * @param work 当前要执行的任务
+		 * @return 新的任务
+		 */
+		private Runnable buildLinkedTask(Work work) {
+			return () -> {
+				try {
+					work.getTask().run();
+				} finally {
+					finishTask(work);
+				}
+				tryStartTask();
+			};
+		}
 
-	public void setRefreshTime(long refreshTime) {
-		this.refreshTime = refreshTime;
+		public Object getKey() {
+			return key;
+		}
+
+		public ConcurrentLinkedQueue<Work> getTasks() {
+			return works;
+		}
+
+		public long getActiveTime() {
+			return activeTime;
+		}
+
+		public void setActiveTime(long activeTime) {
+			this.activeTime = activeTime;
+		}
 	}
 
 	/**

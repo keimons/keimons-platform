@@ -1,6 +1,6 @@
 package com.keimons.platform.session;
 
-import com.keimons.platform.executor.LocaleCommitterPolicy;
+import com.keimons.platform.executor.ICommitterStrategy;
 import com.keimons.platform.keimons.DefaultPlayer;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.KeimonsHandler;
@@ -105,7 +105,7 @@ public class Session implements ISession {
 
 	@Override
 	public Object getExecutorCode() {
-		return player == null ? LocaleCommitterPolicy.DEFAULT : player.getIdentifier();
+		return player == null ? ICommitterStrategy.DEFAULT : player.getIdentifier();
 	}
 
 	/**

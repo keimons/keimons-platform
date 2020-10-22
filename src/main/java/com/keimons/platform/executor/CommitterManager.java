@@ -1,13 +1,10 @@
 package com.keimons.platform.executor;
 
 import com.keimons.platform.StrategyAlreadyExistsException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * 任务提交管理器
@@ -45,72 +42,76 @@ public class CommitterManager {
 	 */
 	public static final int DEFAULT_COMMITTER_STRATEGY = LINKED_TASK_COMMITTER_POLICY;
 
-	@SuppressWarnings("unchecked")
-	private static final Function<? super Object, ? extends ICommitterStrategy>[] creators = new Function[16];
-
 	/**
-	 * 整个程序中，所有的任务
+	 * 提交策略
 	 */
-	@SuppressWarnings("unchecked")
-	private static final Map<Object, ICommitterStrategy>[] strategies = new ConcurrentHashMap[16];
+	private static final ICommitterStrategy[] strategies = new ICommitterStrategy[127];
 
 	static {
-		Map<Object, ICommitterStrategy> simple = Collections.singletonMap(
-				LocaleCommitterPolicy.DEFAULT, new LocaleCommitterPolicy()
-		);
-		registerCommitterStrategy(
-				LOCATE_TASK_COMMITTER_POLICY,
-				null,
-				simple
-		);
-		registerCommitterStrategy(
-				LINKED_TASK_COMMITTER_POLICY,
-				LinkedCommitterPolicy::new,
-				new ConcurrentHashMap<>()
-		);
+		registerCommitterStrategy(LOCATE_TASK_COMMITTER_POLICY, new LocaleCommitterPolicy());
+		registerCommitterStrategy(LINKED_TASK_COMMITTER_POLICY, new LinkedCommitterPolicy());
+
+		/**
+		 * 启动一个守护线程，定时检测整个程序中过期的Key
+		 */
+		Thread thread = new Thread(() -> {
+			while (true) {
+				for (ICommitterStrategy strategy : strategies) {
+					if (strategy != null) {
+						strategy.refresh();
+					}
+				}
+				try {
+					Thread.sleep(5 * 1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}, "CommitterRefresh");
+		thread.setDaemon(true);
+		thread.start();
+	}
+
+	/**
+	 * 获取一个任务提交策略
+	 *
+	 * @param committerIndex 任务提交者
+	 * @return 任务提交策略
+	 */
+	public static ICommitterStrategy getCommitterStrategy(
+			@Range(from = 0, to = 127) int committerIndex) {
+		return strategies[committerIndex];
 	}
 
 	/**
 	 * 使用任务提交策略，提交一个任务
 	 *
-	 * @param committerStrategy 任务排队类型
-	 * @param key               任务队列标识
-	 * @param executorStrategy  任务执行策略
-	 * @param threadCode        线程码
-	 * @param task              等待执行的任务
+	 * @param committerIndex   任务提交策略
+	 * @param key              提交者标识
+	 * @param executorStrategy 任务执行策略
+	 * @param threadCode       线程码
+	 * @param task             等待执行的任务
 	 */
-	public static void commitTask(int committerStrategy,
+	public static void commitTask(int committerIndex,
 								  Object key,
 								  int executorStrategy,
 								  int threadCode,
 								  Runnable task) {
-		ICommitterStrategy strategy;
-		if (committerStrategy == LOCATE_TASK_COMMITTER_POLICY) {
-			strategy = strategies[committerStrategy].get(LocaleCommitterPolicy.DEFAULT);
-		} else {
-			strategy = strategies[committerStrategy].computeIfAbsent(key, creators[committerStrategy]);
-		}
-		strategy.commitTask(executorStrategy, threadCode, task);
+		strategies[committerIndex].commit(key, executorStrategy, threadCode, task);
 	}
 
 	/**
 	 * 注册一个任务提交策略
 	 *
-	 * @param committerStrategy 任务排队策略
-	 * @param creator           任务队列创建
-	 * @param tasks             对应Map
+	 * @param committerIndex 任务提交者
+	 * @param strategy       任务提交策略
 	 */
 	public synchronized static void registerCommitterStrategy(
-			@Range(from = 0, to = 15) int committerStrategy,
-			Function<? super Object, ? extends ICommitterStrategy> creator,
-			Map<Object, ICommitterStrategy> tasks) {
-		if (Objects.nonNull(strategies[committerStrategy])) {
-			throw new StrategyAlreadyExistsException("committer", committerStrategy);
+			@Range(from = 0, to = 127) int committerIndex,
+			@NotNull ICommitterStrategy strategy) {
+		if (Objects.nonNull(strategies[committerIndex])) {
+			throw new StrategyAlreadyExistsException("committer", committerIndex);
 		}
-		if (Objects.isNull(tasks)) {
-			throw new NullPointerException();
-		}
-		creators[committerStrategy] = creator;
-		strategies[committerStrategy] = tasks;
+		strategies[committerIndex] = strategy;
 	}
 }

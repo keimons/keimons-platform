@@ -1,6 +1,7 @@
 package com.keimons.platform.executor;
 
 import com.keimons.platform.StrategyAlreadyExistsException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
@@ -47,30 +48,44 @@ public class ExecutorManager {
 
 	static {
 		// 无操作任务执行器
-		strategies[NONE_EXECUTOR_STRATEGY] = new NoneExecutorPolicy();
+		registerExecutorStrategy(NONE_EXECUTOR_STRATEGY, new NoneExecutorPolicy());
 	}
 
 	/**
-	 * 获取一个任务执行器
+	 * 获取一个任务执行策略
 	 *
-	 * @param executor 任务执行器
-	 * @return 任务执行器
+	 * @param executorIndex 任务执行器
+	 * @return 任务执行策略
 	 */
-	public static IExecutorStrategy getExecutorStrategy(@Range(from = 0, to = 127) int executor) {
-		return strategies[executor];
+	@SuppressWarnings("unchecked")
+	public static <T extends IExecutorStrategy> T getExecutorStrategy(
+			@Range(from = 0, to = 127) int executorIndex) {
+		return (T) strategies[executorIndex];
+	}
+
+	/**
+	 * 使用任务执行策略，执行一个任务
+	 *
+	 * @param executorIndex 任务执行策略
+	 * @param threadCode    线程码
+	 * @param task          等待执行的任务
+	 */
+	public static void executeTask(int executorIndex, int threadCode, Runnable task) {
+		strategies[executorIndex].commit(threadCode, task);
 	}
 
 	/**
 	 * 注册一个任务执行器
 	 *
-	 * @param executorStrategy 任务执行器
-	 * @param strategy         任务执行策略
+	 * @param executorIndex 任务执行器
+	 * @param strategy      任务执行策略
 	 */
 	public static synchronized void registerExecutorStrategy(
-			@Range(from = 0, to = 127) int executorStrategy, IExecutorStrategy strategy) {
-		if (Objects.nonNull(strategies[executorStrategy])) {
-			throw new StrategyAlreadyExistsException("executor", executorStrategy);
+			@Range(from = 0, to = 127) int executorIndex,
+			@NotNull IExecutorStrategy strategy) {
+		if (Objects.nonNull(strategies[executorIndex])) {
+			throw new StrategyAlreadyExistsException("executor", executorIndex);
 		}
-		strategies[executorStrategy] = strategy;
+		strategies[executorIndex] = strategy;
 	}
 }

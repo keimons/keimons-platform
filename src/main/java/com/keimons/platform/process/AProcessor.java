@@ -2,6 +2,7 @@ package com.keimons.platform.process;
 
 import com.keimons.platform.executor.CommitterManager;
 import com.keimons.platform.executor.ExecutorManager;
+import org.jetbrains.annotations.Range;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -40,14 +41,14 @@ public @interface AProcessor {
 	 *
 	 * @return 任务提交策略
 	 */
-	int CommitterStrategy() default CommitterManager.DEFAULT_COMMITTER_STRATEGY;
+	@Range(from = 0, to = 15) int CommitterStrategy() default CommitterManager.DEFAULT_COMMITTER_STRATEGY;
 
 	/**
 	 * 任务执行策略
 	 *
 	 * @return 任务执行策略
 	 */
-	int ExecutorStrategy() default ExecutorManager.DEFAULT_EXECUTOR_STRATEGY;
+	@Range(from = 0, to = 127) int ExecutorStrategy() default ExecutorManager.DEFAULT_EXECUTOR_STRATEGY;
 
 	/**
 	 * 协议接受的间隔时间
@@ -56,9 +57,9 @@ public @interface AProcessor {
 	 * 服务器中防止客户端频繁的消息请求，每个消息都有接收间隔，如
 	 * 果没有间隔代表该消息可以无任何限制的请求。
 	 *
-	 * @return 间隔时间
+	 * @return 间隔时间 毫秒值
 	 */
-	int Interval() default 50;
+	@Range(from = 0, to = Integer.MAX_VALUE) int Interval() default 50;
 
 	/**
 	 * 协议描述

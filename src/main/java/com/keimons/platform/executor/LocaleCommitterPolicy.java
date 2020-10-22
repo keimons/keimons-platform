@@ -12,16 +12,14 @@ package com.keimons.platform.executor;
  **/
 public class LocaleCommitterPolicy implements ICommitterStrategy {
 
-	public static final Object DEFAULT = new Object();
-
 	@Override
-	public void commitTask(int executor, int threadCode, Runnable task) {
+	public void commit(Object key, int executor, int threadCode, Runnable task) {
 		IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(executor);
 		strategy.commit(threadCode, task);
 	}
 
 	@Override
-	public long getRefreshTime() {
-		return 0L;
+	public void refresh() {
+
 	}
 }
