@@ -1,4 +1,4 @@
-package com.keimons.platform.annotation;
+package com.keimons.platform.modular;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

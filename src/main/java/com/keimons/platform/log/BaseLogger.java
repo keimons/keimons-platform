@@ -9,7 +9,6 @@ import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 import ch.qos.logback.core.util.OptionHelper;
-import com.keimons.platform.iface.ILogger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;

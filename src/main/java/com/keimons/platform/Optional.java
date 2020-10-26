@@ -3,7 +3,7 @@ package com.keimons.platform;
 import com.keimons.platform.module.IModuleSerializable;
 import com.keimons.platform.network.NetService;
 import com.keimons.platform.network.coder.CodecAdapter;
-import com.keimons.platform.process.IPacketParseStrategy;
+import com.keimons.platform.handler.IPacketParseStrategy;
 import com.keimons.platform.unit.BaseEnum;
 
 /**

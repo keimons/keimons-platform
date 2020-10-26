@@ -1,7 +1,7 @@
 package com.keimons.platform;
 
-import com.keimons.platform.iface.IManager;
-import com.keimons.platform.iface.IService;
+import com.keimons.platform.modular.IManager;
+import com.keimons.platform.modular.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.network.coder.CodecAdapter;
 

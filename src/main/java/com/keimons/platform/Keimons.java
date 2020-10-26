@@ -1,19 +1,19 @@
 package com.keimons.platform;
 
-import com.keimons.platform.annotation.AManager;
-import com.keimons.platform.annotation.AModular;
-import com.keimons.platform.annotation.AService;
+import com.keimons.platform.modular.AManager;
+import com.keimons.platform.modular.AModular;
+import com.keimons.platform.modular.AService;
 import com.keimons.platform.console.ConsoleService;
 import com.keimons.platform.event.EventService;
 import com.keimons.platform.event.IEventHandler;
-import com.keimons.platform.iface.IManager;
-import com.keimons.platform.iface.IService;
+import com.keimons.platform.modular.IManager;
+import com.keimons.platform.modular.IService;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.BytesModuleSerialize;
 import com.keimons.platform.network.KeimonsTcpService;
 import com.keimons.platform.network.coder.CodecAdapter;
 import com.keimons.platform.player.PlayerManager;
-import com.keimons.platform.process.BaseHandlerManager;
+import com.keimons.platform.handler.BaseHandlerManager;
 import com.keimons.platform.quartz.SchedulerService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;

@@ -1,4 +1,4 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.module;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

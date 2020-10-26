@@ -1,4 +1,4 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.log;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;

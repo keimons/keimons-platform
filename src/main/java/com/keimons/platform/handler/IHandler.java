@@ -1,8 +1,9 @@
-package com.keimons.platform.process;
+package com.keimons.platform.handler;
 
 import com.keimons.platform.executor.ExecutorManager;
 import com.keimons.platform.executor.IExecutorStrategy;
 import com.keimons.platform.executor.NoneExecutorPolicy;
+import com.keimons.platform.process.IProcessor;
 import com.keimons.platform.session.ISession;
 
 /**
@@ -29,11 +30,11 @@ public interface IHandler<SessionT extends ISession, DataT, MessageT> {
 	int getCommitterStrategy();
 
 	/**
-	 * 任务执行器策略
+	 * 任务执行策略
 	 * <p>
 	 * 如果没有指定策略，则使用{@link NoneExecutorPolicy}无操作任务执行策略。如果指定某一个自定义的任务执行器，
 	 * 需要先注册{@link ExecutorManager#registerExecutorStrategy(int, IExecutorStrategy)}这个任务执行
-	 * 器，这样才能被任务执行器所检测到。
+	 * 器，这样才能被任务执行器所使用。
 	 *
 	 * @return 策略
 	 * @see ExecutorManager 执行器管理

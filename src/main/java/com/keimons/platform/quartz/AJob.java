@@ -1,4 +1,4 @@
-package com.keimons.platform.annotation;
+package com.keimons.platform.quartz;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

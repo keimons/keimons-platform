@@ -14,8 +14,7 @@ import java.lang.annotation.Target;
  * <p>
  * 标注了这个类是用来处理客户端请求的，在系统启动时，系统会扫描所有的系统模块，当模块
  * 中的某个类标注了这个注解，则会加载到消息处理器中，这里描述了消息处理器的相关信息，
- * 在{@link IProcessor}定义了业务如何处理，两
- * 个模块独立工作，不会合二为一
+ * 在{@link IProcessor}定义了消息如何处理，两个模块独立工作，不会合二为一。
  *
  * @author monkey1993
  * @version 1.0
@@ -41,7 +40,7 @@ public @interface AProcessor {
 	 *
 	 * @return 任务提交策略
 	 */
-	@Range(from = 0, to = 15) int CommitterStrategy() default CommitterManager.DEFAULT_COMMITTER_STRATEGY;
+	@Range(from = 0, to = 127) int CommitterStrategy() default CommitterManager.DEFAULT_COMMITTER_STRATEGY;
 
 	/**
 	 * 任务执行策略

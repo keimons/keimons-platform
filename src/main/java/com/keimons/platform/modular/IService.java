@@ -1,4 +1,4 @@
-package com.keimons.platform.iface;
+package com.keimons.platform.modular;
 
 /**
  * 业务逻辑管理

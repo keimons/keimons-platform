@@ -1,6 +1,5 @@
 package com.keimons.platform.quartz;
 
-import com.keimons.platform.annotation.AJob;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;

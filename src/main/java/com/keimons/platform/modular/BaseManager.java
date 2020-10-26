@@ -1,8 +1,5 @@
 package com.keimons.platform.modular;
 
-import com.keimons.platform.annotation.AManager;
-import com.keimons.platform.iface.IManager;
-
 /**
  * 数据管理基类
  *

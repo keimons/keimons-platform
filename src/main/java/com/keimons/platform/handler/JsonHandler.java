@@ -1,7 +1,6 @@
 package com.keimons.platform.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.keimons.platform.process.BaseHandler;
 import com.keimons.platform.process.IProcessor;
 import com.keimons.platform.session.Session;
 

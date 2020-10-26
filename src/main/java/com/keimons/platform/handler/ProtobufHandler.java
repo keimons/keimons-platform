@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
-import com.keimons.platform.process.BaseHandler;
 import com.keimons.platform.process.IProcessor;
 import com.keimons.platform.session.Session;
 

@@ -6,7 +6,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.iface.ILogger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;

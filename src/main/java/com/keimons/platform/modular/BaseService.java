@@ -1,10 +1,8 @@
 package com.keimons.platform.modular;
 
-import com.keimons.platform.annotation.AService;
 import com.keimons.platform.event.Event;
 import com.keimons.platform.event.IEventCode;
 import com.keimons.platform.event.IEventHandler;
-import com.keimons.platform.iface.IService;
 
 /**
  * 业务逻辑管理
@@ -21,7 +19,7 @@ import com.keimons.platform.iface.IService;
 public abstract class BaseService implements IService, IEventHandler {
 
 	@Override
-	public IEventCode[] register() {
+	public IEventCode<?>[] register() {
 		return new IEventCode[0];
 	}
 
