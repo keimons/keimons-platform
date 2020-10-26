@@ -13,7 +13,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * 消息处理管理器
@@ -104,15 +104,15 @@ public abstract class BaseHandlerManager<SessionT extends ISession, PacketT, Dat
 	 * @param annotation  扫描的注解
 	 * @param creator     转化函数
 	 */
-	protected void addHandler(
+	protected <T extends Annotation, MessageT> void addHandler(
 			String packageName,
-			Class<? extends Annotation> annotation,
-			Function<? super Class<IProcessor<SessionT, ?>>,
-					? extends IHandler<SessionT, DataT, ?>> creator
+			Class<T> annotation,
+			BiFunction<? super Class<IProcessor<SessionT, MessageT>>, T,
+								? extends IHandler<SessionT, DataT, MessageT>> creator
 	) {
-		List<Class<IProcessor<SessionT, ?>>> classes = ClassUtil.findClasses(packageName, annotation);
-		for (Class<IProcessor<SessionT, ?>> clazz : classes) {
-			IHandler<SessionT, DataT, ?> handler = creator.apply(clazz);
+		List<Class<IProcessor<SessionT, MessageT>>> classes = ClassUtil.findClasses(packageName, annotation);
+		for (Class<IProcessor<SessionT, MessageT>> clazz : classes) {
+			IHandler<SessionT, DataT, ?> handler = creator.apply(clazz, clazz.getAnnotation(annotation));
 			addHandler(handler);
 		}
 	}

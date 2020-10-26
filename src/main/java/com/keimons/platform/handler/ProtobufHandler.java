@@ -32,9 +32,9 @@ public class ProtobufHandler<MessageT extends Message> extends BaseHandler<Sessi
 
 	@SuppressWarnings("unchecked")
 	public ProtobufHandler(IProcessor<Session, MessageT> processor,
-						   int msgCode, int taskStrategy, int executorStrategy,
+						   int msgCode, int committerStrategy, int executorStrategy,
 						   int interval, String desc) {
-		super(processor, msgCode, taskStrategy, executorStrategy, interval, desc);
+		super(processor, msgCode, committerStrategy, executorStrategy, interval, desc);
 
 		Class<MessageT> messageType = getMessageType();
 		MessageT instance = Internal.getDefaultInstance(messageType);

@@ -1,7 +1,6 @@
 package com.keimons.platform.handler;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
+import com.alibaba.fastjson.JSONObject;
 import com.keimons.platform.process.AProcessor;
 import com.keimons.platform.process.IProcessor;
 import com.keimons.platform.session.Session;
@@ -13,15 +12,15 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  **/
-public class ProtobufHandlerManager extends BaseHandlerManager<Session, PbPacket.Packet, ByteString> {
+public class JsonHandlerManager extends BaseHandlerManager<Session, JSONObject, JSONObject> {
 
-	private static final ProtobufHandlerManager instance = new ProtobufHandlerManager();
+	private static final JsonHandlerManager instance = new JsonHandlerManager();
 
-	private ProtobufHandlerManager() {
+	private JsonHandlerManager() {
 
 	}
 
-	public static ProtobufHandlerManager getInstance() {
+	public static JsonHandlerManager getInstance() {
 		return instance;
 	}
 
@@ -31,10 +30,10 @@ public class ProtobufHandlerManager extends BaseHandlerManager<Session, PbPacket
 	 * @param pkg 包体
 	 */
 	public void addHandler(String pkg) {
-		super.<AProcessor, Message>addHandler(pkg, AProcessor.class, (clazz, annotation) -> {
+		super.<AProcessor, JSONObject>addHandler(pkg, AProcessor.class, (clazz, annotation) -> {
 			try {
-				IProcessor<Session, Message> processor = clazz.getDeclaredConstructor().newInstance();
-				return new ProtobufHandler<>(
+				IProcessor<Session, JSONObject> processor = clazz.getDeclaredConstructor().newInstance();
+				return new JsonHandler(
 						processor,
 						annotation.MsgCode(),
 						annotation.CommitterStrategy(),
