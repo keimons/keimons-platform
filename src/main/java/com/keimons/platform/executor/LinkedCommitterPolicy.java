@@ -102,8 +102,8 @@ public class LinkedCommitterPolicy implements ICommitterStrategy {
 			this.key = key;
 		}
 
-		public void commitTask(int executor, int threadCode, Runnable task) {
-			Work work = new Work(executor, threadCode, task);
+		public void commitTask(int executorStrategy, int threadCode, Runnable task) {
+			Work work = new Work(executorStrategy, threadCode, task);
 			works.offer(work);
 			activeTime = System.currentTimeMillis();
 			tryStartTask();
@@ -119,7 +119,7 @@ public class LinkedCommitterPolicy implements ICommitterStrategy {
 					busy.set(FREE);
 					return;
 				}
-				IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(work.getExecutor());
+				IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(work.getExecutorStrategy());
 				strategy.commit(work.getThreadCode(), buildLinkedTask(work));
 			}
 		}
@@ -180,7 +180,7 @@ public class LinkedCommitterPolicy implements ICommitterStrategy {
 		/**
 		 * 任务执行策略
 		 */
-		private int executor;
+		private int executorStrategy;
 
 		/**
 		 * 线程码
@@ -192,18 +192,18 @@ public class LinkedCommitterPolicy implements ICommitterStrategy {
 		 */
 		private Runnable task;
 
-		public Work(int executor, int threadCode, Runnable task) {
-			this.executor = executor;
+		public Work(int executorStrategy, int threadCode, Runnable task) {
+			this.executorStrategy = executorStrategy;
 			this.threadCode = threadCode;
 			this.task = task;
 		}
 
-		public int getExecutor() {
-			return executor;
+		public int getExecutorStrategy() {
+			return executorStrategy;
 		}
 
-		public void setExecutor(int executor) {
-			this.executor = executor;
+		public void setExecutorStrategy(int executorStrategy) {
+			this.executorStrategy = executorStrategy;
 		}
 
 		public int getThreadCode() {

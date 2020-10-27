@@ -17,12 +17,16 @@ public interface ICommitterStrategy {
 	 * @param key              提交者的唯一表示
 	 * @param executorStrategy 任务执行策略
 	 * @param threadCode       线程码
-	 * @param task             任务
+	 * @param task             等待执行的任务
 	 */
 	void commit(Object key, int executorStrategy, int threadCode, Runnable task);
 
 	/**
-	 * 获取刷新时间
+	 * 刷新
+	 * <p>
+	 * 检测并清理已经长时间不用的任务提交者。
+	 *
+	 * @see LinkedCommitterPolicy 清理已经过期的Committer
 	 */
 	void refresh();
 }

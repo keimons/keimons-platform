@@ -13,8 +13,8 @@ package com.keimons.platform.executor;
 public class LocaleCommitterPolicy implements ICommitterStrategy {
 
 	@Override
-	public void commit(Object key, int executor, int threadCode, Runnable task) {
-		IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(executor);
+	public void commit(Object key, int executorStrategy, int threadCode, Runnable task) {
+		IExecutorStrategy strategy = ExecutorManager.getExecutorStrategy(executorStrategy);
 		strategy.commit(threadCode, task);
 	}
 
