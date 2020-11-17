@@ -1,7 +1,7 @@
 package com.keimons.platform.network;
 
-import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.network.coder.DefaultByteAdapter;
 import com.keimons.platform.network.coder.KeimonsServiceInitializer;
 import io.netty.bootstrap.ServerBootstrap;
@@ -22,6 +22,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class KeimonsTcpService implements NetService {
 
+	private static final ILogger logger = LoggerFactory.getLogger(KeimonsTcpService.class);
+
 	/**
 	 * BossGroup线程池
 	 */
@@ -40,7 +42,7 @@ public class KeimonsTcpService implements NetService {
 			workerGroup = new EpollEventLoopGroup();
 		} else {
 			bossGroup = new NioEventLoopGroup();
-			workerGroup = new NioEventLoopGroup(KeimonsServer.KeimonsConfig.getNetThreadCount()[0]);
+			workerGroup = new NioEventLoopGroup(8);
 		}
 		try {
 			ServerBootstrap b = new ServerBootstrap();
@@ -61,7 +63,7 @@ public class KeimonsTcpService implements NetService {
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {
-			LogService.error(e);
+			logger.error(e);
 			System.exit(-1);
 		} finally {
 			bossGroup.shutdownGracefully();

@@ -1,7 +1,8 @@
 package com.keimons.platform.quartz;
 
 import com.keimons.platform.exception.ModuleException;
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.unit.ClassUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -20,6 +21,8 @@ import java.util.Set;
  * @since 1.0
  */
 public class SchedulerService {
+
+	private static final ILogger logger = LoggerFactory.getLogger(SchedulerService.class);
 
 	/**
 	 * 创建Scheduler的工厂
@@ -48,13 +51,13 @@ public class SchedulerService {
 			// 删除任务
 			scheduler.deleteJob(jobKey);
 		} catch (SchedulerException e) {
-			LogService.error(e, "调度任务添加失败：旧任务移除失败！");
+			logger.error(e, "调度任务添加失败：旧任务移除失败！");
 		}
 
 		try {
 			scheduler.scheduleJob(jobDetail, trigger);
 		} catch (SchedulerException e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 	}
 
@@ -105,7 +108,7 @@ public class SchedulerService {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
 			scheduler.start();
 		} catch (SchedulerException e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 	}
 
@@ -116,7 +119,7 @@ public class SchedulerService {
 		try {
 			scheduler.shutdown();
 		} catch (SchedulerException e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 	}
 }

@@ -2,7 +2,8 @@ package com.keimons.platform.session;
 
 import com.keimons.platform.executor.ICommitterStrategy;
 import com.keimons.platform.keimons.DefaultPlayer;
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.network.KeimonsHandler;
 import com.keimons.platform.player.IPlayer;
 import com.keimons.platform.unit.TimeUtil;
@@ -27,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.8
  */
 public class Session implements ISession {
+
+	private static final ILogger logger = LoggerFactory.getLogger(Session.class);
 
 	/**
 	 * 会话的自增ID
@@ -128,7 +131,7 @@ public class Session implements ISession {
 				ctx.channel().attr(KeimonsHandler.SESSION).set(null);
 				ctx.close();
 			} catch (Exception e) {
-				LogService.error(e, "关闭客户端-服务器连接失败");
+				logger.error(e, "关闭客户端-服务器连接失败");
 			}
 		}
 		ctx = null;

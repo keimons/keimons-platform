@@ -1,6 +1,7 @@
 package com.keimons.platform.unit;
 
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import io.netty.util.internal.StringUtil;
 
 import java.security.MessageDigest;
@@ -14,6 +15,8 @@ import java.security.NoSuchAlgorithmException;
  * @since 1.8
  */
 public class MD5Util {
+
+	private static final ILogger logger = LoggerFactory.getLogger(MD5Util.class);
 
 	/**
 	 * 计算字节数组的MD5
@@ -35,7 +38,7 @@ public class MD5Util {
 			// byte[]通常我们会转化为十六进制的32位长度的字符串来使用,本文会介绍三种常用的转换方法
 			return StringUtil.toHexString(md5Array);
 		} catch (NoSuchAlgorithmException e) {
-			LogService.error(e);
+			logger.error(e);
 			return null;
 		}
 	}

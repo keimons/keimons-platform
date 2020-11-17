@@ -1,6 +1,7 @@
 package com.keimons.platform.fixed;
 
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OtherServerManager {
+
+	private static final ILogger logger = LoggerFactory.getLogger(OtherServerManager.class);
 
 	static {
 		System.out.println(OtherServerManager.class.getName());
@@ -31,7 +34,7 @@ public class OtherServerManager {
 			OtherServer ins = (OtherServer) forName.getDeclaredConstructor().newInstance();
 			ins.start();
 		} catch (Exception e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 	}
 
@@ -51,7 +54,7 @@ public class OtherServerManager {
 		try {
 			url = new URL(pluginurl);
 		} catch (MalformedURLException e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 		loader.addURLFile(url);
 		addLoader(pluginName, loader);

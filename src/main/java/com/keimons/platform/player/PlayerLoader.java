@@ -1,12 +1,9 @@
 package com.keimons.platform.player;
 
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 
 /**
  * 玩家数据加载器
@@ -16,6 +13,8 @@ import java.util.function.Consumer;
  * @since 1.8
  **/
 public class PlayerLoader implements Runnable {
+
+	private static final ILogger logger = LoggerFactory.getLogger(PlayerLoader.class);
 
 	/**
 	 * 正在加载中的队列
@@ -38,7 +37,7 @@ public class PlayerLoader implements Runnable {
 				Runnable runnable = loading.take();
 				runnable.run();
 			} catch (Exception e) {
-				LogService.error(e);
+				logger.error(e);
 			}
 		}
 	}

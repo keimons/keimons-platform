@@ -1,13 +1,15 @@
 package com.keimons.platform.keimons;
 
-import com.keimons.platform.KeimonsServer;
-import com.keimons.platform.player.*;
 import com.keimons.platform.datebase.RedissonManager;
-import com.keimons.platform.log.LogService;
 import com.keimons.platform.module.*;
+import com.keimons.platform.player.BasePlayer;
+import com.keimons.platform.player.IPlayerData;
+import com.keimons.platform.player.PlayerManager;
 import com.keimons.platform.unit.SerializeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.redisson.client.codec.ByteArrayCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -21,6 +23,8 @@ import java.util.*;
  **/
 public class DefaultPlayer extends BasePlayer<String> {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultPlayer.class);
+
 	public DefaultPlayer(String identifier) {
 		this.identifier = identifier;
 	}
@@ -32,12 +36,12 @@ public class DefaultPlayer extends BasePlayer<String> {
 
 	@Override
 	public void loaded() {
-		LogService.info("加载成功！id：" + this.identifier);
+		logger.info("加载成功！id：" + this.identifier);
 	}
 
 	@Override
 	public void online() {
-		LogService.info("登录成功！id：" + this.identifier);
+		logger.info("登录成功！id：" + this.identifier);
 	}
 
 	@Override
@@ -114,11 +118,9 @@ public class DefaultPlayer extends BasePlayer<String> {
 					}
 				}
 			}
-			if (KeimonsServer.KeimonsConfig.isDebug()) {
-				LogService.debug("玩家ID：" + identifier + "，数据模块共计：" + size + "字节！");
-			}
+			logger.debug("玩家ID：" + identifier + "，数据模块共计：" + size + "字节！");
 		} catch (Exception e) {
-			LogService.error(e);
+			logger.error("加载异常", e);
 		}
 	}
 

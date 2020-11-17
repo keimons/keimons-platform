@@ -1,111 +1,260 @@
 package com.keimons.platform.log;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.filter.LevelFilter;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.OutputStreamAppender;
-import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-import ch.qos.logback.core.util.OptionHelper;
-import org.slf4j.LoggerFactory;
+import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.nio.charset.Charset;
+import java.io.ObjectStreamException;
 
 /**
- * 默认日志抽象实现
+ * 基础日志实现
+ *
+ *
  *
  * @author monkey1993
  * @version 1.0
+ * @date 2020-11-17
  * @since 1.8
- */
+ **/
 public abstract class BaseLogger implements ILogger {
+
+	private static final String EXCEPTION_MESSAGE = "Unexpected exception:";
 
 	private final String name;
 
-	protected final Level level;
-
-	private final String path;
-
-	protected String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n";
-
-	public BaseLogger(String path, String name, Level level) {
-		if (!path.endsWith("/")) {
-			path += "/";
+	protected BaseLogger(String name) {
+		if (name == null) {
+			throw new NullPointerException("name");
 		}
-		this.path = path;
 		this.name = name;
-		this.level = level;
 	}
 
 	@Override
-	public OutputStreamAppender<ILoggingEvent> build() {
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		// 设置appender的
-		RollingFileAppender<ILoggingEvent> appender = new RollingFileAppender<>();
-		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		appender.setContext(context);
-		// appender的name属性
-		appender.setName(name + "Appender");
-		// 日志的文件名
-		appender.setFile(OptionHelper.substVars(path + name + ".log", context));
-
-		// 设置日志的级别过滤器
-		LevelFilter levelFilter = DefaultLevelFilter.getLevelFilter(level);
-		levelFilter.start();
-
-		// 日志文件创建规则：时间线策略
-		TimeBasedRollingPolicy<ILoggingEvent> policy = new TimeBasedRollingPolicy<>();
-		// 文件名格式
-		String fp = OptionHelper.substVars(path + "%d{yyyy-MM-dd}/" + name + ".%d{yyyy-MM-dd}.log", context);
-		// 设置文件名模式
-		policy.setFileNamePattern(fp);
-		// 设置父节点是appender
-		policy.setParent(appender);
-		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		policy.setContext(context);
-		// 启动文件创建策略
-		policy.start();
-
-		// 日志输出样式和编码
-		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		// 设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-		encoder.setContext(context);
-		// 设置格式
-		encoder.setPattern(pattern);
-		// 设置文件编码格式
-		encoder.setCharset(Charset.forName("UTF-8"));
-		// 启动编码器
-		encoder.start();
-
-		appender.setRollingPolicy(policy);
-		appender.setEncoder(encoder);
-		appender.addFilter(levelFilter);
-
-		appender.start();
-		return appender;
-	}
-
-	@Override
-	public String getName() {
+	public String name() {
 		return name;
 	}
 
-	public Level getLevel() {
-		return level;
+	@Override
+	public boolean isEnabled(Level level) {
+		switch (level) {
+			case DEBUG:
+				return isDebugEnabled();
+			case INFO:
+				return isInfoEnabled();
+			case WARN:
+				return isWarnEnabled();
+			case ERROR:
+				return isErrorEnabled();
+			default:
+				throw new Error();
+		}
 	}
 
-	public String getPath() {
-		return path;
+	@Override
+	public void debug(Throwable t) {
+		debug(EXCEPTION_MESSAGE, t);
 	}
 
-	public String getPattern() {
-		return pattern;
+	@Override
+	public void info(Throwable t) {
+		info(EXCEPTION_MESSAGE, t);
 	}
 
-	public BaseLogger setPattern(String pattern) {
-		this.pattern = pattern;
-		return this;
+	@Override
+	public void warn(Throwable t) {
+		warn(EXCEPTION_MESSAGE, t);
+	}
+
+	@Override
+	public void error(Throwable t) {
+		error(EXCEPTION_MESSAGE, t);
+	}
+
+	@Override
+	public void log(Level level, String msg) {
+		switch (level) {
+			case DEBUG:
+				debug(msg);
+				break;
+			case INFO:
+				info(msg);
+				break;
+			case WARN:
+				warn(msg);
+				break;
+			case ERROR:
+				error(msg);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, String format, Object arg) {
+		switch (level) {
+			case DEBUG:
+				debug(format, arg);
+				break;
+			case INFO:
+				info(format, arg);
+				break;
+			case WARN:
+				warn(format, arg);
+				break;
+			case ERROR:
+				error(format, arg);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, String format, Object arg0, Object arg1) {
+		switch (level) {
+			case DEBUG:
+				debug(format, arg0, arg1);
+				break;
+			case INFO:
+				info(format, arg0, arg1);
+				break;
+			case WARN:
+				warn(format, arg0, arg1);
+				break;
+			case ERROR:
+				error(format, arg0, arg1);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, String format, Object... arguments) {
+		switch (level) {
+			case DEBUG:
+				debug(format, arguments);
+				break;
+			case INFO:
+				info(format, arguments);
+				break;
+			case WARN:
+				warn(format, arguments);
+				break;
+			case ERROR:
+				error(format, arguments);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, Throwable cause) {
+		switch (level) {
+			case DEBUG:
+				debug(cause);
+				break;
+			case INFO:
+				info(cause);
+				break;
+			case WARN:
+				warn(cause);
+				break;
+			case ERROR:
+				error(cause);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, Throwable cause, String msg) {
+		switch (level) {
+			case DEBUG:
+				debug(msg, cause);
+				break;
+			case INFO:
+				info(msg, cause);
+				break;
+			case WARN:
+				warn(msg, cause);
+				break;
+			case ERROR:
+				error(msg, cause);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, Throwable cause, String format, Object arg) {
+		switch (level) {
+			case DEBUG:
+				debug(cause, format, arg);
+				break;
+			case INFO:
+				info(cause, format, arg);
+				break;
+			case WARN:
+				warn(cause, format, arg);
+				break;
+			case ERROR:
+				error(cause, format, arg);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, Throwable cause, String format, Object arg0, Object arg1) {
+		switch (level) {
+			case DEBUG:
+				debug(cause, format, arg0, arg1);
+				break;
+			case INFO:
+				info(cause, format, arg0, arg1);
+				break;
+			case WARN:
+				warn(cause, format, arg0, arg1);
+				break;
+			case ERROR:
+				error(cause, format, arg0, arg1);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	@Override
+	public void log(Level level, Throwable cause, String format, Object... arguments) {
+		switch (level) {
+			case DEBUG:
+				debug(cause, format, arguments);
+				break;
+			case INFO:
+				info(cause, format, arguments);
+				break;
+			case WARN:
+				warn(cause, format, arguments);
+				break;
+			case ERROR:
+				error(cause, format, arguments);
+				break;
+			default:
+				throw new Error();
+		}
+	}
+
+	protected Object readResolve() throws ObjectStreamException {
+		return InternalLoggerFactory.getInstance(name());
+	}
+
+	@Override
+	public String toString() {
+		return StringUtil.simpleClassName(this) + '(' + name() + ')';
 	}
 }

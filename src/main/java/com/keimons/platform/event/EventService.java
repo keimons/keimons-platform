@@ -1,7 +1,8 @@
 package com.keimons.platform.event;
 
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.thread.NameThreadFactory;
-import com.keimons.platform.log.LogService;
 import com.keimons.platform.player.IPlayer;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -21,6 +22,8 @@ import java.util.concurrent.ThreadFactory;
  * @since 1.8
  */
 public class EventService {
+
+	private static final ILogger logger = LoggerFactory.getLogger(EventService.class);
 
 	/**
 	 * RingBuffer 大小，必须是 2 的 N 次方
@@ -59,7 +62,7 @@ public class EventService {
 		try {
 			disruptor.publishEvent(EventService::translate, player, eventCode, params);
 		} catch (Exception e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 	}
 
@@ -120,7 +123,7 @@ public class EventService {
 				try {
 					handler.handler(event);
 				} catch (Exception e) {
-					LogService.error(e);
+					logger.error(e);
 				}
 			}
 		}

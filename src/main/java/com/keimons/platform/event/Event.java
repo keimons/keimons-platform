@@ -27,11 +27,6 @@ public class Event {
 	 */
 	private Object[] params;
 
-	@SuppressWarnings("unchecked")
-	public <T extends Enum<T> & IEventCode<?>> T getEventCode() {
-		return (T) eventCode;
-	}
-
 	/**
 	 * 获取参数
 	 *
@@ -44,13 +39,18 @@ public class Event {
 		return (T) params[index];
 	}
 
-	public IPlayer<?> getPlayer() {
-		return player;
+	@SuppressWarnings("unchecked")
+	public <T extends Enum<T> & IEventCode<?>> T getEventCode() {
+		return (T) eventCode;
 	}
 
-	public Event setPlayer(IPlayer<?> player) {
+	@SuppressWarnings("unchecked")
+	public <T extends IPlayer<?>> T getPlayer() {
+		return (T) player;
+	}
+
+	public void setPlayer(IPlayer<?> player) {
 		this.player = player;
-		return this;
 	}
 
 	public void setEventCode(Enum<? extends IEventCode<?>> eventCode) {

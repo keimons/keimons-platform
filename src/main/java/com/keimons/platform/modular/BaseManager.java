@@ -7,6 +7,20 @@ package com.keimons.platform.modular;
  * @version 1.0
  * @since 1.8
  **/
-@AManager
-public abstract class BaseManager implements IManager {
+public abstract class BaseManager implements IAssembly {
+
+	@Override
+	public void init() {
+
+	}
+
+	@Override
+	public void start() throws Throwable {
+
+	}
+
+	@Override
+	public void shutdown() {
+
+	}
 }

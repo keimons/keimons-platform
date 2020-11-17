@@ -16,7 +16,7 @@ import com.keimons.platform.event.IEventHandler;
  * @since 1.8
  */
 @AService
-public abstract class BaseService implements IService, IEventHandler {
+public abstract class BaseService implements IEventHandler {
 
 	@Override
 	public IEventCode<?>[] register() {
@@ -25,15 +25,5 @@ public abstract class BaseService implements IService, IEventHandler {
 
 	@Override
 	public void handler(Event event) {
-	}
-
-	@Override
-	public boolean start() {
-		return false;
-	}
-
-	@Override
-	public boolean shutdown() {
-		return false;
 	}
 }

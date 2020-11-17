@@ -1,6 +1,7 @@
 package com.keimons.platform.unit;
 
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.module.AnnotationNotFoundException;
 import jdk.internal.vm.annotation.ForceInline;
 
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
  * @since 1.8
  */
 public class ClassUtil {
+
+	private static final ILogger logger = LoggerFactory.getLogger(ClassUtil.class);
 
 	/**
 	 * 判断一个类是否是一个普通类
@@ -173,18 +176,18 @@ public class ClassUtil {
 										// 添加到classes
 										classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className));
 									} catch (ClassNotFoundException e) {
-										LogService.error(e);
+										logger.error(e);
 									}
 								}
 							}
 						}
 					} catch (IOException e) {
-						LogService.error(e);
+						logger.error(e);
 					}
 				}
 			}
 		} catch (IOException e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 
 		return classes;
@@ -361,7 +364,7 @@ public class ClassUtil {
 					// 这里用forName有一些不好，会触发static方法，没有使用classLoader的load干净
 					classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className));
 				} catch (ClassNotFoundException e) {
-					LogService.error(e);
+					logger.error(e);
 				}
 			}
 		}
@@ -444,18 +447,18 @@ public class ClassUtil {
 										packages.add(Package.getPackage(packageName));
 									} catch (ClassNotFoundException e) {
 										// 添加用户自定义视图类错误 找不到此类的.class文件
-										LogService.error(e);
+										logger.error(e);
 									}
 								}
 							}
 						}
 					} catch (IOException e) {
-						LogService.error(e);
+						logger.error(e);
 					}
 				}
 			}
 		} catch (IOException e) {
-			LogService.error(e);
+			logger.error(e);
 		}
 
 		return packages;

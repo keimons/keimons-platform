@@ -1,6 +1,7 @@
 package com.keimons.platform.executor;
 
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 
 import java.util.concurrent.*;
 
@@ -12,6 +13,8 @@ import java.util.concurrent.*;
  * @since 1.8
  **/
 public class CodeExecutorPolicy extends BaseExecutorStrategy {
+
+	private static final ILogger logger = LoggerFactory.getLogger(CodeExecutorPolicy.class);
 
 	/**
 	 * 任务执行器
@@ -92,7 +95,7 @@ public class CodeExecutorPolicy extends BaseExecutorStrategy {
 					Runnable runnable = queue.take();
 					runnable.run();
 				} catch (Throwable e) {
-					LogService.error(e);
+					logger.error(e);
 				}
 			}
 		}

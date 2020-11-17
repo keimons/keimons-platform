@@ -1,7 +1,8 @@
 package com.keimons.platform.network;
 
 import com.keimons.platform.handler.ProtobufHandlerManager;
-import com.keimons.platform.log.LogService;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.session.SessionManager;
@@ -25,6 +26,8 @@ import java.net.InetSocketAddress;
  */
 public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 
+	private static final ILogger logger = LoggerFactory.getLogger(KeimonsHandler.class);
+
 	public static final AttributeKey<ISession> SESSION = AttributeKey.valueOf("SESSION");
 
 	public KeimonsHandler(Class<I> messageType) {
@@ -37,13 +40,13 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 			ISession session = ctx.channel().attr(SESSION).get();
 			if (session == null) {
 				ctx.close();
-				LogService.error("当前ctx无法获取Session，Session已经被销毁");
+				logger.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
 			ProtobufHandlerManager.getInstance().handler((Session) session, (byte[]) packet);
 		} catch (Exception e) {
 			String info = "会话ID：" + ctx.channel().attr(SESSION).get();
-			LogService.error(e, info);
+			logger.error(e, info);
 		}
 	}
 
@@ -69,12 +72,12 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 		ISession session = ctx.channel().attr(SESSION).get();
 		if (session != null) {
 			String errInfo = "Netty Exception! SessionId: " + NetUtil.getIpAddress(ctx);
-			LogService.error(errInfo);
+			logger.error(errInfo);
 			session.disconnect();
 		} else {
 			ctx.close();
 		}
-		LogService.error(cause, "未能在应用中捕获的异常");
+		logger.error(cause, "未能在应用中捕获的异常");
 	}
 
 	@Override

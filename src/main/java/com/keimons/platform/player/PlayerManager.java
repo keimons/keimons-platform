@@ -1,8 +1,9 @@
 package com.keimons.platform.player;
 
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.module.APlayerData;
 import com.keimons.platform.module.IGameData;
-import com.keimons.platform.log.LogService;
 import com.keimons.platform.unit.ClassUtil;
 import com.keimons.platform.unit.TimeUtil;
 
@@ -25,6 +26,8 @@ import java.util.function.Predicate;
  * @since 1.8
  */
 public class PlayerManager {
+
+	private static final ILogger logger = LoggerFactory.getLogger(PlayerManager.class);
 
 	/**
 	 * 空模块
@@ -163,7 +166,7 @@ public class PlayerManager {
 						consumer.accept(player);
 					}
 				} catch (Exception e) {
-					LogService.error(e);
+					logger.error(e);
 				}
 			});
 			return null;

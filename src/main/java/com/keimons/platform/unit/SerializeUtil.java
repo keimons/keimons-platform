@@ -2,6 +2,8 @@ package com.keimons.platform.unit;
 
 import com.keimons.platform.Keimons;
 import com.keimons.platform.Optional;
+import com.keimons.platform.log.ILogger;
+import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.module.IGameData;
 import com.keimons.platform.module.IModule;
 import com.keimons.platform.module.IModuleSerializable;
@@ -18,6 +20,8 @@ import java.util.List;
  * @since 1.8
  **/
 public class SerializeUtil {
+
+	private static final ILogger logger = LoggerFactory.getLogger(SerializeUtil.class);
 
 	/**
 	 * 序列化模块
