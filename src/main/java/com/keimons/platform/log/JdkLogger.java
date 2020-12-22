@@ -108,7 +108,7 @@ class JdkLogger extends BaseLogger {
 	@Override
 	public void debug(String format, Object... arguments) {
 		if (logger.isLoggable(Level.FINE)) {
-			FormattingTuple ft = MessageFormatter.format(format, arguments);
+			FormattingTuple ft = MessageFormatter.arrayFormat(format, arguments);
 			log(Level.FINE, ft.getMessage(), ft.getThrowable());
 		}
 	}
@@ -175,7 +175,7 @@ class JdkLogger extends BaseLogger {
 	@Override
 	public void info(String format, Object... arguments) {
 		if (logger.isLoggable(Level.INFO)) {
-			FormattingTuple ft = MessageFormatter.format(format, arguments);
+			FormattingTuple ft = MessageFormatter.arrayFormat(format, arguments);
 			log(Level.INFO, ft.getMessage(), ft.getThrowable());
 		}
 	}
@@ -242,7 +242,7 @@ class JdkLogger extends BaseLogger {
 	@Override
 	public void warn(String format, Object... arguments) {
 		if (logger.isLoggable(Level.WARNING)) {
-			FormattingTuple ft = MessageFormatter.format(format, arguments);
+			FormattingTuple ft = MessageFormatter.arrayFormat(format, arguments);
 			log(Level.WARNING, ft.getMessage(), ft.getThrowable());
 		}
 	}
@@ -309,7 +309,7 @@ class JdkLogger extends BaseLogger {
 	@Override
 	public void error(String format, Object... arguments) {
 		if (logger.isLoggable(Level.SEVERE)) {
-			FormattingTuple ft = MessageFormatter.format(format, arguments);
+			FormattingTuple ft = MessageFormatter.arrayFormat(format, arguments);
 			log(Level.SEVERE, ft.getMessage(), ft.getThrowable());
 		}
 	}

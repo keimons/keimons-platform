@@ -44,10 +44,11 @@ dependencies {
     // 定时任务框架
     compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0', transitive: false
 
-    // 启用LogBack日志模块 需要以下三个依赖
+    // 启用LogBack日志模块 需要以下两个依赖
 //    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3', transitive: false
 //    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    // 启用Slf4J日志模块 需要以下依赖
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
     // 增强注解
     compile group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
