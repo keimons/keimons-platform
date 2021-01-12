@@ -1,26 +1,17 @@
 package com.keimons.platform.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import jdk.internal.vm.annotation.ForceInline;
 
-/**
- * Json包体解析策略
- *
- * @author monkey1993
- * @version 1.0
- * @since 1.8
- **/
-public class JsonPacketPolicy implements IPacketParseStrategy<JSONObject, JSONObject> {
+public class JsonPacketPolicy implements IPacketStrategy<JSONObject, JSONObject> {
 
-	@Override
-	public JSONObject parsePacket(byte[] packet) throws Exception {
-		return JSONObject.parseObject(new String(packet));
-	}
-
+	@ForceInline
 	@Override
 	public int findMsgCode(JSONObject packet) {
 		return packet.getIntValue("msgCode");
 	}
 
+	@ForceInline
 	@Override
 	public JSONObject findData(JSONObject packet) {
 		return packet.getJSONObject("data");

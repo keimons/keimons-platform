@@ -14,7 +14,7 @@ public class PacketParseException extends RuntimeException {
 	 *
 	 * @param e 异常
 	 */
-	public PacketParseException(Exception e) {
+	public PacketParseException(Throwable e) {
 		super("packet parse exception", e);
 	}
 }

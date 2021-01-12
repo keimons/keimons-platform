@@ -1,2 +1,3 @@
 rootProject.name = 'keimons-platform'
+include 'keimons.basic'
 

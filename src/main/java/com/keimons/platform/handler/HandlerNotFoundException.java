@@ -5,7 +5,6 @@ package com.keimons.platform.handler;
  *
  * @author monkey1993
  * @version 1.0
- * @date 2020-09-14
  * @since 1.8
  **/
 public class HandlerNotFoundException extends RuntimeException {

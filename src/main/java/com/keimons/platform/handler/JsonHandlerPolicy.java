@@ -1,7 +1,6 @@
 package com.keimons.platform.handler;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
+import com.alibaba.fastjson.JSONObject;
 import com.keimons.platform.process.AProcessor;
 import com.keimons.platform.process.IProcessor;
 import com.keimons.platform.session.Session;
@@ -13,16 +12,10 @@ import com.keimons.platform.session.Session;
  * @version 1.0
  * @since 1.8
  **/
-public class ProtobufHandlerManager extends BaseHandlerManager<Session, PbPacket.Packet, ByteString> {
+public class JsonHandlerPolicy extends BaseHandlerPolicy<Session, JSONObject, JSONObject> {
 
-	private static final ProtobufHandlerManager instance = new ProtobufHandlerManager();
-
-	private ProtobufHandlerManager() {
-
-	}
-
-	public static ProtobufHandlerManager getInstance() {
-		return instance;
+	public JsonHandlerPolicy(int strategyIndex) {
+		super(strategyIndex);
 	}
 
 	/**
@@ -31,10 +24,10 @@ public class ProtobufHandlerManager extends BaseHandlerManager<Session, PbPacket
 	 * @param pkg 包体
 	 */
 	public void addHandler(String pkg) {
-		super.<AProcessor, Message>addHandler(pkg, AProcessor.class, (clazz, annotation) -> {
+		super.<AProcessor, JSONObject>addHandler(pkg, AProcessor.class, (clazz, annotation) -> {
 			try {
-				IProcessor<Session, Message> processor = clazz.getDeclaredConstructor().newInstance();
-				return new ProtobufHandler<>(
+				IProcessor<Session, JSONObject> processor = clazz.getDeclaredConstructor().newInstance();
+				return new JsonHandler(
 						processor,
 						annotation.MsgCode(),
 						annotation.CommitterStrategy(),
@@ -50,7 +43,7 @@ public class ProtobufHandlerManager extends BaseHandlerManager<Session, PbPacket
 	}
 
 	@Override
-	public void exceptionCaught(Session session, byte[] raw, Throwable cause) {
+	public void exceptionCaught(Session session, JSONObject packet, Throwable cause) {
 		cause.printStackTrace();
 	}
 }

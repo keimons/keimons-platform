@@ -4,7 +4,7 @@ apply plugin: 'java'
 group 'com.keimons.platform'
 version '1.0.0-SNAPSHOT'
 
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_14
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
@@ -18,41 +18,49 @@ repositories {
 
 dependencies {
     // 数据库
-    compile group: 'org.redisson', name: 'redisson', version: '3.7.5', transitive: false
+    implementation 'org.redisson:redisson:3.7.5', {
+        transitive false
+    }
 
     // 序列化相关
-    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.54'
-    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.13.0'
-    compile group: 'com.baidu', name: 'jprotobuf', version: '2.2.14', transitive: false
+    implementation 'com.alibaba:fastjson:1.2.54'
+    implementation 'com.google.protobuf:protobuf-java:3.13.0'
+    implementation 'com.baidu:jprotobuf:2.2.14', {
+        transitive false
+    }
 
     // 数据压缩
-    compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.7.3'
+    implementation 'org.xerial.snappy:snappy-java:1.1.7.3'
+
+    // 拓展库
+    implementation 'com.google.guava:guava:30.1-jre'
 
     // 脚本语言groovy
-    compile group: 'com.google.guava', name: 'guava', version: '29.0-jre', transitive: false
-    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.3'
+    compile localGroovy()
 
     // ASM
-    compile group: 'org.ow2.asm', name: 'asm', version: '8.0.1'
-    compile group: 'org.ow2.asm', name: 'asm-commons', version: '8.0.1'
+    implementation 'org.ow2.asm:asm:8.0.1'
+    implementation 'org.ow2.asm:asm-commons:8.0.1'
 
     // 环形Buffer
-    compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+    implementation 'com.lmax:disruptor:3.3.7'
 
-    compile group: 'io.netty', name: 'netty-all', version: '4.1.27.Final'
+    implementation 'io.netty:netty-all:4.1.27.Final'
 
     // 定时任务框架
-    compile group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0', transitive: false
+    implementation 'org.quartz-scheduler:quartz:2.3.0', {
+        transitive false
+    }
 
     // 启用LogBack日志模块 需要以下三个依赖
 //    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3', transitive: false
 //    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
 
     // 增强注解
-    compile group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
+    implementation 'org.jetbrains:annotations:20.1.0'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 //task sourcesJar(type: Jar) {
@@ -122,6 +130,11 @@ dependencies {
 //signing {
 //    sign publishing.publications.publish
 //}
+
+compileJava {
+    options.compilerArgs += ['--module-path', classpath.asPath]
+    options.compilerArgs += ['--add-exports', 'java.base/jdk.internal.vm.annotation=ALL-UNNAMED,keimons.platform.main']
+}
 
 javadoc {
     options.encoding = "UTF-8"

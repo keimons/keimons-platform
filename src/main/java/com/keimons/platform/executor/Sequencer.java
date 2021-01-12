@@ -6,7 +6,7 @@ import sun.misc.Unsafe;
 
 /**
  * 环形Buffer计数器
- *
+ * <p>
  * 数据的存取应该是原子的操作，但是，使用环形Buffer实际上不论是存入还是取出，都会经过两步。
  * 存入过程：1.将数据存入环形Buffer中 2.修改存入位置标记
  * 取出过程：1.将数据从环形Buffer取出 2.修改取出位置标记
@@ -17,7 +17,7 @@ import sun.misc.Unsafe;
  *
  * @author monkey1993
  * @version 1.0
- * @since 1.8
+ * @since 14
  **/
 class Sequencer {
 

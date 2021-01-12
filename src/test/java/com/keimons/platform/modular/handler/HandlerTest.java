@@ -1,13 +1,11 @@
 package com.keimons.platform.modular.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.keimons.platform.Keimons;
-import com.keimons.platform.Optional;
 import com.keimons.platform.executor.CodeExecutorPolicy;
 import com.keimons.platform.executor.ExecutorManager;
 import com.keimons.platform.executor.PoolExecutorPolicy;
-import com.keimons.platform.handler.JsonHandlerManager;
-import com.keimons.platform.handler.JsonPacketPolicy;
+import com.keimons.platform.handler.HandlerManager;
+import com.keimons.platform.handler.JsonHandlerPolicy;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.RandomUtil;
@@ -40,17 +38,17 @@ public class HandlerTest {
 
 	@BeforeClass
 	public static void beforeTest() throws NoSuchMethodException, IllegalAccessException {
-		Keimons.set(Optional.MESSAGE_PARSE, new JsonPacketPolicy());
 		ExecutorManager.registerExecutorStrategy(
 				POOL_EXECUTOR_STRATEGY, new PoolExecutorPolicy("Pool", 4)
 		);
 		ExecutorManager.registerExecutorStrategy(
 				CODE_EXECUTOR_STRATEGY, new CodeExecutorPolicy("Code", 4)
 		);
-		JsonHandlerManager.getInstance().addHandler("com.keimons.platform.modular");
+		JsonHandlerPolicy policy = HandlerManager.getHandlerStrategy(HandlerManager.JSON_HANDLER);
+		policy.addHandler("com.keimons.platform.modular");
 
-		MethodHandle handler = MethodHandles.publicLookup().findVirtual(JsonHandlerManager.class,
-				"handler", MethodType.methodType(void.class, ISession.class, byte[].class));
+		MethodHandle handler = MethodHandles.publicLookup().findVirtual(JsonHandlerPolicy.class,
+				"handler", MethodType.methodType(void.class, ISession.class, Object.class));
 		HandlerTest.handler = MethodHandles.insertArguments(handler, 0, new Session(null));
 	}
 

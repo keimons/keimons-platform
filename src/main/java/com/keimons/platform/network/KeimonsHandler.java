@@ -1,6 +1,6 @@
 package com.keimons.platform.network;
 
-import com.keimons.platform.handler.ProtobufHandlerManager;
+import com.keimons.platform.handler.HandlerManager;
 import com.keimons.platform.log.ILogger;
 import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.session.ISession;
@@ -43,7 +43,7 @@ public class KeimonsHandler<I> extends SimpleChannelInboundHandler<I> {
 				logger.error("当前ctx无法获取Session，Session已经被销毁");
 				return;
 			}
-			ProtobufHandlerManager.getInstance().handler((Session) session, (byte[]) packet);
+			HandlerManager.defaultHandler(session, packet);
 		} catch (Exception e) {
 			String info = "会话ID：" + ctx.channel().attr(SESSION).get();
 			logger.error(e, info);
