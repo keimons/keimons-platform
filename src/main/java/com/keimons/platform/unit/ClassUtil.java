@@ -4,6 +4,7 @@ import com.keimons.platform.log.ILogger;
 import com.keimons.platform.log.LoggerFactory;
 import com.keimons.platform.module.AnnotationNotFoundException;
 import jdk.internal.vm.annotation.ForceInline;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -224,6 +225,7 @@ public class ClassUtil {
 		final Class<?> thisClass = object.getClass();
 		Class<?> currentClass = thisClass;
 		for (; ; ) {
+			TypeVariable<? extends Class<?>>[] typeParameters = currentClass.getTypeParameters();
 			if (currentClass.getSuperclass() == clazz) {
 				int typeParamIndex = -1;
 				TypeVariable<?>[] typeParams = currentClass.getSuperclass().getTypeParameters();
@@ -302,6 +304,9 @@ public class ClassUtil {
 			final Object object, Class<?> clazz, String typeName) {
 		Type[] interfaces = object.getClass().getGenericInterfaces();
 		for (Type interfaceType : interfaces) {
+			if (interfaceType instanceof Class) {
+				continue;
+			}
 			ParameterizedType paramType = (ParameterizedType) interfaceType;
 			if (paramType.getRawType() != clazz) {
 				continue;
@@ -318,9 +323,17 @@ public class ClassUtil {
 			if (index < 0) {
 				return null;
 			}
-			Type[] arguments = paramType.getActualTypeArguments();
-			if (arguments[index] instanceof Class) {
-				return (Class<T>) arguments[index];
+			Type argument = paramType.getActualTypeArguments()[index];
+			if (argument instanceof Class) {
+				return (Class<T>) argument;
+			} else if (argument instanceof TypeVariableImpl) {
+				TypeVariableImpl<?> variable = (TypeVariableImpl<?>) argument;
+				Type[] bounds = variable.getBounds();
+				if (bounds.length == 1 && bounds[0] instanceof Class) {
+					return (Class<T>) bounds[0];
+				} else {
+					// TODO 该泛型实际继承自多个接口
+				}
 			}
 		}
 		return null;

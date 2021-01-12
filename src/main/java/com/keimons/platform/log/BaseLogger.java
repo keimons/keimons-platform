@@ -1,14 +1,7 @@
 package com.keimons.platform.log;
 
-import io.netty.util.internal.StringUtil;
-import io.netty.util.internal.logging.InternalLoggerFactory;
-
-import java.io.ObjectStreamException;
-
 /**
  * 基础日志实现
- *
- *
  *
  * @author monkey1993
  * @version 1.0
@@ -249,12 +242,8 @@ public abstract class BaseLogger implements ILogger {
 		}
 	}
 
-	protected Object readResolve() throws ObjectStreamException {
-		return InternalLoggerFactory.getInstance(name());
-	}
-
 	@Override
 	public String toString() {
-		return StringUtil.simpleClassName(this) + '(' + name() + ')';
+		return this.getClass().getSimpleName() + '(' + name() + ')';
 	}
 }

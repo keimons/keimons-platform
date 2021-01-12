@@ -52,9 +52,6 @@ dependencies {
         transitive false
     }
 
-    // 启用LogBack日志模块 需要以下三个依赖
-//    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3', transitive: false
-//    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     implementation 'org.slf4j:slf4j-api:1.7.25'
 
     // 增强注解

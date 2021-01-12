@@ -1,5 +1,8 @@
 package com.keimons.platform.log;
 
+import org.slf4j.ILoggerFactory;
+import org.slf4j.helpers.NOPLoggerFactory;
+
 import java.util.logging.Logger;
 
 /**
@@ -9,7 +12,7 @@ import java.util.logging.Logger;
  * @version 1.0
  * @since 1.8
  **/
-public abstract class LoggerFactory {
+public class LoggerFactory {
 
 	private static LoggerFactory factory;
 
@@ -23,7 +26,7 @@ public abstract class LoggerFactory {
 				factory = Slf4JLoggerFactory.INSTANCE;
 				ILogger logger = factory.getLogger0(name);
 				logger.debug("Using SLF4J as the default logging framework");
-			} catch (Throwable ignore1) {
+			} catch (Throwable ignore) {
 				factory = JdkLoggerFactory.INSTANCE;
 				ILogger logger = factory.getLogger0(name);
 				logger.debug("Using java.util.logging as the default logging framework");
@@ -38,7 +41,9 @@ public abstract class LoggerFactory {
 	 * @param name 日志名称
 	 * @return 日志文件
 	 */
-	abstract ILogger getLogger0(String name);
+	protected ILogger getLogger0(String name) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 依赖于Slf4J的日志工厂
@@ -49,7 +54,11 @@ public abstract class LoggerFactory {
 
 		@Override
 		public ILogger getLogger0(String name) {
-			return new Slf4JLogger(org.slf4j.LoggerFactory.getILoggerFactory().getLogger(name));
+			ILoggerFactory factory = org.slf4j.LoggerFactory.getILoggerFactory();
+			if (factory instanceof NOPLoggerFactory) {
+				throw new NoClassDefFoundError("NOPLoggerFactory not supported");
+			}
+			return new Slf4JLogger(factory.getLogger(name));
 		}
 	}
 

@@ -1,9 +1,5 @@
 package com.keimons.platform.log;
 
-import org.slf4j.ILoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * System.out和System.err重定向到Logback
  *
@@ -19,8 +15,7 @@ public enum ConsoleLogger {
 	INFO {
 		@Override
 		public void log(final String message) {
-			ILoggerFactory context = LoggerFactory.getILoggerFactory();
-			Logger logger = context.getLogger(ConsoleService.OUT_CONSOLE);
+			ILogger logger = LoggerFactory.getLogger(ConsoleService.OUT_CONSOLE);
 			logger.info(message);
 		}
 	},
@@ -31,8 +26,7 @@ public enum ConsoleLogger {
 	ERROR {
 		@Override
 		public void log(final String message) {
-			ILoggerFactory context = LoggerFactory.getILoggerFactory();
-			Logger logger = context.getLogger(ConsoleService.ERR_CONSOLE);
+			ILogger logger = LoggerFactory.getLogger(ConsoleService.ERR_CONSOLE);
 			logger.error(message);
 		}
 	};
