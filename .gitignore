@@ -12,5 +12,6 @@ publish/*
 src/test/**/*.*
 !src/test/java/com/keimons/platform/**/*.*
 keimons-platform.iml
+keimons.basic/out/*
 
 ## 白名单

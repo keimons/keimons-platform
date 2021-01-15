@@ -9,4 +9,9 @@ module keimons.platform.main {
 	requires com.google.protobuf;
 	requires snappy.java;
 	requires com.google.common;
+	requires java.logging;
+	requires slf4j.api;
+	requires org.jetbrains.annotations;
+	requires quartz;
+	requires org.codehaus.groovy;
 }

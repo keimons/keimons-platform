@@ -4,7 +4,7 @@ apply plugin: 'java'
 group 'com.keimons.platform'
 version '1.0.0-SNAPSHOT'
 
-sourceCompatibility = JavaVersion.VERSION_14
+sourceCompatibility = JavaVersion.VERSION_11
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
@@ -36,7 +36,9 @@ dependencies {
     implementation 'com.google.guava:guava:30.1-jre'
 
     // 脚本语言groovy
-    compile localGroovy()
+    implementation 'org.codehaus.groovy:groovy-all:3.0.7', {
+
+    }
 
     // ASM
     implementation 'org.ow2.asm:asm:8.0.1'
@@ -131,7 +133,13 @@ dependencies {
 compileJava {
     options.compilerArgs += ['--module-path', classpath.asPath]
     options.compilerArgs += ['--add-exports', 'java.base/jdk.internal.vm.annotation=ALL-UNNAMED,keimons.platform.main']
+    options.compilerArgs += ['--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED']
+    options.compilerArgs += ['--add-exports', 'java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED,keimons.platform.main']
 }
+
+//tasks.withType(Test) {
+//    jvmArgs += "--enable-preview"
+//}
 
 javadoc {
     options.encoding = "UTF-8"
