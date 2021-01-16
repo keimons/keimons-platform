@@ -528,7 +528,7 @@ public class ClassUtil {
 	 *
 	 * @param type  类文件
 	 * @param param 参数名
-	 * @return 抛出异常，并且不会返回任何内容
+	 * @throws IllegalStateException 抛出异常，并且不会返回任何内容
 	 */
 	private static void fail(Class<?> type, String param) {
 		throw new IllegalStateException(

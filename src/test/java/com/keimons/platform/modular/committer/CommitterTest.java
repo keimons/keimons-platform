@@ -1,7 +1,6 @@
 package com.keimons.platform.modular.committer;
 
 import com.keimons.platform.executor.*;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,14 +27,17 @@ public class CommitterTest {
 
 	public static final Lock LOCK = new ReentrantLock();
 
-	@BeforeClass
-	public static void beforeTest() {
-		ExecutorManager.registerExecutorStrategy(
-				POOL_EXECUTOR_STRATEGY, new PoolExecutorPolicy("Pool", 4)
-		);
-		ExecutorManager.registerExecutorStrategy(
-				CODE_EXECUTOR_STRATEGY, new CodeExecutorPolicy("Code", 4)
-		);
+	static {
+		if (ExecutorManager.getExecutorStrategy(POOL_EXECUTOR_STRATEGY) == null) {
+			ExecutorManager.registerExecutorStrategy(
+					POOL_EXECUTOR_STRATEGY, new PoolExecutorPolicy("Pool", 4)
+			);
+		}
+		if (ExecutorManager.getExecutorStrategy(CODE_EXECUTOR_STRATEGY) == null) {
+			ExecutorManager.registerExecutorStrategy(
+					CODE_EXECUTOR_STRATEGY, new CodeExecutorPolicy("Code", 4)
+			);
+		}
 	}
 
 	@Test

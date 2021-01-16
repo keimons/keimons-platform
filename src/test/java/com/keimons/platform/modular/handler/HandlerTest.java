@@ -9,13 +9,11 @@ import com.keimons.platform.handler.JsonHandlerPolicy;
 import com.keimons.platform.session.ISession;
 import com.keimons.platform.session.Session;
 import com.keimons.platform.unit.RandomUtil;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,20 +34,29 @@ public class HandlerTest {
 
 	public static MethodHandle handler;
 
-	@BeforeClass
-	public static void beforeTest() throws NoSuchMethodException, IllegalAccessException {
-		ExecutorManager.registerExecutorStrategy(
-				POOL_EXECUTOR_STRATEGY, new PoolExecutorPolicy("Pool", 4)
-		);
-		ExecutorManager.registerExecutorStrategy(
-				CODE_EXECUTOR_STRATEGY, new CodeExecutorPolicy("Code", 4)
-		);
+	static {
+		if (ExecutorManager.getExecutorStrategy(POOL_EXECUTOR_STRATEGY) == null) {
+			ExecutorManager.registerExecutorStrategy(
+					POOL_EXECUTOR_STRATEGY, new PoolExecutorPolicy("Pool", 4)
+			);
+		}
+		if (ExecutorManager.getExecutorStrategy(CODE_EXECUTOR_STRATEGY) == null) {
+			ExecutorManager.registerExecutorStrategy(
+					CODE_EXECUTOR_STRATEGY, new CodeExecutorPolicy("Code", 4)
+			);
+		}
 		JsonHandlerPolicy policy = HandlerManager.getHandlerStrategy(HandlerManager.JSON_HANDLER);
 		policy.addHandler("com.keimons.platform.modular");
 
-		MethodHandle handler = MethodHandles.publicLookup().findVirtual(JsonHandlerPolicy.class,
-				"handler", MethodType.methodType(void.class, ISession.class, Object.class));
-		HandlerTest.handler = MethodHandles.insertArguments(handler, 0, new Session(null));
+		try {
+			MethodHandle handler = MethodHandles.publicLookup().findVirtual(JsonHandlerPolicy.class,
+					"handler", MethodType.methodType(void.class, ISession.class, Object.class));
+			handler = MethodHandles.insertArguments(handler, 0, policy);
+			handler = MethodHandles.insertArguments(handler, 0, new Session(null));
+			HandlerTest.handler = handler;
+		} catch (NoSuchMethodException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test
@@ -62,10 +69,13 @@ public class HandlerTest {
 			request.put("msgCode", 1001);
 			request.put("data", packet);
 
-			handler.invokeExact(request.toJSONString().getBytes());
+			handler.invokeWithArguments(request);
 		}
-		Scanner scanner = new Scanner(System.in);
-		scanner.nextLine();
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 	}
 
 	@Test
@@ -82,7 +92,7 @@ public class HandlerTest {
 			}
 			request.put("data", packet);
 
-			handler.invokeExact(request.toJSONString().getBytes());
+			handler.invokeWithArguments(request);
 		}
 		try {
 			Thread.sleep(10000);

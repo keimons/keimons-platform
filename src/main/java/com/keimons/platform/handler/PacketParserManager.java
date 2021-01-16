@@ -19,7 +19,7 @@ public class PacketParserManager {
 	private static final IPacketStrategy<?, ?>[] packetStrategies = new IPacketStrategy[127];
 
 	static {
-//		registerPacketParserStrategy(0);
+		registerPacketParserStrategy(0, new JsonParserPolicy(), new JsonPacketPolicy());
 	}
 
 	/**
