@@ -81,7 +81,7 @@ public class StringUtil {
 
 	/**
 	 * 字符串{@code 测试{}字符串}的加载方式
-	 *
+	 * <p>
 	 * 首先按照{@code {}}对字符串进行分割。
 	 *
 	 * @param format

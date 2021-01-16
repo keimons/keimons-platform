@@ -68,6 +68,7 @@ public class LinkedCommitterPolicy implements ICommitterStrategy {
 	}
 
 	public static class Committer {
+
 		/**
 		 * 空闲中的状态
 		 */

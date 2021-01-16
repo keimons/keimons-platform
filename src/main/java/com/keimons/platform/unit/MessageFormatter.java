@@ -12,6 +12,7 @@ import java.util.Map;
  * @since 1.8
  **/
 final public class MessageFormatter {
+
 	static final char DELIM_START = '{';
 	static final char DELIM_STOP = '}';
 	static final String DELIM_STR = "{}";

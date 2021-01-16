@@ -8,4 +8,5 @@ package com.keimons.platform.event;
  * @since 1.0
  */
 public interface IEventCode<T extends Enum<T> & IEventCode> {
+
 }

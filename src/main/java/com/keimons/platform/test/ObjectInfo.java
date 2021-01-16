@@ -11,7 +11,7 @@ public class ObjectInfo {
 	 * Field name
 	 */
 	public final String name;
-	 /**
+	/**
 	 * Field type name
 	 */
 	public final String type;
@@ -87,6 +87,7 @@ public class ObjectInfo {
 	}
 
 	private static final class OffsetComparator implements Comparator<ObjectInfo> {
+
 		@Override
 		public int compare(final ObjectInfo o1, final ObjectInfo o2) {
 			return o1.offset - o2.offset; //safe because offsets are small non-negative numbers
