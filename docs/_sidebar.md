@@ -1,6 +1,2 @@
-<!-- docs/_sidebar.md -->
-
-* [首页](zh-cn/)
+* [系统启动流程](zh-cn/)
 * [指南](zh-cn/guide)
-* [TEST](zh-cn/test)
-

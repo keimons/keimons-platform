@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Document</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <meta name="description" content="Description">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css">
 </head>
 <body>
-<div id="app"></div>
-<script>
+  <div id="app"></div>
+  <script>
     window.$docsify = {
-        name: 'keimons',
-        repo: 'https://github.com/keimons/keimons-platform',
-        coverpage: true,
-        loadSidebar: true
+      name: '',
+      repo: 'https://github.com/keimons/keimons-platform',
+	  loadSidebar: true,
+	    loadNavbar: true,
+	  subMaxLevel: 10,
+	  maxLevel: 20,
+	  coverpage: true,
+	  name: '<span><h1>keimons-platform</h1></span>',
+	  nameLink: '/',
+	  search: 'auto', // 默认值
+	  
     }
-</script>
-<script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+	
+	
+  </script>
+  <!-- Docsify v4 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
 </body>
 </html>

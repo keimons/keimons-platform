@@ -7,4 +7,4 @@
 * 后端框架：Redis
 
 [GitHub](https://github.com/keimons/keimons-platform)
-[Get Started](#quick-start)
+[Get Started](/zh-cn/)
