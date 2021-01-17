@@ -83,8 +83,8 @@ public interface ILogger {
 	 * Log an exception (throwable) at the ERROR level with an
 	 * accompanying message.
 	 *
-	 * @param cause   the exception (throwable) to log
-	 * @param msg the message accompanying the exception
+	 * @param cause the exception (throwable) to log
+	 * @param msg   the message accompanying the exception
 	 */
 	void debug(Throwable cause, String msg);
 
@@ -95,7 +95,7 @@ public interface ILogger {
 	 * <p>This form avoids superfluous object creation when the logger
 	 * is disabled for the ERROR level. </p>
 	 *
-	 * @param cause      the exception (throwable) to log
+	 * @param cause  the exception (throwable) to log
 	 * @param format the format string
 	 * @param arg    the argument
 	 */
@@ -172,8 +172,8 @@ public interface ILogger {
 	 * Log an exception (throwable) at the ERROR level with an
 	 * accompanying message.
 	 *
-	 * @param cause   the exception (throwable) to log
-	 * @param msg the message accompanying the exception
+	 * @param cause the exception (throwable) to log
+	 * @param msg   the message accompanying the exception
 	 */
 	void info(Throwable cause, String msg);
 
@@ -184,7 +184,7 @@ public interface ILogger {
 	 * <p>This form avoids superfluous object creation when the logger
 	 * is disabled for the ERROR level. </p>
 	 *
-	 * @param cause      the exception (throwable) to log
+	 * @param cause  the exception (throwable) to log
 	 * @param format the format string
 	 * @param arg    the argument
 	 */
@@ -261,8 +261,8 @@ public interface ILogger {
 	 * Log an exception (throwable) at the ERROR level with an
 	 * accompanying message.
 	 *
-	 * @param cause   the exception (throwable) to log
-	 * @param msg the message accompanying the exception
+	 * @param cause the exception (throwable) to log
+	 * @param msg   the message accompanying the exception
 	 */
 	void warn(Throwable cause, String msg);
 
@@ -273,7 +273,7 @@ public interface ILogger {
 	 * <p>This form avoids superfluous object creation when the logger
 	 * is disabled for the ERROR level. </p>
 	 *
-	 * @param cause      the exception (throwable) to log
+	 * @param cause  the exception (throwable) to log
 	 * @param format the format string
 	 * @param arg    the argument
 	 */
@@ -350,8 +350,8 @@ public interface ILogger {
 	 * Log an exception (throwable) at the ERROR level with an
 	 * accompanying message.
 	 *
-	 * @param cause   the exception (throwable) to log
-	 * @param msg the message accompanying the exception
+	 * @param cause the exception (throwable) to log
+	 * @param msg   the message accompanying the exception
 	 */
 	void error(Throwable cause, String msg);
 
@@ -362,7 +362,7 @@ public interface ILogger {
 	 * <p>This form avoids superfluous object creation when the logger
 	 * is disabled for the ERROR level. </p>
 	 *
-	 * @param cause      the exception (throwable) to log
+	 * @param cause  the exception (throwable) to log
 	 * @param format the format string
 	 * @param arg    the argument
 	 */
@@ -440,8 +440,8 @@ public interface ILogger {
 	 * Log an exception (throwable) at the ERROR level with an
 	 * accompanying message.
 	 *
-	 * @param cause   the exception (throwable) to log
-	 * @param msg the message accompanying the exception
+	 * @param cause the exception (throwable) to log
+	 * @param msg   the message accompanying the exception
 	 */
 	void log(Level level, Throwable cause, String msg);
 
@@ -452,7 +452,7 @@ public interface ILogger {
 	 * <p>This form avoids superfluous object creation when the logger
 	 * is disabled for the ERROR level. </p>
 	 *
-	 * @param cause      the exception (throwable) to log
+	 * @param cause  the exception (throwable) to log
 	 * @param format the format string
 	 * @param arg    the argument
 	 */

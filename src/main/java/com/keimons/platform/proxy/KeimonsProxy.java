@@ -42,7 +42,7 @@ public class KeimonsProxy {
 	}
 
 	public static void main(String[] args) throws NoSuchMethodException {
-		System.out.println("当前线程名："+Thread.currentThread().getName());
+		System.out.println("当前线程名：" + Thread.currentThread().getName());
 		proxies.put(IRpcTest.class, new IRpcTestImpl());
 		Method faceMethod = IRpcTest.class.getMethod("test", String.class);
 		Method implMethod = IRpcTestImpl.class.getMethod("test", String.class);

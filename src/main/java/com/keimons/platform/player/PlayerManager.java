@@ -193,10 +193,10 @@ public class PlayerManager {
 	 *
 	 * @param identifier 玩家唯一标识符
 	 * @param predicate  移除规则 {@code true} 移除 {@code false} 不移除
-     * @param modules    保留模块
-     * @param <T>        玩家主键类型
-     * @param <R>        玩家类型
-     * @return 被卸载的玩家
+	 * @param modules    保留模块
+	 * @param <T>        玩家主键类型
+	 * @param <R>        玩家类型
+	 * @return 被卸载的玩家
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T, R extends IPlayer<T>> R unload(T identifier, Predicate<IPlayer<?>> predicate, Class<? extends IPlayerData>[] modules) {
