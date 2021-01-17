@@ -6,6 +6,7 @@
 
 
 * 指南
+  * [解析策略](zh-cn/analysis/)
   * [线程模型](zh-cn/thread.md)
   * [数据模型](zh-cn/data.md)
   * [入库操作](zh-cn/redis.md)

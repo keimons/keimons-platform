@@ -5,6 +5,10 @@ import com.keimons.platform.session.ISession;
 import com.keimons.platform.unit.ClassUtil;
 
 /**
+ * 处理器信息
+ * <p>
+ * 这是一个基础的处理器信息，描述了一个消息的执行逻辑。
+ *
  * @author monkey1993
  * @version 1.0
  * @since 1.8
