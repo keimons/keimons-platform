@@ -1,4 +1,7 @@
-# 包体解析策略
+# 解析策略
+
+
+## 消息解析
 
 由于网络层存在粘包/半包情况，所以，服务器在收到消息后，需要对数据流进行二次封装，构造出来一个完整的包体。 包体解析策略负责将`byte[]`解析成系统中可识别数据，例如`json`、`protobuf`等数据结构。
 
@@ -76,3 +79,7 @@ public class JsonParserPolicy implements IParserStrategy<JSONObject> {
 	}
 }
 ```
+
+## 包体解析
+
+讲包体中的消息进行解析
