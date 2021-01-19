@@ -13,6 +13,7 @@ src/test/**/*.*
 keimons-platform.iml
 keimons.basic/out/*
 keimons.basic/build/*
+keimons-docs-sidebar/out/*
 
 ## 白名单
 !src/test/java/com/keimons/platform/**/*.*
