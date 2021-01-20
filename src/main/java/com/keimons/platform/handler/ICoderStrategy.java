@@ -22,16 +22,27 @@ import jdk.internal.vm.annotation.ForceInline;
  * @version 1.0
  * @since 1.8
  **/
-public interface IParserStrategy<PacketT> {
+public interface ICoderStrategy<PacketT> {
 
 	/**
-	 * 包体解析
+	 * 反序列化包体
 	 * <p>
-	 * 将消息解析成指定的消息类型，例如：json、protobuf等。
+	 * 将消息{@code byte[]}反序列化成指定的消息类型，例如：json、protobuf等。
 	 *
 	 * @param packet 已经经过了二次封装的完整消息体
 	 * @return 指定载体类型的包体
 	 */
 	@ForceInline
-	PacketT parsePacket(byte[] packet) throws Exception;
+	PacketT decoder(byte[] packet) throws Exception;
+
+	/**
+	 * 序列化包体
+	 * <p>
+	 * 将消息对象序列化为{@code byte[]}。原始数据类型可能是json、protobuf等。
+	 *
+	 * @param packet 已经经过了二次封装的完整消息体
+	 * @return 指定载体类型的包体
+	 */
+	@ForceInline
+	byte[] encoder(PacketT packet) throws Exception;
 }

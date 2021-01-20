@@ -1,32 +1,10 @@
 ## 消息解析 <!-- {docsify-ignore-all} -->
 
-由于网络层存在粘包/半包情况，所以，服务器在收到消息后，需要对数据流进行二次封装，构造出来一个完整的包体。 包体解析策略负责将`byte[]`解析成系统中可识别数据，例如`json`、`protobuf`等数据结构。
+由于网络层存在粘包/半包情况，所以，服务器在收到消息后，需要对数据流进行二次封装，构造出来一个完整的包体。同时，当服务器发送数据时，也需要将一个包体编码成字节流，再发送到客户端。
 
-```
-public interface IParserStrategy<PacketT> {
+* 接收数据时，消息解析策略负责将`byte[]`解析成系统中可识别数据，例如`json`、`protobuf`等数据结构。
 
-	/**
-	 * 包体解析
-	 * <p>
-	 * 将消息解析成指定的消息类型，例如：json、protobuf等。
-	 *
-	 * @param packet 已经经过了二次封装的完整消息体
-	 * @return 指定载体类型的包体
-	 */
-	@ForceInline
-	PacketT parsePacket(byte[] packet) throws Exception;
-}
-```
-
-本次操作对应数据流程：
-
-```
-+--------+       +--------+
-| byte[] | ----> | packet |
-+--------+       +--------+
-```
-
-在本设计中，包体中会包含消息号和消息体。
+* 发送数据时，消息解析策略负责将`json`、`protobuf`等数据结构，编码成`byte[]`后，发送到客户端。
 
 示例一：将数据封装为protobuf对象。
 
@@ -42,12 +20,17 @@ import jdk.internal.vm.annotation.ForceInline;
  * @version 1.0
  * @since 1.8
  **/
-public class ProtobufParserPolicy implements IParserStrategy<PbPacket.Packet> {
+public class ProtobufCoderPolicy implements ICoderStrategy<PbPacket.Packet> {
 
 	@ForceInline
 	@Override
-	public PbPacket.Packet parsePacket(byte[] packet) throws Exception {
+	public PbPacket.Packet decoder(byte[] packet) throws Exception {
 		return PbPacket.Packet.parseFrom(packet);
+	}
+
+	@Override
+	public byte[] encoder(PbPacket.Packet packet) throws Exception {
+		return packet.toByteArray();
 	}
 }
 ```
@@ -71,12 +54,96 @@ public class JsonParserPolicy implements IParserStrategy<JSONObject> {
 
 	@ForceInline
 	@Override
-	public JSONObject parsePacket(byte[] packet) throws Exception {
+	public JSONObject decoder(byte[] packet) throws Exception {
 		return JSONObject.parseObject(new String(packet));
+	}
+
+	@Override
+	public byte[] encoder(JSONObject packet) throws Exception {
+		return packet.toJSONString().getBytes();
 	}
 }
 ```
 
 ## 包体解析
 
-讲包体中的消息进行解析
+当服务器收到消息后，需要将消息号和消息体从包体中解析出来，包体的数据结构可能是`json`、`protobuf`等数据结构。
+同时，当消息处理完成后，需要将消息号、错误号、消息体等信息封装到包体中。
+
+示例一：从protobuf中解析出消息号和消息体。
+
+```
+public class JsonPacketPolicy implements IPacketStrategy<JSONObject, JSONObject> {
+
+	@ForceInline
+	@Override
+	public int findMsgCode(JSONObject packet) {
+		return packet.getIntValue("msgCode");
+	}
+
+	@ForceInline
+	@Override
+	public JSONObject findData(JSONObject packet) {
+		return packet.getJSONObject("data");
+	}
+
+	/**
+	 * 构造一个消息体
+	 *
+	 * @param msgCode 消息号
+	 * @param errCode 错误信息
+	 * @param message 消息体
+	 * @return 消息体
+	 */
+	public JSONObject createPacket(int msgCode, Object errCode, Object message) {
+		JSONObject packet = new JSONObject();
+		packet.put("msgCode", msgCode);
+		if (errCode != null) {
+			packet.put("errCode", msgCode);
+		}
+		if (message != null) {
+			packet.put("data", message);
+		}
+		return packet;
+	}
+}
+```
+
+示例二：从json中解析出消息号和消息体。
+
+```
+public class JsonPacketPolicy implements IPacketStrategy<JSONObject, JSONObject> {
+
+	@ForceInline
+	@Override
+	public int findMsgCode(JSONObject packet) {
+		return packet.getIntValue("msgCode");
+	}
+
+	@ForceInline
+	@Override
+	public JSONObject findData(JSONObject packet) {
+		return packet.getJSONObject("data");
+	}
+
+	/**
+	 * 构造一个消息体
+	 *
+	 * @param msgCode 消息号
+	 * @param errCode 错误信息
+	 * @param message 消息体
+	 * @return 消息体
+	 */
+	public JSONObject createPacket(int msgCode, Object errCode, Object message) {
+		JSONObject packet = new JSONObject();
+		packet.put("msgCode", msgCode);
+		if (errCode != null) {
+			packet.put("errCode", msgCode);
+		}
+		if (message != null) {
+			packet.put("data", message);
+		}
+		return packet;
+	}
+}
+```

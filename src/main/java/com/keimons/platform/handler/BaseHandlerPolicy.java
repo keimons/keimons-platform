@@ -34,7 +34,7 @@ public abstract class BaseHandlerPolicy<SessionT extends ISession, PacketT, Data
 	protected final Map<Integer, IHandler<SessionT, DataT, ?>> handlers = new HashMap<>();
 
 	protected BaseHandlerPolicy(int strategyIndex) {
-		packetStrategy = PacketParserManager.getPacketStrategy(strategyIndex);
+		packetStrategy = PacketCoderManager.getPacketStrategy(strategyIndex);
 	}
 
 	@Override

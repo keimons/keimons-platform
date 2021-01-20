@@ -12,11 +12,16 @@ import jdk.internal.vm.annotation.ForceInline;
  * @version 1.0
  * @since 1.8
  */
-public class JsonParserPolicy implements IParserStrategy<JSONObject> {
+public class JsonCoderPolicy implements ICoderStrategy<JSONObject> {
 
 	@ForceInline
 	@Override
-	public JSONObject parsePacket(byte[] packet) throws Exception {
+	public JSONObject decoder(byte[] packet) throws Exception {
 		return JSONObject.parseObject(new String(packet));
+	}
+
+	@Override
+	public byte[] encoder(JSONObject packet) throws Exception {
+		return packet.toJSONString().getBytes();
 	}
 }

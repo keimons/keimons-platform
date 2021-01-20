@@ -6,12 +6,12 @@ import org.jetbrains.annotations.Range;
 
 import java.util.Objects;
 
-public class PacketParserManager {
+public class PacketCoderManager {
 
 	/**
 	 * 消息解析策略
 	 */
-	private static final IParserStrategy<?>[] parserStrategies = new IParserStrategy[127];
+	private static final ICoderStrategy<?>[] parserStrategies = new ICoderStrategy[127];
 
 	/**
 	 * 包体解析策略
@@ -19,7 +19,7 @@ public class PacketParserManager {
 	private static final IPacketStrategy<?, ?>[] packetStrategies = new IPacketStrategy[127];
 
 	static {
-		registerPacketParserStrategy(0, new JsonParserPolicy(), new JsonPacketPolicy());
+		registerPacketParserStrategy(0, new JsonCoderPolicy(), new JsonPacketPolicy());
 	}
 
 	/**
@@ -29,9 +29,9 @@ public class PacketParserManager {
 	 * @return 消息解析策略
 	 */
 	@SuppressWarnings("unchecked")
-	public static <PacketT> IParserStrategy<PacketT> getParserStrategy(
+	public static <PacketT> ICoderStrategy<PacketT> getParserStrategy(
 			@Range(from = 0, to = 127) int strategyIndex) {
-		return (IParserStrategy<PacketT>) parserStrategies[strategyIndex];
+		return (ICoderStrategy<PacketT>) parserStrategies[strategyIndex];
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class PacketParserManager {
 	 */
 	public synchronized static <PacketT, DataT> void registerPacketParserStrategy(
 			@Range(from = 0, to = 127) int strategyIndex,
-			@NotNull IParserStrategy<PacketT> parserStrategy,
+			@NotNull ICoderStrategy<PacketT> parserStrategy,
 			@NotNull IPacketStrategy<PacketT, DataT> packetStrategy) {
 		if (Objects.nonNull(parserStrategies[strategyIndex])) {
 			throw new StrategyAlreadyExistsException("parser", strategyIndex);
