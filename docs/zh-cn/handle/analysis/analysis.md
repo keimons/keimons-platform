@@ -73,38 +73,42 @@ public class JsonParserPolicy implements IParserStrategy<JSONObject> {
 示例一：从protobuf中解析出消息号和消息体。
 
 ```
-public class JsonPacketPolicy implements IPacketStrategy<JSONObject, JSONObject> {
+public class ProtobufPacketPolicy implements IPacketStrategy<PbPacket.Packet, ByteString> {
 
 	@ForceInline
 	@Override
-	public int findMsgCode(JSONObject packet) {
-		return packet.getIntValue("msgCode");
+	public int findMsgCode(PbPacket.Packet packet) {
+		return packet.getMsgCode();
 	}
 
 	@ForceInline
 	@Override
-	public JSONObject findData(JSONObject packet) {
-		return packet.getJSONObject("data");
+	public ByteString findData(PbPacket.Packet packet) {
+		return packet.getData();
 	}
 
 	/**
 	 * 构造一个消息体
 	 *
 	 * @param msgCode 消息号
-	 * @param errCode 错误信息
+	 * @param errCode 错误号
 	 * @param message 消息体
 	 * @return 消息体
 	 */
-	public JSONObject createPacket(int msgCode, Object errCode, Object message) {
-		JSONObject packet = new JSONObject();
-		packet.put("msgCode", msgCode);
+	public PbPacket.Packet createPacket(int msgCode, String errCode, MessageLiteOrBuilder message) {
+		PbPacket.Packet.Builder builder = PbPacket.Packet.newBuilder();
+		builder.setMsgCode(msgCode);
 		if (errCode != null) {
-			packet.put("errCode", msgCode);
+			builder.setErrCode(errCode);
 		}
 		if (message != null) {
-			packet.put("data", message);
+			if (message instanceof MessageLite) {
+				builder.setData(((MessageLite) message).toByteString());
+			} else {
+				builder.setData(((MessageLite.Builder) message).build().toByteString());
+			}
 		}
-		return packet;
+		return builder.build();
 	}
 }
 ```
