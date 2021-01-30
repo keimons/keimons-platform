@@ -1,4 +1,4 @@
-package keimons.basic;
+package com.keimons.basic;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;

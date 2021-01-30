@@ -3,6 +3,7 @@ package com.keimons.platform.network.coder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public class DefaultByteAdapter extends ByteAdapter {
 				return;
 			}
 			// 消息类型
-			byte type = in.readByte();
+			byte target = in.readByte();
 			// 消息长度
 			int length = in.readInt();
 			if (length > in.readableBytes()) {
@@ -42,10 +43,16 @@ public class DefaultByteAdapter extends ByteAdapter {
 			in.getBytes(in.readerIndex(), array, 0, length);
 			// 设置读取的位置
 			in.readerIndex(in.readerIndex() + length);
+			ByteBuffer byteBuffer = in.nioBuffer(in.readerIndex(), length);
 			if (in.readableBytes() <= 0) {
 				in.clear();
 			}
 			out.add(array);
 		}
+	}
+
+	@Override
+	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+		super.channelRegistered(ctx);
 	}
 }

@@ -1,9 +1,9 @@
 package com.keimons.platform;
 
+import com.keimons.basic.ICodecStrategy;
 import com.keimons.platform.module.IModuleSerializable;
 import com.keimons.platform.network.NetService;
 import com.keimons.platform.network.coder.CodecAdapter;
-import com.keimons.platform.handler.ICoderStrategy;
 import com.keimons.platform.unit.BaseEnum;
 
 /**
@@ -34,7 +34,7 @@ public class Optional<T> extends BaseEnum<Optional<T>> {
 	/**
 	 * 消息解析策略
 	 */
-	public static final Optional<ICoderStrategy> MESSAGE_PARSE;
+	public static final Optional<ICodecStrategy> MESSAGE_PARSE;
 
 	static {
 		NET = new Optional<>("NET", 0);

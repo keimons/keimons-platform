@@ -29,8 +29,8 @@ public class HandlerManager {
 	private static int DEFAULT_HANDLER = 0;
 
 	static {
-		registerHandlerStrategy(0, new JsonHandlerPolicy(0));
-		registerHandlerStrategy(1, new ProtobufHandlerPolicy(1));
+		registerHandlerStrategy(JSON_HANDLER, new JsonHandlerPolicy(0));
+		registerHandlerStrategy(PROTOBUF_HANDLER, new ProtobufHandlerPolicy(1));
 	}
 
 	/**
@@ -59,18 +59,22 @@ public class HandlerManager {
 	/**
 	 * 使用消息处理策略，处理消息
 	 *
+	 * @param <PacketT>    包体类型
+	 * @param <SessionT>   会话类型
 	 * @param handlerIndex 消息处理策略
 	 * @param session      客户端-服务器会话
 	 * @param packet       包体
 	 */
-	public static <SessionT extends ISession, Packet> void handler(
-			int handlerIndex, SessionT session, Packet packet) {
+	public static <SessionT extends ISession, PacketT> void handler(
+			int handlerIndex, SessionT session, PacketT packet) {
 		strategies[handlerIndex].handler(session, packet);
 	}
 
 	/**
 	 * 注册一个消息处理策略
 	 *
+	 * @param <PacketT>    包体类型
+	 * @param <SessionT>   会话类型
 	 * @param handlerIndex 消息处理器器
 	 * @param strategy     消息处理策略
 	 */

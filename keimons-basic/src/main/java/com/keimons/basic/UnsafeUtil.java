@@ -1,4 +1,4 @@
-package keimons.basic;
+package com.keimons.basic;
 
 import sun.misc.Unsafe;
 

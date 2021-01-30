@@ -1,4 +1,5 @@
 module keimons.platform.main {
+	requires keimons.basic;
 	requires jdk.unsupported;
 	requires java.base;
 	requires redisson;

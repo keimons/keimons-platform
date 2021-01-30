@@ -1,4 +1,4 @@
-package keimons.basic;
+package com.keimons.basic;
 
 /**
  * 提交策略

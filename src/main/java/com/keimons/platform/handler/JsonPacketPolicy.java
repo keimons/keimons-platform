@@ -1,6 +1,7 @@
 package com.keimons.platform.handler;
 
 import com.alibaba.fastjson.JSONObject;
+import com.keimons.basic.IPacketStrategy;
 import jdk.internal.vm.annotation.ForceInline;
 
 public class JsonPacketPolicy implements IPacketStrategy<JSONObject, JSONObject> {

@@ -3,7 +3,6 @@ package com.keimons.platform.process;
 import com.keimons.platform.executor.CommitterManager;
 import com.keimons.platform.executor.ExecutorManager;
 import com.keimons.platform.handler.IHandler;
-import com.keimons.platform.handler.ICoderStrategy;
 import com.keimons.platform.session.ISession;
 
 /**
@@ -18,7 +17,7 @@ import com.keimons.platform.session.ISession;
  * @version 1.0
  * @see AProcessor 消息描述
  * @see IHandler 任务处理
- * @see ICoderStrategy 包体解析策略
+ * @see ICodecStrategy 包体解析策略
  * @see CommitterManager 任务提交器
  * @see ExecutorManager 任务执行器
  * @since 1.8

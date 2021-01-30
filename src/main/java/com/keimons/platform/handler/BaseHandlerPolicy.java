@@ -1,5 +1,6 @@
 package com.keimons.platform.handler;
 
+import com.keimons.basic.IPacketStrategy;
 import com.keimons.platform.exception.ModuleException;
 import com.keimons.platform.executor.CommitterManager;
 import com.keimons.platform.process.AProcessor;
@@ -34,7 +35,7 @@ public abstract class BaseHandlerPolicy<SessionT extends ISession, PacketT, Data
 	protected final Map<Integer, IHandler<SessionT, DataT, ?>> handlers = new HashMap<>();
 
 	protected BaseHandlerPolicy(int strategyIndex) {
-		packetStrategy = PacketCoderManager.getPacketStrategy(strategyIndex);
+		packetStrategy = PacketManager.getPacketStrategy(strategyIndex);
 	}
 
 	@Override

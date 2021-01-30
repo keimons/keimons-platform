@@ -1,6 +1,4 @@
-package com.keimons.platform.handler;
-
-import jdk.internal.vm.annotation.ForceInline;
+package com.keimons.basic;
 
 /**
  * 消息体解析策略
@@ -17,12 +15,13 @@ import jdk.internal.vm.annotation.ForceInline;
  * <p>
  * 消息{@code byte[]}的来源可能是Netty、Mina等网络框架。
  *
- * @param <PacketT> 包体
+ * @param <InBoundT>  入栈消息类型
+ * @param <OutBoundT> 出栈消息类型
  * @author monkey1993
  * @version 1.0
  * @since 1.8
  **/
-public interface ICoderStrategy<PacketT> {
+public interface ICodecStrategy<InBoundT, OutBoundT> extends IStrategy {
 
 	/**
 	 * 反序列化包体
@@ -32,17 +31,15 @@ public interface ICoderStrategy<PacketT> {
 	 * @param packet 已经经过了二次封装的完整消息体
 	 * @return 指定载体类型的包体
 	 */
-	@ForceInline
-	PacketT decoder(byte[] packet) throws Exception;
+	OutBoundT decode(InBoundT packet) throws Exception;
 
 	/**
 	 * 序列化包体
 	 * <p>
 	 * 将消息对象序列化为{@code byte[]}。原始数据类型可能是json、protobuf等。
 	 *
-	 * @param packet 已经经过了二次封装的完整消息体
+	 * @param data 已经经过了二次封装的完整消息体
 	 * @return 指定载体类型的包体
 	 */
-	@ForceInline
-	byte[] encoder(PacketT packet) throws Exception;
+	InBoundT encode(OutBoundT data) throws Exception;
 }

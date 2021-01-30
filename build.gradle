@@ -22,6 +22,8 @@ test {
 }
 
 dependencies {
+    compile project (':keimons-basic')
+
     // 数据库
     implementation 'org.redisson:redisson:3.7.5', {
         transitive false
