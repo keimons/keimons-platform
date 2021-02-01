@@ -2,9 +2,13 @@ package com.keimons.platform.network;
 
 import com.keimons.platform.log.ILogger;
 import com.keimons.platform.log.LoggerFactory;
+import io.netty.channel.ChannelHandlerContext;
+import org.apache.mina.core.session.IoSession;
+
+import java.util.Arrays;
 
 /**
- * 会话工厂
+ * 连接工厂
  *
  * @author monkey1993
  * @version 1.0
@@ -13,10 +17,10 @@ import com.keimons.platform.log.LoggerFactory;
  **/
 public abstract class SessionFactory {
 
-	private static ILogger logger = LoggerFactory.getLogger(SessionFactory.class);
+	private static final ILogger logger = LoggerFactory.getLogger(SessionFactory.class);
 
 	/**
-	 * 会话工厂
+	 * 连接工厂
 	 */
 	private static SessionFactory factory;
 
@@ -27,7 +31,8 @@ public abstract class SessionFactory {
 	 * @param <T>     会话
 	 * @return 新连接
 	 */
-	public static <ConnectT, T extends ISession<ConnectT>> T create(ConnectT connect) {
+	@SuppressWarnings("unchecked")
+	public static <T extends ISession> T create(Object connect) {
 		if (factory == null) {
 			try {
 				factory = NettySessionFactory.INSTANCE;
@@ -37,7 +42,7 @@ public abstract class SessionFactory {
 				logger.debug("Using IoSession as the default session");
 			}
 		}
-		return factory.create0(connect);
+		return (T) factory.create0(connect);
 	}
 
 	/**
@@ -46,7 +51,7 @@ public abstract class SessionFactory {
 	 * @param connect 日志名称
 	 * @return 日志文件
 	 */
-	protected abstract <ConnectT, T extends ISession<ConnectT>> T create0(ConnectT connect);
+	protected abstract ISession create0(Object connect);
 
 	/**
 	 * 依赖于Slf4J的日志工厂
@@ -56,9 +61,8 @@ public abstract class SessionFactory {
 		static final NettySessionFactory INSTANCE = new NettySessionFactory();
 
 		@Override
-		@SuppressWarnings("unchecked")
-		protected <ConnectT, T extends ISession<ConnectT>> T create0(ConnectT connect) {
-			return (T) new NettySession();
+		protected ISession create0(Object connect) {
+			return new NettySession((ChannelHandlerContext) connect);
 		}
 	}
 
@@ -70,8 +74,21 @@ public abstract class SessionFactory {
 		static final MinaSessionFactory INSTANCE = new MinaSessionFactory();
 
 		@Override
-		protected <ConnectT, T extends ISession<ConnectT>> T create0(ConnectT connect) {
-			return (T) new MinaSession();
+		protected ISession create0(Object connect) {
+			return new MinaSession((IoSession) connect);
 		}
+	}
+
+	public static void main(String[] args) {
+		ISession session = SessionFactory.create(null);
+		byte[] bytes = new byte[4];
+		bytes[0] = 0;
+		bytes[1] = 1;
+		bytes[2] = 2;
+		bytes[3] = 3;
+		session.write(bytes).addListener((IWriteFutureListener) future -> {
+			System.out.println(Arrays.toString(bytes));
+			System.out.println(future.getFuture().toString());
+		});
 	}
 }

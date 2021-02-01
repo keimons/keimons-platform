@@ -3,20 +3,37 @@ package com.keimons.platform.network;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
+ * 客户端-服务器连接
+ *
  * @author monkey1993
  * @version 1.0
  * @date 2021-01-29
  * @since 1.8
  **/
-public class NettySession implements ISession<ChannelHandlerContext> {
+public class NettySession implements ISession {
 
-	@Override
-	public IFuture write(Object object) {
-		return null;
+	/**
+	 * 原始连接
+	 */
+	private final ChannelHandlerContext ctx;
+
+	/**
+	 * 构造器
+	 *
+	 * @param ctx 原始连接
+	 */
+	public NettySession(ChannelHandlerContext ctx) {
+		this.ctx = ctx;
 	}
 
 	@Override
-	public IFuture write(Object object, Object object2) {
-		return null;
+	@SuppressWarnings("unchecked")
+	public ChannelHandlerContext getSession() {
+		return ctx;
+	}
+
+	@Override
+	public NettyWriteFuture write(Object object) {
+		return new NettyWriteFuture(this, ctx.writeAndFlush(object));
 	}
 }

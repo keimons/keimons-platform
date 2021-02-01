@@ -53,6 +53,7 @@ dependencies {
     implementation 'com.lmax:disruptor:3.3.7'
 
     implementation 'io.netty:netty-all:4.1.27.Final'
+    implementation 'org.apache.mina:mina-core:2.1.4'
 
     // 定时任务框架
     implementation 'org.quartz-scheduler:quartz:2.3.0', {

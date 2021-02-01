@@ -6,6 +6,7 @@ module keimons.platform.main {
 	requires fastjson;
 	requires disruptor;
 	requires io.netty.all;
+	requires mina.core;
 	requires jprotobuf;
 	requires com.google.protobuf;
 	requires snappy.java;
