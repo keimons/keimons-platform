@@ -1,6 +1,7 @@
 package com.keimons.platform.network;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.AttributeKey;
 
 /**
  * 客户端-服务器连接
@@ -24,6 +25,8 @@ public class NettySession implements ISession {
 	 */
 	public NettySession(ChannelHandlerContext ctx) {
 		this.ctx = ctx;
+		AttributeKey<ISession> key = AttributeKey.valueOf("1234");
+		ISession session = this.ctx.channel().attr(key).get();
 	}
 
 	@Override

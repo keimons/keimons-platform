@@ -16,4 +16,6 @@ module keimons.platform.main {
 	requires org.jetbrains.annotations;
 	requires quartz;
 	requires org.codehaus.groovy;
+	requires org.objectweb.asm;
+	exports com.keimons.platform.asm;
 }

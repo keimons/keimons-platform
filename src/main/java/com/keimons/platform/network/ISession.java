@@ -18,6 +18,8 @@ public interface ISession {
 	 */
 	<T> T getSession();
 
+
+
 	/**
 	 * 写入数据
 	 *

@@ -138,9 +138,9 @@ dependencies {
 
 compileJava {
     options.compilerArgs += ['--module-path', classpath.asPath]
-    options.compilerArgs += ['--add-exports', 'java.base/jdk.internal.vm.annotation=ALL-UNNAMED,keimons.platform.main']
-    options.compilerArgs += ['--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED']
-    options.compilerArgs += ['--add-exports', 'java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED,keimons.platform.main']
+    options.compilerArgs += ['--add-exports', 'java.base/jdk.internal.vm.annotation=keimons.platform.main']
+    options.compilerArgs += ['--add-exports', 'java.base/sun.reflect.generics.reflectiveObjects=keimons.platform.main']
+    options.compilerArgs += ['--add-opens', 'java.base/java.lang.reflect=keimons.platform.main']
 }
 
 //tasks.withType(Test) {
