@@ -91,8 +91,8 @@ publishing {
                 // 开发者信息
                 developers {
                     developer {
-                        name = 'monkey1993'
-                        email = 'monkey1993@keimons.com'
+                        name = 'monkey'
+                        email = 'monkey@keimons.com'
                     }
                 }
                 // 版本控制仓库地址

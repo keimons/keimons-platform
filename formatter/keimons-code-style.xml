@@ -1,4 +1,4 @@
-<code_scheme name="keimons-code-style" version="173">
+<code_scheme name="nutshell-code-style" version="173">
   <codeStyleSettings language="JAVA">
     <option name="BLANK_LINES_AFTER_CLASS_HEADER" value="1" />
     <indentOptions>

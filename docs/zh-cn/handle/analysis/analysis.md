@@ -14,11 +14,11 @@ import jdk.internal.vm.annotation.ForceInline;
 /**
  * Protobuf包体解析策略
  * <p>
- * 示例程序：将消息解析成{@link com.keimons.platform.handler.PbPacket.Packet}对象。
+ * 示例程序：将消息解析成{@link com.nutshell.nutshell.handler.PbPacket.Packet}对象。
  *
- * @author monkey1993
+ * @author houyn[monkey@keimons.com]
  * @version 1.0
- * @since 1.8
+ * @since 11
  **/
 public class ProtobufCoderPolicy implements ICoderStrategy<PbPacket.Packet> {
 
@@ -46,9 +46,9 @@ import jdk.internal.vm.annotation.ForceInline;
  * <p>
  * 示例程序：使用fastjson将消息解析成{@link com.alibaba.fastjson.JSONObject}对象。
  *
- * @author monkey1993
+ * @author houyn[monkey@keimons.com]
  * @version 1.0
- * @since 1.8
+ * @since 11
  */
 public class JsonParserPolicy implements IParserStrategy<JSONObject> {
 

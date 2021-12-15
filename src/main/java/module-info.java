@@ -1,5 +1,5 @@
-module keimons.platform.main {
-	requires keimons.basic;
+module nutshell {
+	requires nutshell.basic;
 	requires jdk.unsupported;
 	requires java.base;
 	requires redisson;
@@ -17,5 +17,5 @@ module keimons.platform.main {
 	requires quartz;
 	requires org.codehaus.groovy;
 	requires org.objectweb.asm;
-	exports com.keimons.platform.asm;
+	exports com.keimons.nutshell.asm;
 }

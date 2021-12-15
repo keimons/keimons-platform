@@ -10,10 +10,10 @@ build/*
 logs/*
 publish/*
 src/test/**/*.*
-keimons-platform.iml
-keimons.basic/out/*
-keimons.basic/build/*
-keimons-docs-sidebar/out/*
+nutshell-basic.iml
+nutshell-basic/out/*
+nutshell-basic/build/*
+nutshell-docs-sidebar/out/*
 
 ## 白名单
-!src/test/java/com/keimons/platform/**/*.*
+!src/test/java/com/nutshell/**/*.*

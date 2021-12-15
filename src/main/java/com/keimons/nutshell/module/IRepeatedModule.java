@@ -1,0 +1,41 @@
+package com.keimons.nutshell.module;
+
+/**
+ * 组持久化方案，这一步是将可重叠的数据进行合并，合并之后才能存入数据库
+ * <p>
+ * 系统中提供的一种持久化方案，例如装备，实际上是将数据
+ *
+ * @param <K> 模块中的数据Key类型
+ * @param <V> 模块中的数据类型
+ * @author houyn[monkey@keimons.com]
+ * @version 1.0
+ * @since 11
+ **/
+public interface IRepeatedModule<K, V extends IGameData & IRepeatedData<K>> extends IModule<V> {
+
+	/**
+	 * 增加数据
+	 * <p>
+	 * 讲一个模块的所有数据合并起来，最终转化为一个整体，存入数据库。需要注意的是，一旦一个模块
+	 * 中有一个数据需要存储，那么，整个模块都应该是被存储的。
+	 *
+	 * @param data 玩家数据
+	 */
+	void add(V data);
+
+	/**
+	 * 获取数据
+	 *
+	 * @param dataId 数据ID
+	 * @return 数据
+	 */
+	V get(K dataId);
+
+	/**
+	 * 移除数据
+	 *
+	 * @param dataId 数据ID
+	 * @return 数据
+	 */
+	V remove(K dataId);
+}

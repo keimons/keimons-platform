@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+}
+
+group 'com.keimons.nutshell.docs-sidebar'
+version '1.0.0-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}

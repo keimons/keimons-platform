@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package com.keimons.platform.handler;
-
-message Packet {
-	int32 msgCode = 1;
-	string errCode = 2;
-    bytes data = 3;
-}

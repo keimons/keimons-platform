@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package com.nutshell.nutshell.handler;
+
+message Packet {
+	int32 msgCode = 1;
+	string errCode = 2;
+    bytes data = 3;
+}

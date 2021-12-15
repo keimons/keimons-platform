@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'java'
 
-group 'com.keimons.platform'
+group 'com.keimons.nutshell'
 version '1.0.0-SNAPSHOT'
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -17,12 +17,12 @@ repositories {
 test {
     filter {
         // 指定测试包路径
-        includeTestsMatching "com.keimons.platform.*"
+        includeTestsMatching "com.keimons.nutshell.*"
     }
 }
 
 dependencies {
-    compile project (':keimons-basic')
+    implementation project(':nutshell-basic')
 
     // 数据库
     implementation 'org.redisson:redisson:3.7.5', {
@@ -108,8 +108,8 @@ dependencies {
 //            // 开发者信息
 //            developers {
 //                developer {
-//                    name = 'monkey1993'
-//                    email = 'monkey1993@keimons.com'
+//                    name = 'monkey'
+//                    email = 'monkey@keimons.com'
 //                }
 //            }
 //            // 版本控制仓库地址
